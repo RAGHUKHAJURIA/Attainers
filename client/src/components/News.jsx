@@ -1,5 +1,6 @@
 import React from 'react'
 
+
 const News = () => {
   return (
     <section className="px-6 md:px-12 py-20 bg-white">
@@ -20,7 +21,7 @@ const News = () => {
         {/* Right Section - Floating Image */}
         <div className="md:w-1/2 flex justify-center relative">
           <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
+            src="/main.jpg"
             alt="government exams illustration"
             className="w-80 h-auto drop-shadow-2xl transition-transform duration-500 hover:scale-105"
           />
