@@ -1,7 +1,7 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
 import News from '../components/News'
-import Dummy from '../components/Dummy'
+import ALLNews from '../components/ALLNews.jsx'
 
 const Hero = () => {
     return (
@@ -10,7 +10,8 @@ const Hero = () => {
             <div style={{ marginTop: "80px" }}></div>
             <News />
             <div style={{ marginTop: "80px" }}></div>
-            <Dummy />
+            <ALLNews />
+
         </>
     )
 }
