@@ -1,0 +1,156 @@
+import Update from "../models/updateModel.js";
+
+export const createUpdate = async (req, res) => {
+    try {
+        const { title, content, type, priority, expiryDate } = req.body;
+
+        const update = new Update({
+            title,
+            content,
+            type,
+            priority: priority || 1,
+            expiryDate: expiryDate ? new Date(expiryDate) : null
+        });
+
+        await update.save();
+
+        res.status(201).json({
+            success: true,
+            message: "Update created successfully!",
+            update
+        });
+    } catch (error) {
+        console.error("Error creating update:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!",
+            error: error.message,
+        });
+    }
+};
+
+export const getAllUpdates = async (req, res) => {
+    try {
+        const { type, page = 1, limit = 10 } = req.query;
+        const query = { isActive: true };
+
+        if (type) {
+            query.type = type;
+        }
+
+        // Filter out expired updates
+        query.$or = [
+            { expiryDate: { $exists: false } },
+            { expiryDate: null },
+            { expiryDate: { $gt: new Date() } }
+        ];
+
+        const updates = await Update.find(query)
+            .sort({ priority: -1, createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const total = await Update.countDocuments(query);
+
+        res.status(200).json({
+            success: true,
+            updates,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page,
+            total
+        });
+    } catch (error) {
+        console.error("Error fetching updates:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!",
+            error: error.message,
+        });
+    }
+};
+
+export const getUpdateById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const update = await Update.findById(id);
+
+        if (!update) {
+            return res.status(404).json({
+                success: false,
+                message: "Update not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            update
+        });
+    } catch (error) {
+        console.error("Error fetching update:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!",
+            error: error.message,
+        });
+    }
+};
+
+export const updateUpdate = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        if (updateData.expiryDate) {
+            updateData.expiryDate = new Date(updateData.expiryDate);
+        }
+
+        const update = await Update.findByIdAndUpdate(id, updateData, { new: true });
+
+        if (!update) {
+            return res.status(404).json({
+                success: false,
+                message: "Update not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Update updated successfully!",
+            update
+        });
+    } catch (error) {
+        console.error("Error updating update:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!",
+            error: error.message,
+        });
+    }
+};
+
+export const deleteUpdate = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const update = await Update.findByIdAndDelete(id);
+
+        if (!update) {
+            return res.status(404).json({
+                success: false,
+                message: "Update not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Update deleted successfully!"
+        });
+    } catch (error) {
+        console.error("Error deleting update:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!",
+            error: error.message,
+        });
+    }
+};
+

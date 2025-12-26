@@ -3,6 +3,7 @@ import cors from 'cors';
 import 'dotenv/config'
 import connectDB from './configs/mongodb.js';
 import router from './routes/adminRoute.js';
+import { clerkMiddleware } from '@clerk/express'
 
 
 const app = express();
@@ -17,7 +18,7 @@ app.get('/', (req, res) => {
     res.send('Home Page...')
 })
 
-app.use('/api/admin', router)
+app.use('/api/admin', clerkMiddleware(), router)
 
 const PORT = process.env.PORT || 5000
 

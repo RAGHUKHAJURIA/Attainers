@@ -1,105 +1,170 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useUser, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const { isSignedIn, user, isLoaded } = useUser();
+  const location = useLocation();
 
-  const navLinks = [
-    { name: 'Home', href: '#' },
-    { name: 'Paid Mock', href: '#' },
-    { name: 'PDF', href: '#' },
-    { name: 'Video Lecture', href: '#' },
-    { name: 'Course', href: '#' },
-    { name: 'Previous Year Papers', href: '#' },
-  ];
-
-  // Detect scroll for blur/shadow effect
+  // Scroll effect detection
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setActiveDropdown(null);
+  }, [location.pathname]);
+
+  const isActive = (path) => location.pathname === path;
+
+  // Navigation Data Structure
+  const navGroups = [
+    { name: 'Home', href: '/', type: 'link' },
+    {
+      name: 'Study Material',
+      type: 'dropdown',
+      items: [
+        { name: 'PDFs', href: '/pdfs' },
+        { name: 'Courses', href: '/courses' },
+        { name: 'Previous Papers', href: '/previous-papers' },
+      ]
+    },
+    {
+      name: 'Content Hub',
+      type: 'dropdown',
+      items: [
+        { name: 'Video Lectures', href: '/video-lectures' },
+        { name: 'Blogs', href: '/blogs' },
+        { name: 'YouTube', href: '/youtube' },
+      ]
+    }
+  ];
+
   return (
     <nav
-      className={`fixed w-full top-0 z-50 transition-all duration-500 ${isScrolled
-        ? "bg-white/70 backdrop-blur-md shadow-lg"
-        : "bg-white/50 backdrop-blur-sm"
+      className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled
+        ? "bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20"
+        : "bg-transparent" // Start transparent, overlapping hero if desired, or bg-white if not
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <a href="#" className="text-xl sm:text-2xl font-bold text-indigo-600">
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+              <span className="text-white font-bold text-xl">A</span>
+            </div>
+            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
               Attainers
-            </a>
-          </div>
+            </span>
+          </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden lg:block">
-            <ul className="flex items-center space-x-4 xl:space-x-6">
-              {navLinks.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="relative font-medium tracking-wide text-gray-700 hover:text-indigo-600 transition-colors duration-300 group"
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-6">
+            {navGroups.map((item, index) => (
+              <div
+                key={index}
+                className="relative group"
+                onMouseEnter={() => item.type === 'dropdown' && setActiveDropdown(item.name)}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                {item.type === 'link' ? (
+                  <Link
+                    to={item.href}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive(item.href)
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-white/50'
+                      }`}
                   >
-                    {link.name}
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover:w-full"></span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+                    {item.name}
+                  </Link>
+                ) : (
+                  <button
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1 ${activeDropdown === item.name ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600'
+                      }`}
+                  >
+                    <span>{item.name}</span>
+                    <svg className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === item.name ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Dropdown Menu */}
+                {item.type === 'dropdown' && (
+                  <div
+                    className={`absolute top-full left-0 w-56 pt-2 transition-all duration-200 origin-top-left ${activeDropdown === item.name
+                      ? 'opacity-100 scale-100 visible'
+                      : 'opacity-0 scale-95 invisible'
+                      }`}
+                  >
+                    <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black ring-opacity-5">
+                      {item.items.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          to={subItem.href}
+                          className={`block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors ${isActive(subItem.href) ? 'bg-blue-50 text-blue-600' : ''}`}
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* Sign In Button (Desktop) */}
-          <div className="hidden lg:block">
-            <a
-              href="#"
-              className="px-4 sm:px-5 py-2 font-semibold bg-indigo-600 text-white rounded-xl shadow-md hover:bg-indigo-400 hover:scale-105 transition-transform duration-300"
-            >
-              Sign In
-            </a>
+          {/* Auth Section */}
+          <div className="hidden lg:flex items-center space-x-4">
+            {!isLoaded ? (
+              <div className="h-9 w-24 bg-gray-200 rounded-lg animate-pulse" />
+            ) : isSignedIn ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-700">
+                  {user.firstName || user.username}
+                </span>
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            ) : (
+              <>
+                <SignInButton mode="modal">
+                  <button className="text-gray-700 hover:text-blue-600 font-medium text-sm transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </>
+            )}
           </div>
 
-          {/* Mobile / Tablet Menu Button */}
-          <div className="lg:hidden flex items-center">
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden flex items-center space-x-4">
+            {isSignedIn && <UserButton afterSignOutUrl="/" />}
             <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-200 transition"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100"
             >
-              {isOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+              {isMobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16m-7 6h7"
-                  />
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
             </button>
@@ -107,31 +172,62 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile & Tablet Menu */}
-      <div
-        className={`${isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-          } overflow-hidden lg:hidden transition-all duration-500 ease-in-out`}
-      >
-        <ul className="px-4 pt-2 pb-4 space-y-2 text-center bg-white/90 backdrop-blur-md rounded-b-lg shadow-md">
-          {navLinks.map((link) => (
-            <li key={link.name}>
-              <a
-                href={link.href}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-600 transition"
-              >
-                {link.name}
-              </a>
-            </li>
-          ))}
-          <li>
-            <a
-              href="#"
-              className="block w-3/4 sm:w-1/2 mx-auto mt-3 px-4 sm:px-5 py-2 font-semibold bg-indigo-500 text-white rounded-xl shadow-md hover:bg-indigo-600 hover:scale-105 transition-transform duration-300"
-            >
-              Sign In
-            </a>
-          </li>
-        </ul>
+      {/* Mobile Menu */}
+      <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="bg-white border-t border-gray-100 shadow-lg pb-6 px-4 pt-2">
+          <div className="space-y-1">
+            {navGroups.map((item, index) => (
+              <div key={index}>
+                {item.type === 'link' ? (
+                  <Link
+                    to={item.href}
+                    className={`block px-4 py-3 rounded-lg text-base font-medium ${isActive(item.href)
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                  >
+                    {item.name}
+                  </Link>
+                ) : (
+                  <div className="py-2">
+                    <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      {item.name}
+                    </div>
+                    <div className="space-y-1 pl-2">
+                      {item.items.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          to={subItem.href}
+                          className={`block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive(subItem.href)
+                            ? 'text-blue-600 bg-blue-50'
+                            : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                            }`}
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          {/* Mobile Auth Buttons */}
+          {!isSignedIn && isLoaded && (
+            <div className="mt-6 space-y-3 px-4">
+              <SignInButton mode="modal">
+                <button className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="w-full py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );
