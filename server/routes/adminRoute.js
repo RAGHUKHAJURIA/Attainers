@@ -8,6 +8,7 @@ import { createPDF, getAllPDFs, getPDFById, updatePDF, deletePDF } from "../cont
 import { createCourse, getAllCourses, getCourseById, updateCourse, deleteCourse } from "../controller/course.js";
 import { createVideoLecture, getAllVideoLectures, getVideoLectureById, updateVideoLecture, deleteVideoLecture } from "../controller/videoLecture.js";
 import { createPreviousPaper, getAllPreviousPapers, getPreviousPaperById, updatePreviousPaper, deletePreviousPaper } from "../controller/previousPaper.js";
+import { createMockTest, getAllMockTests, getMockTestById, updateMockTest, deleteMockTest, addQuestions } from "../controller/mockTest.js";
 import { protectAdminRoute } from "../middleware/clerkMiddleware.js";
 
 const router = express.Router();
@@ -71,5 +72,13 @@ router.get('/previous-papers', getAllPreviousPapers)
 router.get('/previous-papers/:id', getPreviousPaperById)
 router.put('/previous-papers/:id', protectAdminRoute, updatePreviousPaper)
 router.delete('/previous-papers/:id', protectAdminRoute, deletePreviousPaper)
+
+// Mock Test routes
+router.post('/mock-tests', protectAdminRoute, createMockTest)
+router.get('/mock-tests', getAllMockTests)
+router.get('/mock-tests/:id', getMockTestById)
+router.put('/mock-tests/:id', protectAdminRoute, updateMockTest)
+router.delete('/mock-tests/:id', protectAdminRoute, deleteMockTest)
+router.post('/mock-tests/:id/questions', protectAdminRoute, addQuestions)
 
 export default router;

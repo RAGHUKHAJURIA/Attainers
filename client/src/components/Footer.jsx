@@ -50,7 +50,7 @@ const Footer = () => {
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                             Video Lectures
                         </Link>
-                        <Link to="/previous-papers" className="group flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors">
+                        <Link to="/mock-tests" className="group flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors">
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                             Mock Tests
                         </Link>

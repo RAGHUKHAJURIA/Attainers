@@ -1,0 +1,91 @@
+import MockTest from "../models/mockTestModel.js";
+
+// Create a new Mock Test
+export const createMockTest = async (req, res) => {
+    try {
+        console.log("Creating new mock test:", req.body);
+        const { title, examName, difficulty, duration, totalQuestions, description } = req.body;
+
+        const newTest = new MockTest({
+            title,
+            examName,
+            difficulty,
+            duration,
+            totalQuestions,
+            description
+        });
+
+        const savedTest = await newTest.save();
+        console.log("Mock test saved:", savedTest);
+        res.status(201).json(savedTest);
+    } catch (error) {
+        console.error("Error creating mock test:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Get all Mock Tests
+export const getAllMockTests = async (req, res) => {
+    try {
+        const tests = await MockTest.find().sort({ createdAt: -1 });
+        res.status(200).json(tests);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Get single Mock Test by ID
+export const getMockTestById = async (req, res) => {
+    try {
+        const test = await MockTest.findById(req.params.id);
+        if (!test) return res.status(404).json({ message: "Mock Test not found" });
+        res.status(200).json(test);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update Mock Test
+export const updateMockTest = async (req, res) => {
+    try {
+        const updatedTest = await MockTest.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        if (!updatedTest) return res.status(404).json({ message: "Mock Test not found" });
+        res.status(200).json(updatedTest);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Delete Mock Test
+export const deleteMockTest = async (req, res) => {
+    try {
+        const deletedTest = await MockTest.findByIdAndDelete(req.params.id);
+        if (!deletedTest) return res.status(404).json({ message: "Mock Test not found" });
+        res.status(200).json({ message: "Mock Test deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Add Questions to Mock Test
+export const addQuestions = async (req, res) => {
+    try {
+        const { questions } = req.body; // Expecting an array of questions
+        const test = await MockTest.findById(req.params.id);
+
+        if (!test) return res.status(404).json({ message: "Mock Test not found" });
+
+        if (questions && Array.isArray(questions)) {
+            test.questions.push(...questions);
+        }
+
+        const updatedTest = await test.save();
+        res.status(200).json(updatedTest);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

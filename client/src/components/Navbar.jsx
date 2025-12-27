@@ -29,6 +29,7 @@ const Navbar = () => {
   // Navigation Data Structure
   const navGroups = [
     { name: 'Home', href: '/', type: 'link' },
+    { name: 'Mock Tests', href: '/mock-tests', type: 'link' },
     {
       name: 'Study Material',
       type: 'dropdown',

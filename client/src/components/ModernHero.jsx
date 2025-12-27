@@ -164,7 +164,7 @@ const ModernHero = () => {
                             <p className="text-sm text-gray-500">Test your preparation</p>
                         </div>
                         {/* Start Now Button */}
-                        <Link to="/previous-papers" className="block w-full text-center py-3 bg-purple-600 text-white font-bold rounded-xl shadow-md hover:bg-purple-700 transition-colors">
+                        <Link to="/mock-tests" className="block w-full text-center py-3 bg-purple-600 text-white font-bold rounded-xl shadow-md hover:bg-purple-700 transition-colors">
                             Start Now
                         </Link>
                     </div>

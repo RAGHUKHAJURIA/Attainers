@@ -13,6 +13,8 @@ import BlogsPage from './pages/BlogsPage';
 import YouTubePage from './pages/YouTubePage';
 import UpdatesPage from './pages/UpdatesPage';
 import TablesPage from './pages/TablesPage';
+import MockTestsPage from './pages/MockTestsPage';
+import MockTestDetailPage from './pages/MockTestDetailPage';
 import { useUser } from '@clerk/clerk-react';
 
 function App() {
@@ -45,6 +47,8 @@ function App() {
         <Route path='/youtube' element={<YouTubePage />} />
         <Route path='/updates' element={<UpdatesPage />} />
         <Route path='/schedules' element={<TablesPage />} />
+        <Route path='/mock-tests' element={<MockTestsPage />} />
+        <Route path='/mock-tests/:id' element={<MockTestDetailPage />} />
       </Routes>
     </AppProvider>
   )
