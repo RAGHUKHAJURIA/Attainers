@@ -43,7 +43,6 @@ const Navbar = () => {
       name: 'Content Hub',
       type: 'dropdown',
       items: [
-        { name: 'Video Lectures', href: '/video-lectures' },
         { name: 'Blogs', href: '/blogs' },
         { name: 'YouTube', href: '/youtube' },
       ]
@@ -53,7 +52,7 @@ const Navbar = () => {
   return (
     <nav
       className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled
-        ? "bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20"
+        ? "bg-white/80 backdrop-blur-md shadow-lg"
         : "bg-transparent" // Start transparent, overlapping hero if desired, or bg-white if not
         }`}
     >

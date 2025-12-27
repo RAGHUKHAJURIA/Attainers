@@ -1,164 +1,163 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import PreviousPaperCard from '../components/PreviousPaperCard';
 import Footer from '../components/Footer';
+import PreviousPaperCard from '../components/PreviousPaperCard';
+import AddPreviousPaperModal from '../components/AddPreviousPaperModal';
+import { useUser, useAuth } from '@clerk/clerk-react';
 
 const PreviousPapersPage = () => {
-    const { allPreviousPapers, fetchAllPreviousPapers } = useContext(AppContext);
-    const [selectedExam, setSelectedExam] = useState('all');
-    const [selectedYear, setSelectedYear] = useState('all');
-    const [selectedCategory, setSelectedCategory] = useState('all');
-
-    const examNames = ['all', 'UPSC', 'SSC', 'Banking', 'Railway', 'Defense', 'State PSC'];
-    const years = ['all', '2024', '2023', '2022', '2021', '2020', '2019', '2018'];
-    const categories = [
-        { value: 'all', label: 'All Categories' },
-        { value: 'upsc', label: 'UPSC' },
-        { value: 'ssc', label: 'SSC' },
-        { value: 'banking', label: 'Banking' },
-        { value: 'railway', label: 'Railway' },
-        { value: 'defense', label: 'Defense' },
-        { value: 'state-psc', label: 'State PSC' }
-    ];
+    const { user, isLoaded } = useUser();
+    const { getToken } = useAuth();
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [papers, setPapers] = useState([]);
 
     useEffect(() => {
-        fetchAllPreviousPapers();
+        fetchPapers();
     }, []);
 
-    const filteredPapers = allPreviousPapers.filter(paper => {
-        if (selectedExam !== 'all' && !paper.examName.toLowerCase().includes(selectedExam.toLowerCase())) return false;
-        if (selectedYear !== 'all' && paper.year.toString() !== selectedYear) return false;
-        if (selectedCategory !== 'all' && paper.category !== selectedCategory) return false;
-        return true;
-    });
+    const fetchPapers = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/admin/previous-papers');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    setPapers(data.papers);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching previous papers:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (isLoaded && user) {
+            setIsAdmin(user.publicMetadata?.role === 'admin');
+        }
+    }, [isLoaded, user]);
+
+    const handleAddPaper = async (newPaper) => {
+        try {
+            const token = await getToken();
+            const response = await fetch('http://localhost:5000/api/admin/previous-papers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newPaper)
+            });
+
+            if (response.ok) {
+                fetchPapers(); // Refresh list
+            } else {
+                const errData = await response.json();
+                alert(`Failed to add paper: ${errData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error adding paper:', error);
+            alert("Error adding paper. Check console for details.");
+        }
+    };
+
+    const filteredPapers = papers.filter(paper =>
+        paper.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        paper.examName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        paper.subject.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
             <Navbar />
-            <div className="pt-20">
-                {/* Header */}
-                <div className="section-header">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                            </div>
-                            <h1 className="text-4xl font-bold mb-4">Previous Year Papers</h1>
-                            <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                                Access previous year question papers from various competitive exams to practice and prepare effectively.
-                            </p>
+
+            <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            Previous Year Papers
+                        </h1>
+                        <p className="mt-2 text-lg text-gray-600">
+                            Access previous year question papers to practice effectively.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search papers..."
+                                className="modern-input !pl-14"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                         </div>
+
+                        {isAdmin && (
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Upload Paper
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {/* Filters */}
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="filter-section">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Exam Filter */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Exam</label>
-                                <select
-                                    value={selectedExam}
-                                    onChange={(e) => setSelectedExam(e.target.value)}
-                                    className="modern-select"
-                                >
-                                    {examNames.map(exam => (
-                                        <option key={exam} value={exam}>
-                                            {exam === 'all' ? 'All Exams' : exam}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                <div className="flex flex-wrap gap-2 mb-8">
+                    {['All', 'UPSC', 'SSC', 'Banking', 'JKSSB'].map((filter) => (
+                        <button
+                            key={filter}
+                            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${searchTerm === '' && filter === 'All' ? 'bg-blue-600 text-white' :
+                                filter !== 'All' && searchTerm.toLowerCase().includes(filter.toLowerCase()) ? 'bg-blue-600 text-white' :
+                                    'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                }`}
+                            onClick={() => setSearchTerm(filter === 'All' ? '' : filter)}
+                        >
+                            {filter}
+                        </button>
+                    ))}
+                </div>
 
-                            {/* Year Filter */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Year</label>
-                                <select
-                                    value={selectedYear}
-                                    onChange={(e) => setSelectedYear(e.target.value)}
-                                    className="modern-select"
-                                >
-                                    {years.map(year => (
-                                        <option key={year} value={year}>
-                                            {year === 'all' ? 'All Years' : year}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Category Filter */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="modern-select"
-                                >
-                                    {categories.map(category => (
-                                        <option key={category.value} value={category.value}>
-                                            {category.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Papers Grid */}
-                    {filteredPapers.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Content Grid */}
+                {filteredPapers.length > 0 ? (
+                    <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                             {filteredPapers.map((paper) => (
-                                <PreviousPaperCard key={paper._id} paper={paper} />
+                                <PreviousPaperCard
+                                    key={paper._id}
+                                    paper={paper}
+                                />
                             ))}
                         </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No papers found</h3>
-                            <p className="text-gray-500">Try adjusting your filters to see more content</p>
-                        </div>
-                    )}
-
-                    {/* Stats */}
-                    <div className="stats-section">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-                            <div>
-                                <div className="text-3xl font-bold text-blue-600 mb-2">
-                                    {allPreviousPapers.length}
-                                </div>
-                                <div className="text-gray-600">Total Papers</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-blue-700 mb-2">
-                                    {allPreviousPapers.filter(paper => paper.isPaid).length}
-                                </div>
-                                <div className="text-gray-600">Paid Papers</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-green-600 mb-2">
-                                    {allPreviousPapers.filter(paper => !paper.isPaid).length}
-                                </div>
-                                <div className="text-gray-600">Free Papers</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-blue-800 mb-2">
-                                    {allPreviousPapers.reduce((total, paper) => total + paper.downloadCount, 0)}
-                                </div>
-                                <div className="text-gray-600">Total Downloads</div>
-                            </div>
-                        </div>
                     </div>
-                </div>
-            </div>
+                ) : (
+                    <div className="text-center py-12">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No papers found</h3>
+                        <p className="mt-1 text-sm text-gray-500">Try adjusting your search criteria.</p>
+                    </div>
+                )}
+            </main>
+
             <Footer />
+
+            <AddPreviousPaperModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAdd={handleAddPaper}
+            />
         </div>
     );
 };

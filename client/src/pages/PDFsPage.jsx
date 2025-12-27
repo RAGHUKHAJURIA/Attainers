@@ -1,165 +1,162 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import PDFCard from '../components/PDFCard';
 import Footer from '../components/Footer';
+import PDFCard from '../components/PDFCard';
+import AddPDFModal from '../components/AddPDFModal';
+import { useUser, useAuth } from '@clerk/clerk-react';
 
 const PDFsPage = () => {
-    const { allPDFs, fetchAllPDFs } = useContext(AppContext);
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [selectedSubject, setSelectedSubject] = useState('all');
-    const [showPaidOnly, setShowPaidOnly] = useState(false);
-
-    const categories = [
-        { value: 'all', label: 'All Categories' },
-        { value: 'study-material', label: 'Study Material' },
-        { value: 'syllabus', label: 'Syllabus' },
-        { value: 'notes', label: 'Notes' },
-        { value: 'reference-books', label: 'Reference Books' },
-        { value: 'question-banks', label: 'Question Banks' },
-        { value: 'solved-papers', label: 'Solved Papers' }
-    ];
-
-    const subjects = [
-        'all', 'Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi',
-        'History', 'Geography', 'Political Science', 'Economics', 'Computer Science',
-        'General Knowledge', 'Current Affairs', 'Reasoning', 'Quantitative Aptitude'
-    ];
+    const { user, isLoaded } = useUser();
+    const { getToken } = useAuth();
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [pdfs, setPdfs] = useState([]);
 
     useEffect(() => {
-        fetchAllPDFs();
+        fetchPDFs();
     }, []);
 
-    const filteredPDFs = allPDFs.filter(pdf => {
-        if (selectedCategory !== 'all' && pdf.category !== selectedCategory) return false;
-        if (selectedSubject !== 'all' && pdf.subject !== selectedSubject) return false;
-        if (showPaidOnly && !pdf.isPaid) return false;
-        return true;
-    });
+    const fetchPDFs = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/admin/pdfs');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    setPdfs(data.pdfs);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching PDFs:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (isLoaded && user) {
+            setIsAdmin(user.publicMetadata?.role === 'admin');
+        }
+    }, [isLoaded, user]);
+
+    const handleAddPDF = async (newPDF) => {
+        try {
+            const token = await getToken();
+            const response = await fetch('http://localhost:5000/api/admin/pdfs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newPDF)
+            });
+
+            if (response.ok) {
+                fetchPDFs(); // Refresh list
+            } else {
+                const errData = await response.json();
+                alert(`Failed to add PDF: ${errData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error adding PDF:', error);
+            alert("Error adding PDF. Check console for details.");
+        }
+    };
+
+    const filteredPDFs = pdfs.filter(pdf =>
+        pdf.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pdf.subject.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
             <Navbar />
-            <div className="pt-20">
-                {/* Header */}
-                <div className="section-header">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <h1 className="text-4xl font-bold mb-4">PDF Resources</h1>
-                            <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                                Access comprehensive study materials, notes, and reference books to enhance your learning experience.
-                            </p>
+
+            <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            PDF Library
+                        </h1>
+                        <p className="mt-2 text-lg text-gray-600">
+                            Access high-quality study materials and reference documents.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search PDFs..."
+                                className="modern-input !pl-14"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                         </div>
+
+                        {isAdmin && (
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Upload PDF
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {/* Filters */}
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="filter-section">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Category Filter */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="modern-select"
-                                >
-                                    {categories.map(category => (
-                                        <option key={category.value} value={category.value}>
-                                            {category.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                <div className="flex flex-wrap gap-2 mb-8">
+                    {['All', 'Mathematics', 'Physics', 'History'].map((filter) => (
+                        <button
+                            key={filter}
+                            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${searchTerm === '' && filter === 'All' ? 'bg-blue-600 text-white' :
+                                filter !== 'All' && searchTerm.includes(filter) ? 'bg-blue-600 text-white' :
+                                    'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                }`}
+                            onClick={() => setSearchTerm(filter === 'All' ? '' : filter)}
+                        >
+                            {filter}
+                        </button>
+                    ))}
+                </div>
 
-                            {/* Subject Filter */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
-                                <select
-                                    value={selectedSubject}
-                                    onChange={(e) => setSelectedSubject(e.target.value)}
-                                    className="modern-select"
-                                >
-                                    {subjects.map(subject => (
-                                        <option key={subject} value={subject}>
-                                            {subject === 'all' ? 'All Subjects' : subject}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Paid Filter */}
-                            <div className="flex items-end">
-                                <label className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={showPaidOnly}
-                                        onChange={(e) => setShowPaidOnly(e.target.checked)}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                    <span className="ml-2 text-sm font-medium text-gray-700">Show paid content only</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* PDFs Grid */}
-                    {filteredPDFs.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {/* Content Grid */}
+                {filteredPDFs.length > 0 ? (
+                    <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                             {filteredPDFs.map((pdf) => (
-                                <PDFCard key={pdf._id} pdf={pdf} />
+                                <PDFCard
+                                    key={pdf._id}
+                                    pdf={pdf}
+                                />
                             ))}
                         </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No PDFs found</h3>
-                            <p className="text-gray-500">Try adjusting your filters to see more content</p>
-                        </div>
-                    )}
-
-                    {/* Stats */}
-                    <div className="stats-section">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-                            <div>
-                                <div className="text-3xl font-bold text-blue-600 mb-2">
-                                    {allPDFs.length}
-                                </div>
-                                <div className="text-gray-600">Total PDFs</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-green-600 mb-2">
-                                    {allPDFs.filter(pdf => !pdf.isPaid).length}
-                                </div>
-                                <div className="text-gray-600">Free PDFs</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-blue-700 mb-2">
-                                    {allPDFs.filter(pdf => pdf.isPaid).length}
-                                </div>
-                                <div className="text-gray-600">Paid PDFs</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-blue-800 mb-2">
-                                    {allPDFs.reduce((total, pdf) => total + pdf.downloadCount, 0)}
-                                </div>
-                                <div className="text-gray-600">Total Downloads</div>
-                            </div>
-                        </div>
                     </div>
-                </div>
-            </div>
+                ) : (
+                    <div className="text-center py-12">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No PDFs found</h3>
+                        <p className="mt-1 text-sm text-gray-500">Try adjusting your search criteria.</p>
+                    </div>
+                )}
+            </main>
+
             <Footer />
+
+            <AddPDFModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAdd={handleAddPDF}
+            />
         </div>
     );
 };

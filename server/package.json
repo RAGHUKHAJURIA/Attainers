@@ -13,10 +13,13 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/express": "^1.7.29",
+    "axios": "^1.13.2",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "mongoose": "^8.18.0",
-    "nodemon": "^3.1.10"
+    "mongoose": "^8.20.4",
+    "node-cron": "^4.2.1",
+    "nodemon": "^3.1.10",
+    "xml2js": "^0.6.2"
   }
 }

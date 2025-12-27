@@ -1,159 +1,257 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import YouTubeCard from '../components/YouTubeCard';
 import Footer from '../components/Footer';
+import AddYouTubeModal from '../components/AddYouTubeModal';
+import { useUser, useAuth } from '@clerk/clerk-react';
 
 const YouTubePage = () => {
-    const { allYouTubeVideos, fetchAllYouTubeVideos } = useContext(AppContext);
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [showFeatured, setShowFeatured] = useState(false);
+    const { user, isLoaded } = useUser();
+    const { getToken } = useAuth();
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [videos, setVideos] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
-    const categories = [
-        { value: 'all', label: 'All Videos' },
-        { value: 'tutorial', label: 'Tutorials' },
-        { value: 'exam-guidance', label: 'Exam Guidance' },
-        { value: 'current-affairs', label: 'Current Affairs' },
-        { value: 'motivation', label: 'Motivation' },
-        { value: 'general', label: 'General' }
-    ];
+    const categories = ['All', 'Tutorial', 'Exam Guidance', 'Current Affairs', 'Motivation', 'General'];
 
     useEffect(() => {
-        fetchAllYouTubeVideos();
+        fetchVideos();
     }, []);
 
-    const filteredVideos = allYouTubeVideos.filter(video => {
-        if (showFeatured && !video.isFeatured) return false;
-        if (selectedCategory !== 'all' && video.category !== selectedCategory) return false;
-        return true;
+    useEffect(() => {
+        if (isLoaded && user) {
+            setIsAdmin(user.publicMetadata?.role === 'admin');
+        }
+    }, [isLoaded, user]);
+
+    const fetchVideos = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/admin/youtube');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    setVideos(data.videos);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching videos:', error);
+        }
+    };
+
+    const handleAddVideo = async (newVideo) => {
+        try {
+            const token = await getToken();
+            const response = await fetch('http://localhost:5000/api/admin/youtube', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newVideo)
+            });
+
+            if (response.ok) {
+                fetchVideos();
+            } else {
+                const errData = await response.json();
+                alert(`Failed to add video: ${errData.message}`);
+            }
+        } catch (error) {
+            console.error('Error adding video:', error);
+            alert("Error adding video.");
+        }
+    };
+
+    const handleSyncVideos = async () => {
+        const channelId = prompt("Enter your YouTube Channel ID (e.g., UC...):");
+        if (!channelId) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch('http://localhost:5000/api/admin/youtube/sync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ channelId })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                fetchVideos();
+            } else {
+                alert(`Sync failed: ${data.message}`);
+            }
+        } catch (error) {
+            console.error('Error syncing videos:', error);
+            alert("Error syncing videos.");
+        }
+    };
+
+    const handleFixThumbnails = async () => {
+        if (!confirm("This will update all video thumbnails. Continue?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch('http://localhost:5000/api/admin/youtube/fix-thumbnails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                fetchVideos();
+            } else {
+                alert(`Fix failed: ${data.message}`);
+            }
+        } catch (error) {
+            console.error('Error fixing thumbnails:', error);
+            alert("Error fixing thumbnails.");
+        }
+    };
+
+    const handleDeleteShorts = async () => {
+        if (!confirm("This will permanently delete all YouTube Shorts. Continue?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch('http://localhost:5000/api/admin/youtube/delete-shorts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                fetchVideos();
+            } else {
+                alert(`Delete failed: ${data.message}`);
+            }
+        } catch (error) {
+            console.error('Error deleting shorts:', error);
+            alert("Error deleting shorts.");
+        }
+    };
+
+    // Filtering Logic
+    const filteredVideos = videos.filter(video => {
+        const matchesCategory = selectedCategory === 'All' || video.category.toLowerCase() === selectedCategory.toLowerCase().replace(' ', '-');
+        const matchesFeatured = showFeaturedOnly ? video.isFeatured : true;
+        return matchesCategory && matchesFeatured;
     });
 
-    const featuredVideos = allYouTubeVideos.filter(video => video.isFeatured);
-
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
             <Navbar />
-            <div className="pt-20">
-                {/* Header */}
-                <div className="section-header">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
-                                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                                </svg>
-                            </div>
-                            <h1 className="text-4xl font-bold mb-4">YouTube Videos</h1>
-                            <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                                Watch educational videos, tutorials, and exam guidance to enhance your learning experience.
-                            </p>
-                        </div>
+
+            <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                            <span className="text-red-600 text-4xl">▶</span> YouTube Library
+                        </h1>
+                        <p className="mt-2 text-lg text-gray-600">
+                            Curated video content to supplement your learning.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                        {/* Featured Toggle */}
+                        <label className="flex items-center cursor-pointer bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={showFeaturedOnly}
+                                onChange={(e) => setShowFeaturedOnly(e.target.checked)}
+                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            />
+                            <span className="ml-2 text-sm font-medium text-gray-700">Featured Only</span>
+                        </label>
+
+                        {isAdmin && (
+                            <>
+                                <button
+                                    onClick={handleSyncVideos}
+                                    className="px-4 py-2 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-colors flex items-center"
+                                >
+                                    <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Sync Videos
+                                </button>
+                                <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all bg-red-600 hover:bg-red-700 border-red-600"
+                                >
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Add Video
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
-
-                {/* Featured Videos Section */}
-                {featuredVideos.length > 0 && (
-                    <div className="max-w-7xl mx-auto px-6 py-8">
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span className="text-yellow-500 mr-2">⭐</span>
-                                Featured Videos
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {featuredVideos.slice(0, 3).map((video) => (
-                                    <YouTubeCard key={video._id} video={video} />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Filters */}
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="filter-section">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="flex flex-wrap gap-2">
-                                {categories.map((category) => (
-                                    <button
-                                        key={category.value}
-                                        onClick={() => setSelectedCategory(category.value)}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === category.value
-                                            ? 'bg-blue-600 text-white shadow-lg'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        {category.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="flex items-center">
-                                <label className="flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={showFeatured}
-                                        onChange={(e) => setShowFeatured(e.target.checked)}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">Show only featured</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Videos Grid */}
-                    {filteredVideos.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {filteredVideos.map((video) => (
-                                <YouTubeCard key={video._id} video={video} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No videos found</h3>
-                            <p className="text-gray-500">
-                                {selectedCategory !== 'all' || showFeatured
-                                    ? 'Try adjusting your filters to see more videos'
-                                    : 'Check back later for new educational content'
-                                }
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Stats */}
-                    <div className="stats-section">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                            <div>
-                                <div className="text-3xl font-bold text-blue-600 mb-2">
-                                    {allYouTubeVideos.length}
-                                </div>
-                                <div className="text-gray-600">Total Videos</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-blue-700 mb-2">
-                                    {featuredVideos.length}
-                                </div>
-                                <div className="text-gray-600">Featured Videos</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-green-600 mb-2">
-                                    {allYouTubeVideos.reduce((total, video) => total + video.views, 0)}
-                                </div>
-                                <div className="text-gray-600">Total Views</div>
-                            </div>
-                        </div>
-                    </div>
+                <div className="flex flex-wrap gap-2 mb-8">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCategory === cat
+                                ? 'bg-red-600 text-white shadow-md'
+                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                }`}
+                            onClick={() => setSelectedCategory(cat)}
+                        >
+                            {cat}
+                        </button>
+                    ))}
                 </div>
-            </div>
+
+                {/* Content Grid */}
+                {filteredVideos.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredVideos.map((video) => (
+                            <YouTubeCard
+                                key={video._id}
+                                video={video}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900">No videos found</h3>
+                        <p className="text-gray-500 mt-1">Try adjusting your filters.</p>
+                    </div>
+                )}
+            </main>
+
             <Footer />
+
+            <AddYouTubeModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAdd={handleAddVideo}
+            />
         </div>
     );
 };
 
 export default YouTubePage;
-

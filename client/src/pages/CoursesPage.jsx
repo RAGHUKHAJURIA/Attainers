@@ -1,168 +1,171 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import CourseCard from '../components/CourseCard';
+import AddCourseModal from '../components/AddCourseModal';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 
 const CoursesPage = () => {
-    const { allCourses, fetchAllCourses } = useContext(AppContext);
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [selectedLevel, setSelectedLevel] = useState('all');
-    const [showFeatured, setShowFeatured] = useState(false);
-
-    const categories = [
-        { value: 'all', label: 'All Categories' },
-        { value: 'government-exams', label: 'Government Exams' },
-        { value: 'competitive-exams', label: 'Competitive Exams' },
-        { value: 'academic', label: 'Academic' },
-        { value: 'skill-development', label: 'Skill Development' },
-        { value: 'language', label: 'Language' },
-        { value: 'certification', label: 'Certification' }
-    ];
-
-    const levels = [
-        { value: 'all', label: 'All Levels' },
-        { value: 'beginner', label: 'Beginner' },
-        { value: 'intermediate', label: 'Intermediate' },
-        { value: 'advanced', label: 'Advanced' },
-        { value: 'expert', label: 'Expert' }
-    ];
+    const { user, isLoaded } = useUser();
+    const { getToken } = useAuth();
+    const navigate = useNavigate();
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [courses, setCourses] = useState([]);
 
     useEffect(() => {
-        fetchAllCourses();
+        fetchCourses();
     }, []);
 
-    const filteredCourses = allCourses.filter(course => {
-        if (selectedCategory !== 'all' && course.category !== selectedCategory) return false;
-        if (selectedLevel !== 'all' && course.level !== selectedLevel) return false;
-        if (showFeatured && !course.isFeatured) return false;
-        return true;
-    });
+    const fetchCourses = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/admin/courses');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    setCourses(data.courses);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (isLoaded && user) {
+            setIsAdmin(user.publicMetadata?.role === 'admin');
+        }
+    }, [isLoaded, user]);
+
+    const handleAddCourse = async (newCourse) => {
+        try {
+            const token = await getToken();
+            const response = await fetch('http://localhost:5000/api/admin/courses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newCourse)
+            });
+
+            if (response.ok) {
+                fetchCourses(); // Refresh
+            } else {
+                const errData = await response.json();
+                alert(`Failed to add course: ${errData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error adding course:', error);
+            alert("Error adding course. Check console.");
+        }
+    };
+
+    const handleCardClick = (course) => {
+        navigate(`/courses/${course._id}`);
+    };
+
+    const filteredCourses = courses.filter(course =>
+        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        course.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
             <Navbar />
-            <div className="pt-20">
-                {/* Header */}
-                <div className="section-header">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                            </div>
-                            <h1 className="text-4xl font-bold mb-4">Courses</h1>
-                            <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                                Enroll in comprehensive courses designed to help you achieve your educational and career goals.
-                            </p>
+
+            <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            Courses & Playlists
+                        </h1>
+                        <p className="mt-2 text-lg text-gray-600">
+                            Explore comprehensive video courses and curated playlists.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search courses..."
+                                className="modern-input !pl-14"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                         </div>
+
+                        {isAdmin && (
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Course
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {/* Filters */}
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="filter-section">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Category Filter */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="modern-select"
-                                >
-                                    {categories.map(category => (
-                                        <option key={category.value} value={category.value}>
-                                            {category.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                <div className="flex flex-wrap gap-2 mb-8">
+                    {['All', 'Academic', 'Competitive Exams', 'Skill Development'].map((filter) => (
+                        <button
+                            key={filter}
+                            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${searchTerm === '' && filter === 'All' ? 'bg-blue-600 text-white' :
+                                filter !== 'All' && searchTerm.toLowerCase().includes(filter.toLowerCase().replace(' ', '-')) ? 'bg-blue-600 text-white' :
+                                    'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                }`}
+                            onClick={() => setSearchTerm(filter === 'All' ? '' : filter)}
+                        >
+                            {filter}
+                        </button>
+                    ))}
+                </div>
 
-                            {/* Level Filter */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Level</label>
-                                <select
-                                    value={selectedLevel}
-                                    onChange={(e) => setSelectedLevel(e.target.value)}
-                                    className="modern-select"
-                                >
-                                    {levels.map(level => (
-                                        <option key={level.value} value={level.value}>
-                                            {level.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Featured Filter */}
-                            <div className="flex items-end">
-                                <label className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={showFeatured}
-                                        onChange={(e) => setShowFeatured(e.target.checked)}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                    <span className="ml-2 text-sm font-medium text-gray-700">Show featured courses only</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Courses Grid */}
-                    {filteredCourses.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Content Grid */}
+                {filteredCourses.length > 0 ? (
+                    <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                             {filteredCourses.map((course) => (
-                                <CourseCard key={course._id} course={course} />
+                                <CourseCard
+                                    key={course._id}
+                                    course={course}
+                                    onClick={handleCardClick}
+                                />
                             ))}
                         </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-                            <p className="text-gray-500">Try adjusting your filters to see more content</p>
-                        </div>
-                    )}
-
-                    {/* Stats */}
-                    <div className="stats-section">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-                            <div>
-                                <div className="text-3xl font-bold text-blue-600 mb-2">
-                                    {allCourses.length}
-                                </div>
-                                <div className="text-gray-600">Total Courses</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-blue-700 mb-2">
-                                    {allCourses.filter(course => course.isFeatured).length}
-                                </div>
-                                <div className="text-gray-600">Featured Courses</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-blue-800 mb-2">
-                                    {allCourses.reduce((total, course) => total + course.enrollmentCount, 0)}
-                                </div>
-                                <div className="text-gray-600">Total Enrollments</div>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-green-600 mb-2">
-                                    {allCourses.reduce((total, course) => total + course.videoCount, 0)}
-                                </div>
-                                <div className="text-gray-600">Total Videos</div>
-                            </div>
-                        </div>
                     </div>
-                </div>
-            </div>
+                ) : (
+                    <div className="text-center py-12">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
+                        <p className="mt-1 text-sm text-gray-500">Try adjusting your search criteria.</p>
+                    </div>
+                )}
+            </main>
+
+            <Footer />
+
+            <AddCourseModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAdd={handleAddCourse}
+            />
         </div>
     );
 };
 
 export default CoursesPage;
-

@@ -35,9 +35,16 @@ const courseSchema = new mongoose.Schema({
         required: true,
         enum: ['beginner', 'intermediate', 'advanced', 'expert']
     },
+    playlistId: {
+        type: String
+    },
+    isYouTube: {
+        type: Boolean,
+        default: false
+    },
     price: {
         type: Number,
-        required: true
+        default: 0
     },
     originalPrice: {
         type: Number

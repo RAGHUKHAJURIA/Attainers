@@ -6,10 +6,11 @@ import { ToastContainer } from 'react-toastify'
 import Admin from './pages/Admin';
 import { AppProvider } from './context/AppContext'
 import PDFsPage from './pages/PDFsPage';
-import VideoLecturesPage from './pages/VideoLecturesPage';
 import CoursesPage from './pages/CoursesPage';
+import CourseDetailPage from './pages/CourseDetailPage';
 import PreviousPapersPage from './pages/PreviousPapersPage';
 import BlogsPage from './pages/BlogsPage';
+import BlogDetailPage from './pages/BlogDetailPage';
 import YouTubePage from './pages/YouTubePage';
 import UpdatesPage from './pages/UpdatesPage';
 import TablesPage from './pages/TablesPage';
@@ -40,10 +41,11 @@ function App() {
         <Route path='/' element={<Hero />} />
         <Route path='/admin' element={<Admin />} />
         <Route path='/pdfs' element={<PDFsPage />} />
-        <Route path='/video-lectures' element={<VideoLecturesPage />} />
         <Route path='/courses' element={<CoursesPage />} />
+        <Route path='/courses/:id' element={<CourseDetailPage />} />
         <Route path='/previous-papers' element={<PreviousPapersPage />} />
         <Route path='/blogs' element={<BlogsPage />} />
+        <Route path='/blogs/:id' element={<BlogDetailPage />} />
         <Route path='/youtube' element={<YouTubePage />} />
         <Route path='/updates' element={<UpdatesPage />} />
         <Route path='/schedules' element={<TablesPage />} />
