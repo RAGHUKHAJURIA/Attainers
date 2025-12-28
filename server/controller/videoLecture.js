@@ -4,7 +4,10 @@ export const createVideoLecture = async (req, res) => {
     try {
         const lectureData = req.body;
 
-        const lecture = new VideoLecture(lectureData);
+        const lecture = new VideoLecture({
+            ...lectureData,
+            isPublished: true
+        });
         await lecture.save();
 
         res.status(201).json({

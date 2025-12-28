@@ -74,18 +74,33 @@ export const deleteMockTest = async (req, res) => {
 // Add Questions to Mock Test
 export const addQuestions = async (req, res) => {
     try {
-        const { questions } = req.body; // Expecting an array of questions
+        console.log(`Adding questions to test ID: ${req.params.id}`);
+        console.log("Payload:", JSON.stringify(req.body, null, 2));
+
+        const { questions } = req.body;
         const test = await MockTest.findById(req.params.id);
 
-        if (!test) return res.status(404).json({ message: "Mock Test not found" });
+        if (!test) {
+            console.log("Mock Test not found.");
+            return res.status(404).json({ message: "Mock Test not found" });
+        }
 
         if (questions && Array.isArray(questions)) {
             test.questions.push(...questions);
+        } else {
+            console.log("Invalid questions format (not an array)");
         }
 
         const updatedTest = await test.save();
+        console.log("Questions added successfully.");
         res.status(200).json(updatedTest);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Error adding questions:", error); // Log full error object
+        console.error("Error Stack:", error.stack);
+        // Return detailed validation error if available
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: "Validation Error", details: error.message });
+        }
+        res.status(500).json({ message: error.message, stack: error.stack });
     }
 };

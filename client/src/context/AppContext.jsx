@@ -26,7 +26,7 @@ export const AppProvider = (props) => {
   // News functions
   const fetchAllNews = async () => {
     try {
-      const res = await axios.get(backendUrl + '/api/admin/all-news');
+      const res = await axios.get(backendUrl + '/api/public/news');
       const data = res.data;
 
       if (data.success) {
@@ -43,8 +43,8 @@ export const AppProvider = (props) => {
   const fetchAllBlogs = async (category = null) => {
     try {
       const url = category ?
-        `${backendUrl}/api/admin/blogs?category=${category}` :
-        `${backendUrl}/api/admin/blogs`;
+        `${backendUrl}/api/public/blogs?category=${category}` :
+        `${backendUrl}/api/public/blogs`;
       const res = await axios.get(url);
       const data = res.data;
 
@@ -62,8 +62,8 @@ export const AppProvider = (props) => {
   const fetchAllTables = async (category = null) => {
     try {
       const url = category ?
-        `${backendUrl}/api/admin/tables?category=${category}` :
-        `${backendUrl}/api/admin/tables`;
+        `${backendUrl}/api/public/tables?category=${category}` :
+        `${backendUrl}/api/public/tables`;
       const res = await axios.get(url);
       const data = res.data;
 
@@ -81,8 +81,8 @@ export const AppProvider = (props) => {
   const fetchAllUpdates = async (type = null) => {
     try {
       const url = type ?
-        `${backendUrl}/api/admin/updates?type=${type}` :
-        `${backendUrl}/api/admin/updates`;
+        `${backendUrl}/api/public/updates?type=${type}` :
+        `${backendUrl}/api/public/updates`;
       const res = await axios.get(url);
       const data = res.data;
 
@@ -99,7 +99,7 @@ export const AppProvider = (props) => {
   // YouTube functions
   const fetchAllYouTubeVideos = async (category = null, featured = null) => {
     try {
-      let url = `${backendUrl}/api/admin/youtube`;
+      let url = `${backendUrl}/api/public/youtube`;
       const params = new URLSearchParams();
 
       if (category) params.append('category', category);
@@ -125,7 +125,7 @@ export const AppProvider = (props) => {
   // PDF functions
   const fetchAllPDFs = async (category = null, subject = null) => {
     try {
-      let url = `${backendUrl}/api/admin/pdfs`;
+      let url = `${backendUrl}/api/public/pdfs`;
       const params = new URLSearchParams();
 
       if (category) params.append('category', category);
@@ -151,7 +151,7 @@ export const AppProvider = (props) => {
   // Course functions
   const fetchAllCourses = async (category = null, level = null) => {
     try {
-      let url = `${backendUrl}/api/admin/courses`;
+      let url = `${backendUrl}/api/public/courses`;
       const params = new URLSearchParams();
 
       if (category) params.append('category', category);
@@ -177,7 +177,7 @@ export const AppProvider = (props) => {
   // Video Lecture functions
   const fetchAllVideoLectures = async (courseId = null) => {
     try {
-      let url = `${backendUrl}/api/admin/video-lectures`;
+      let url = `${backendUrl}/api/public/video-lectures`;
       const params = new URLSearchParams();
 
       if (courseId) params.append('courseId', courseId);
@@ -202,7 +202,7 @@ export const AppProvider = (props) => {
   // Previous Paper functions
   const fetchAllPreviousPapers = async (examName = null, year = null, category = null) => {
     try {
-      let url = `${backendUrl}/api/admin/previous-papers`;
+      let url = `${backendUrl}/api/public/previous-papers`;
       const params = new URLSearchParams();
 
       if (examName) params.append('examName', examName);
@@ -230,11 +230,19 @@ export const AppProvider = (props) => {
   const createContent = async (type, data) => {
     try {
       const token = await getToken();
-      const res = await axios.post(`${backendUrl}/api/admin/${type}`, data, {
+
+      const config = {
         headers: {
           Authorization: `Bearer ${token}`
         }
-      });
+      };
+
+      // Axios automatically sets content-type to multipart/form-data when data is FormData
+      // So no special handling usually needed, but ensuring user didn't force JSON headers previously.
+      // The previous code didn't force Content-Type: application/json, so it should work.
+      // But adding explicit check if needed, or just let axios handle it.
+
+      const res = await axios.post(`${backendUrl}/api/admin/${type}`, data, config);
 
       if (res.data.success) {
         toast.success(res.data.message);

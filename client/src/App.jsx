@@ -16,6 +16,7 @@ import UpdatesPage from './pages/UpdatesPage';
 import TablesPage from './pages/TablesPage';
 import MockTestsPage from './pages/MockTestsPage';
 import MockTestDetailPage from './pages/MockTestDetailPage';
+// import VideoLecturesPage from './pages/VideoLecturesPage';
 import { useUser } from '@clerk/clerk-react';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
         <Route path='/courses' element={<CoursesPage />} />
         <Route path='/courses/:id' element={<CourseDetailPage />} />
         <Route path='/previous-papers' element={<PreviousPapersPage />} />
+        {/* Route path='/video-lectures' element={<VideoLecturesPage />} / */}
         <Route path='/blogs' element={<BlogsPage />} />
         <Route path='/blogs/:id' element={<BlogDetailPage />} />
         <Route path='/youtube' element={<YouTubePage />} />

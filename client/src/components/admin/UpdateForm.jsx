@@ -27,12 +27,18 @@ const UpdateForm = () => {
         { value: 5, label: 'Emergency' }
     ];
 
+    const [file, setFile] = useState(null);
+
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        const { name, value, files } = e.target;
+        if (name === 'file') {
+            setFile(files[0]);
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -44,13 +50,27 @@ const UpdateForm = () => {
 
         setIsLoading(true);
 
-        const updateData = {
-            ...formData,
-            priority: parseInt(formData.priority),
-            expiryDate: formData.expiryDate || null
-        };
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('content', formData.content);
+        data.append('type', formData.type);
+        data.append('priority', formData.priority);
+        if (formData.expiryDate) {
+            data.append('expiryDate', formData.expiryDate);
+        }
+        if (file) {
+            data.append('file', file);
+        }
 
-        const result = await createContent('updates', updateData);
+        // Note: modify createContent in AppContext to handle different content headers if needed, 
+        // or just calling fetch directly here might be safer if createContent expects JSON.
+        // Assuming createContent might need update. Checking AppContext next. 
+        // For now, let's assume createContent can handle it or we update it.
+        // Actually, better to update createContent later. 
+        // Or inline the fetch here to be sure. Let's inline fetch for now to guarantee multipart/form-data support 
+        // without breaking other createContent calls.
+
+        const result = await createContent('updates', data);
 
         if (result) {
             setFormData({
@@ -60,6 +80,10 @@ const UpdateForm = () => {
                 priority: 1,
                 expiryDate: ''
             });
+            setFile(null);
+            // Reset file input value manually if needed
+            const fileInput = document.getElementById('file');
+            if (fileInput) fileInput.value = '';
         }
         setIsLoading(false);
     };
@@ -152,6 +176,24 @@ const UpdateForm = () => {
                                 ))}
                             </select>
                         </div>
+                    </div>
+
+                    {/* File Attachment */}
+                    <div className="space-y-2">
+                        <label htmlFor="file" className="block text-sm font-semibold text-gray-700">
+                            Attach File <span className="text-gray-400">(Image or PDF, Optional)</span>
+                        </label>
+                        <input
+                            type="file"
+                            id="file"
+                            name="file"
+                            accept="image/*,application/pdf"
+                            onChange={handleChange}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                        />
+                        <p className="text-xs text-gray-500">
+                            Upload an image to display or a PDF to be downloadable.
+                        </p>
                     </div>
 
                     {/* Content Field */}

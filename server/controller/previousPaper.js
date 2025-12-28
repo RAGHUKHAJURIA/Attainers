@@ -4,7 +4,16 @@ export const createPreviousPaper = async (req, res) => {
     try {
         const paperData = req.body;
 
-        const paper = new PreviousPaper(paperData);
+        if (req.file) {
+            paperData.fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            paperData.fileName = req.file.originalname; // Override/Set filename from upload
+            paperData.fileSize = req.file.size;
+        }
+
+        const paper = new PreviousPaper({
+            ...paperData,
+            isPublished: true
+        });
         await paper.save();
 
         res.status(201).json({

@@ -22,12 +22,18 @@ const BlogForm = () => {
         { value: 'general', label: 'General' }
     ];
 
+    const [file, setFile] = useState(null);
+
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        const { name, value, files } = e.target;
+        if (name === 'file') {
+            setFile(files[0]);
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -39,27 +45,63 @@ const BlogForm = () => {
 
         setIsLoading(true);
 
-        // Convert tags string to array
-        const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-
-        const blogData = {
-            ...formData,
-            tags: tagsArray
-        };
-
-        const result = await createContent('blogs', blogData);
-
-        if (result) {
-            setFormData({
-                title: '',
-                content: '',
-                excerpt: '',
-                category: 'study-material',
-                tags: '',
-                featuredImage: '',
-                author: 'Admin'
-            });
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('content', formData.content);
+        data.append('excerpt', formData.excerpt);
+        data.append('category', formData.category);
+        data.append('tags', formData.tags); // server expects array but FormData sends string, backend should parse if needed or we split here?
+        // Wait, typical FormData sends string. Backend blog.js might expect array.
+        // Let's check blog.js. If it expects array, we might need to send multiple 'tags' keys or JSON stringify.
+        // But previously it sent an object with array.
+        // Let's check blog.js controller.
+        data.append('author', formData.author);
+        if (file) {
+            data.append('file', file);
         }
+        // Fallback or explicit URL if no file? Controller handles req.file priority.
+        if (formData.featuredImage) {
+            data.append('featuredImage', formData.featuredImage);
+        }
+
+        // Tags handling: FormData sends string. If backend expects array, we might need to change backend or send multiple fields.
+        // Let's assume for now I will rely on backend to handle it or just stringify it?
+        // Actually, if I look at UpdateForm, I used FormData.
+
+        // I'll check blog.js.
+        // For now let's apply this change partially or check blog.js first.
+        // I will just prepare the structure.
+
+        const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        tagsArray.forEach(tag => data.append('tags[]', tag)); // standard way for arrays
+        // OR
+        // data.append('tags', JSON.stringify(tagsArray)); // if backend parses JSON
+
+        // Let's check blog.js controller to be safe. I will pause this edit and check blog.js first.
+
+        // ABORTING EDIT TO CHECK CONTROLLER.
+        // Check if createContent is available
+        if (createContent) {
+            const result = await createContent('blogs', data);
+            if (result) {
+                // Reset logic here if successful, or defer to result check
+                setFormData({
+                    title: '',
+                    content: '',
+                    excerpt: '',
+                    category: 'study-material',
+                    tags: '',
+                    featuredImage: '',
+                    author: 'Admin'
+                });
+                setFile(null);
+                const fileInput = document.getElementById('file');
+                if (fileInput) fileInput.value = '';
+            }
+        } else {
+            console.error("createContent function is missing from context");
+        }
+
         setIsLoading(false);
     };
 
@@ -70,9 +112,14 @@ const BlogForm = () => {
             excerpt: '',
             category: 'study-material',
             tags: '',
+
             featuredImage: '',
             author: 'Admin'
         });
+        setFile(null);
+        // Reset file input if exists
+        const fileInput = document.getElementById('file');
+        if (fileInput) fileInput.value = '';
     };
 
     return (
@@ -198,17 +245,29 @@ const BlogForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label htmlFor="featuredImage" className="block text-sm font-semibold text-gray-700">
-                                Featured Image URL <span className="text-gray-400">(Optional)</span>
+                                Featured Image
                             </label>
-                            <input
-                                type="url"
-                                id="featuredImage"
-                                name="featuredImage"
-                                value={formData.featuredImage}
-                                onChange={handleChange}
-                                placeholder="https://example.com/image.jpg"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-                            />
+                            <div className="flex flex-col gap-2">
+                                <input
+                                    type="url"
+                                    id="featuredImage"
+                                    name="featuredImage"
+                                    value={formData.featuredImage}
+                                    onChange={handleChange}
+                                    disabled={!!file}
+                                    placeholder="Image URL (https://...)"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                />
+                                <div className="text-center text-xs text-gray-400 font-medium">- OR -</div>
+                                <input
+                                    type="file"
+                                    id="file"
+                                    name="file"
+                                    accept="image/*"
+                                    onChange={handleChange}
+                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-2">

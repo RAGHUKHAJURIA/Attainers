@@ -1,15 +1,26 @@
 import Update from "../models/updateModel.js";
+import fs from 'fs';
+import path from 'path';
 
 export const createUpdate = async (req, res) => {
     try {
         const { title, content, type, priority, expiryDate } = req.body;
+        let image = null;
+
+        if (req.file) {
+            image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        } else if (req.body.image) {
+            // Handle if image is sent as a URL string (e.g. from existing update)
+            image = req.body.image;
+        }
 
         const update = new Update({
             title,
             content,
             type,
             priority: priority || 1,
-            expiryDate: expiryDate ? new Date(expiryDate) : null
+            expiryDate: expiryDate ? new Date(expiryDate) : null,
+            image
         });
 
         await update.save();
@@ -104,6 +115,10 @@ export const updateUpdate = async (req, res) => {
             updateData.expiryDate = new Date(updateData.expiryDate);
         }
 
+        if (req.file) {
+            updateData.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
+
         const update = await Update.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!update) {
@@ -138,6 +153,21 @@ export const deleteUpdate = async (req, res) => {
                 success: false,
                 message: "Update not found"
             });
+        }
+
+        // Delete associated image if exists
+        if (update.image) {
+            try {
+                const filename = update.image.split('/uploads/')[1];
+                if (filename) {
+                    const filePath = path.join(process.cwd(), 'uploads', filename);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+            } catch (err) {
+                console.error("Error deleting image file:", err);
+            }
         }
 
         res.status(200).json({

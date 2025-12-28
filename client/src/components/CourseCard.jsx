@@ -1,11 +1,13 @@
 import React from 'react';
 
-const CourseCard = ({ course, onClick }) => {
+const CourseCard = ({ course, onClick, isAdmin, onDelete }) => {
     const handleClick = () => {
         if (onClick) {
             onClick(course);
         }
     };
+    // ... (helper functions hidden for brevity if not changed, but replace_file_content needs context)
+    // Actually I should just grab the start and end of the relevant block.
 
     const getCategoryColor = (category) => {
         const colors = {
@@ -73,7 +75,7 @@ const CourseCard = ({ course, onClick }) => {
             className="modern-card hover-lift cursor-pointer group"
             onClick={handleClick}
         >
-            {/* Course Thumbnail */}
+            {/* ... Image ... */}
             <div className="relative">
                 <img
                     src={course.thumbnail}
@@ -103,9 +105,25 @@ const CourseCard = ({ course, onClick }) => {
                     <span className="badge-primary">
                         {course.category.replace('-', ' ').toUpperCase()}
                     </span>
-                    <span className="badge-secondary">
-                        {course.level.toUpperCase()}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className="badge-secondary">
+                            {course.level.toUpperCase()}
+                        </span>
+                        {isAdmin && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(course._id);
+                                }}
+                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                                title="Delete Course"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Title */}

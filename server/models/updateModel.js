@@ -26,6 +26,10 @@ const updateSchema = new mongoose.Schema({
     },
     expiryDate: {
         type: Date
+    },
+    image: {
+        type: String, // URL to uploaded image
+        default: null
     }
 }, { timestamps: true });
 

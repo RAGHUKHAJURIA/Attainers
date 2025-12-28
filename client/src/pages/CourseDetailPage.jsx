@@ -11,7 +11,7 @@ const CourseDetailPage = () => {
     useEffect(() => {
         const fetchCourse = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/admin/courses/${id}`);
+                const response = await fetch(`http://localhost:5000/api/public/courses/${id}`);
                 const data = await response.json();
                 if (data.success) {
                     setCourse(data.course);

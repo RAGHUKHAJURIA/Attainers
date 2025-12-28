@@ -7,6 +7,7 @@ const AddPDFModal = ({ isOpen, onClose, onAdd }) => {
         category: 'study-material',
         subject: 'Mathematics',
         fileUrl: '',
+        file: null, // For uploaded file
         fileName: '',
         fileSize: 0,
         pages: 0,
@@ -33,6 +34,7 @@ const AddPDFModal = ({ isOpen, onClose, onAdd }) => {
             category: 'study-material',
             subject: 'Mathematics',
             fileUrl: '',
+            file: null,
             fileName: '',
             fileSize: 0,
             pages: 0,
@@ -112,15 +114,24 @@ const AddPDFModal = ({ isOpen, onClose, onAdd }) => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">File URL (e.g. Google Drive/Dropbox)</label>
-                                <input
-                                    type="url"
-                                    required
-                                    className="modern-input mt-1"
-                                    placeholder="https://..."
-                                    value={formData.fileUrl}
-                                    onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                                />
+                                <label className="block text-sm font-medium text-gray-700">Upload File (PDF) OR File URL</label>
+                                <div className="mt-1 space-y-2">
+                                    <input
+                                        type="file"
+                                        accept="application/pdf"
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        onChange={(e) => setFormData({ ...formData, file: e.target.files[0], fileUrl: '' })} // Clear URL if file selected
+                                    />
+                                    <div className="text-center text-gray-400 text-sm">- OR -</div>
+                                    <input
+                                        type="url"
+                                        className="modern-input"
+                                        placeholder="https://... (Google Drive/Dropbox)"
+                                        value={formData.fileUrl}
+                                        onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value, file: null })} // Clear file if URL entered
+                                        disabled={!!formData.file}
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

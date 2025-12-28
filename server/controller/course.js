@@ -4,7 +4,10 @@ export const createCourse = async (req, res) => {
     try {
         const courseData = req.body;
 
-        const course = new Course(courseData);
+        const course = new Course({
+            ...courseData,
+            isPublished: true
+        });
         await course.save();
 
         res.status(201).json({

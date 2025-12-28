@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const TableCard = ({ table, onClick }) => {
+const TableCard = ({ table, onClick, isAdmin, onDelete }) => {
     const [showFullTable, setShowFullTable] = useState(false);
 
     const handleClick = () => {
@@ -23,8 +23,8 @@ const TableCard = ({ table, onClick }) => {
         return colors[category] || colors.general;
     };
 
-    const previewRows = table.data.slice(0, 3);
-    const remainingRows = table.data.length - 3;
+    const displayedRows = showFullTable ? table.data : table.data.slice(0, 3);
+    const remainingRows = table.data.length - displayedRows.length;
 
     return (
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
@@ -34,9 +34,25 @@ const TableCard = ({ table, onClick }) => {
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(table.category)}`}>
                         {table.category.replace('-', ' ').toUpperCase()}
                     </span>
-                    <span className="text-sm text-gray-500">
-                        {table.data.length} rows
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">
+                            {table.data.length} rows
+                        </span>
+                        {isAdmin && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(table._id);
+                                }}
+                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                                title="Delete Table"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -71,7 +87,7 @@ const TableCard = ({ table, onClick }) => {
 
                         {/* Data Rows */}
                         <tbody>
-                            {previewRows.map((row, rowIndex) => (
+                            {displayedRows.map((row, rowIndex) => (
                                 <tr key={rowIndex} className="border-b border-gray-100 hover:bg-gray-50">
                                     {row.row.map((cell, cellIndex) => (
                                         <td key={cellIndex} className="py-2 px-3 text-gray-600">
@@ -101,7 +117,7 @@ const TableCard = ({ table, onClick }) => {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
-                        View Full Table
+                        {showFullTable ? 'Show Less' : 'View Full Table'}
                     </button>
                 </div>
             </div>

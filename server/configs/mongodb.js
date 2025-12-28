@@ -6,10 +6,7 @@ const connectDB = async () => {
     console.log("MongoDB Connected:", mongoose.connection.name);
   });
 
-  await mongoose.connect(process.env.MONGODB_URL, {
-    dbName: "Attainers", 
-
-  });
+  await mongoose.connect(process.env.MONGODB_URL || "mongodb+srv://raghu:raghu41@youtube.nscdniz.mongodb.net/Attainers");
 };
 
 export default connectDB;

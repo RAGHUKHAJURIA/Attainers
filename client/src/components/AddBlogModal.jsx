@@ -7,6 +7,8 @@ const AddBlogModal = ({ isOpen, onClose, onAdd }) => {
         content: '',
         category: 'study-material',
         featuredImage: '',
+        featuredImage: '',
+        file: null, // For upload
         tags: ''
     });
 
@@ -18,14 +20,29 @@ const AddBlogModal = ({ isOpen, onClose, onAdd }) => {
         // Split tags by comma and trim
         const processedTags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
 
-        const finalData = {
-            ...formData,
-            tags: processedTags,
-            author: 'Admin', // Default to Admin for now
-            views: 0
-        };
+        if (formData.file) {
+            const data = new FormData();
+            data.append('title', formData.title);
+            data.append('excerpt', formData.excerpt);
+            data.append('content', formData.content);
+            data.append('category', formData.category);
+            data.append('tags', processedTags.join(',')); // API expects string or array handling
+            data.append('file', formData.file); // 'file' field name matches adminRoute 'upload.single("file")'
+            // featuredImage URL if provided as fallback? Logic in backend handles req.file priority.
+            // If we want to support URL when file is null, we append it.
+            if (formData.featuredImage) data.append('featuredImage', formData.featuredImage);
 
-        onAdd(finalData);
+            onAdd(data);
+        } else {
+            // Standard JSON behavior if no file
+            const finalData = {
+                ...formData,
+                tags: processedTags,
+                author: 'Admin', // Default to Admin for now
+                views: 0
+            };
+            onAdd(finalData);
+        }
         setFormData({
             title: '',
             excerpt: '',
@@ -76,14 +93,24 @@ const AddBlogModal = ({ isOpen, onClose, onAdd }) => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Featured Image URL</label>
-                                    <input
-                                        type="url"
-                                        className="modern-input mt-1"
-                                        placeholder="https://..."
-                                        value={formData.featuredImage}
-                                        onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
-                                    />
+                                    <label className="block text-sm font-medium text-gray-700">Detailed Image</label>
+                                    <div className="flex flex-col gap-2 mt-1">
+                                        <input
+                                            type="url"
+                                            className="modern-input"
+                                            placeholder="Image URL (https://...)"
+                                            value={formData.featuredImage}
+                                            onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value, file: null })}
+                                            disabled={!!formData.file}
+                                        />
+                                        <div className="text-center text-xs text-gray-400">- OR -</div>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="text-sm text-gray-500"
+                                            onChange={(e) => setFormData({ ...formData, file: e.target.files[0], featuredImage: '' })}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

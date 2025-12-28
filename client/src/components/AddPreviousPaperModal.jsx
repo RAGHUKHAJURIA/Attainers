@@ -9,6 +9,7 @@ const AddPreviousPaperModal = ({ isOpen, onClose, onAdd }) => {
         category: 'upsc',
         paperType: 'prelims',
         fileUrl: '',
+        file: null, // For upload
         fileName: '',
         fileSize: 0,
         pages: 0,
@@ -24,8 +25,8 @@ const AddPreviousPaperModal = ({ isOpen, onClose, onAdd }) => {
         const finalData = {
             ...formData,
             year: parseInt(formData.year),
-            fileName: formData.fileName || formData.title + '.pdf',
-            fileSize: parseInt(formData.fileSize) || 1024 * 1024, // Default 1MB dummy
+            fileName: formData.fileName || (formData.file ? formData.file.name : formData.title + '.pdf'),
+            fileSize: parseInt(formData.fileSize) || (formData.file ? formData.file.size : 1024 * 1024),
             pages: parseInt(formData.pages) || 1,
             price: formData.isPaid ? parseFloat(formData.price) : 0
         };
@@ -38,6 +39,7 @@ const AddPreviousPaperModal = ({ isOpen, onClose, onAdd }) => {
             category: 'upsc',
             paperType: 'prelims',
             fileUrl: '',
+            file: null,
             fileName: '',
             fileSize: 0,
             pages: 0,
@@ -143,14 +145,23 @@ const AddPreviousPaperModal = ({ isOpen, onClose, onAdd }) => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">File URL</label>
-                                <input
-                                    type="url"
-                                    required
-                                    className="modern-input mt-1"
-                                    placeholder="https://..."
-                                    value={formData.fileUrl}
-                                    onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                                />
+                                <div className="flex flex-col gap-2 mt-1">
+                                    <input
+                                        type="url"
+                                        className="modern-input"
+                                        placeholder="https://... (Optional if uploading)"
+                                        value={formData.fileUrl}
+                                        onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value, file: null })}
+                                        disabled={!!formData.file}
+                                    />
+                                    <div className="text-center text-xs text-gray-400 font-medium">- OR -</div>
+                                    <input
+                                        type="file"
+                                        accept="application/pdf"
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        onChange={(e) => setFormData({ ...formData, file: e.target.files[0], fileUrl: '' })}
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

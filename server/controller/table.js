@@ -44,6 +44,8 @@ export const getAllTables = async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
+
+
         const total = await Table.countDocuments(query);
 
         res.status(200).json({

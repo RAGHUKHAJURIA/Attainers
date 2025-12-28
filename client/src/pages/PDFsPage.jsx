@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { AppContext } from '../context/AppContext';
 import Navbar from '../components/Navbar';
+import { useContext, useState, useEffect } from 'react';
 import Footer from '../components/Footer';
 import PDFCard from '../components/PDFCard';
 import AddPDFModal from '../components/AddPDFModal';
@@ -11,6 +12,11 @@ const PDFsPage = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const { backendUrl, fetchAllPDFs: contextFetchPDFs } = useContext(AppContext);
+    // Note: AppContext has fetchAllPDFs but it stores result in context. 
+    // This page uses local state 'pdfs'.
+    // Ideally should use context data, but refactoring to context entirely might break local search/filter if not careful.
+    // For now, just use backendUrl to fix hardcoding.
     const [pdfs, setPdfs] = useState([]);
 
     useEffect(() => {
@@ -19,7 +25,7 @@ const PDFsPage = () => {
 
     const fetchPDFs = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/admin/pdfs');
+            const response = await fetch(`${backendUrl}/api/public/pdfs`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -37,16 +43,62 @@ const PDFsPage = () => {
         }
     }, [isLoaded, user]);
 
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this PDF?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/pdfs/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                fetchPDFs(); // Refresh list
+            } else {
+                const errData = await response.json();
+                alert(`Failed to delete PDF: ${errData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error deleting PDF:', error);
+            alert("Error deleting PDF. Check console for details.");
+        }
+    };
+
     const handleAddPDF = async (newPDF) => {
         try {
             const token = await getToken();
-            const response = await fetch('http://localhost:5000/api/admin/pdfs', {
+            let body;
+            let headers = {
+                'Authorization': `Bearer ${token}`
+            };
+
+            if (newPDF.file) {
+                const formData = new FormData();
+                formData.append('title', newPDF.title);
+                formData.append('description', newPDF.description);
+                formData.append('category', newPDF.category);
+                formData.append('subject', newPDF.subject);
+                if (newPDF.fileUrl) formData.append('fileUrl', newPDF.fileUrl);
+                formData.append('file', newPDF.file);
+                formData.append('fileName', newPDF.fileName);
+                formData.append('fileSize', newPDF.fileSize);
+                formData.append('pages', newPDF.pages);
+                formData.append('isPaid', newPDF.isPaid);
+                formData.append('price', newPDF.price);
+                body = formData;
+                // do NOT set Content-Type header for FormData
+            } else {
+                body = JSON.stringify(newPDF);
+                headers['Content-Type'] = 'application/json';
+            }
+
+            const response = await fetch(`${backendUrl}/api/admin/pdfs`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(newPDF)
+                headers: headers,
+                body: body
             });
 
             if (response.ok) {
@@ -135,6 +187,8 @@ const PDFsPage = () => {
                                 <PDFCard
                                     key={pdf._id}
                                     pdf={pdf}
+                                    isAdmin={isAdmin}
+                                    onDelete={handleDelete}
                                 />
                             ))}
                         </div>

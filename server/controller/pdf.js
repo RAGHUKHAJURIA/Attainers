@@ -1,22 +1,34 @@
 import PDF from "../models/pdfModel.js";
+import fs from 'fs';
+import path from 'path';
 
 export const createPDF = async (req, res) => {
     try {
         const { title, description, category, subject, fileUrl, fileName, fileSize, pages, tags, isPaid, price, author } = req.body;
+        let finalFileUrl = fileUrl;
+        let finalFileName = fileName;
+        let finalFileSize = fileSize;
+
+        if (req.file) {
+            finalFileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            finalFileName = req.file.originalname; // Or keep it simple
+            finalFileSize = req.file.size;
+        }
 
         const pdf = new PDF({
             title,
             description,
             category,
             subject,
-            fileUrl,
-            fileName,
-            fileSize,
+            fileUrl: finalFileUrl,
+            fileName: finalFileName,
+            fileSize: finalFileSize,
             pages,
             tags: tags || [],
             isPaid: isPaid || false,
             price: price || 0,
-            author: author || 'Admin'
+            author: author || 'Admin',
+            isPublished: true
         });
 
         await pdf.save();
@@ -104,6 +116,12 @@ export const updatePDF = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
+        if (req.file) {
+            updateData.fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            updateData.fileName = req.file.originalname;
+            updateData.fileSize = req.file.size;
+        }
+
         const pdf = await PDF.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!pdf) {
@@ -138,6 +156,21 @@ export const deletePDF = async (req, res) => {
                 success: false,
                 message: "PDF not found"
             });
+        }
+
+        // Delete associated file if it is a local upload
+        if (pdf.fileUrl && pdf.fileUrl.includes('/uploads/')) {
+            try {
+                const filename = pdf.fileUrl.split('/uploads/')[1];
+                if (filename) {
+                    const filePath = path.join(process.cwd(), 'uploads', filename);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+            } catch (err) {
+                console.error("Error deleting PDF file:", err);
+            }
         }
 
         res.status(200).json({

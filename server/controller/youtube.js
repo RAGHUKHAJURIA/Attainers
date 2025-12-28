@@ -223,7 +223,7 @@ export const getAllYouTubeVideos = async (req, res) => {
         const { page = 1, limit = 15 } = req.query;
 
         const videos = await YouTube.find({ isPublished: true })
-            .sort({ publishedAt: -1 })
+            .sort({ publishedAt: -1, _id: 1 })
             .limit(Number(limit))
             .skip((page - 1) * limit);
 
@@ -295,5 +295,99 @@ export const subscribeToFeed = async (req, res) => {
         res.status(200).json({ success: true, message: "Subscription request sent" });
     } catch (error) {
         res.status(500).json({ success: false, message: "Subscription failed", error: error.message });
+    }
+};
+
+export const deleteYouTubeVideo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const video = await YouTube.findByIdAndDelete(id);
+
+        if (!video) {
+            return res.status(404).json({ success: false, message: "Video not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Video deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error deleting video:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete video",
+            error: error.message
+        });
+    }
+};
+
+export const deleteYouTubeShorts = async (req, res) => {
+    try {
+        // Delete where duration <= 60 (as string) OR title contains #shorts (case insensitive)
+        // Note: Duration might be stored as string "15" or "59".
+        // Ideally we used integer for duration, but schema says String.
+        // Let's rely on the title/description filter mostly, or try to adhere to how sync logic works.
+        // Sync logic: duration > 0 && duration <= 60.
+
+        // We can use a regex for title/desc
+        const result = await YouTube.deleteMany({
+            $or: [
+                { title: { $regex: /#shorts/i } },
+                { description: { $regex: /#shorts/i } },
+                // If you trust your duration field is properly populated for shorts...
+                // But generally users might manually add them.
+            ]
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Deleted ${result.deletedCount} shorts successfully`
+        });
+    } catch (error) {
+        console.error("Error deleting shorts:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete shorts",
+            error: error.message
+        });
+    }
+};
+
+export const createYouTubeVideo = async (req, res) => {
+    try {
+        const { title, description, videoUrl, category, tags, isFeatured } = req.body;
+
+        const videoId = extractVideoId(videoUrl);
+        if (!videoId) {
+            return res.status(400).json({ success: false, message: "Invalid YouTube URL" });
+        }
+
+        const thumbnail = getVideoThumbnail(videoId);
+
+        const video = await YouTube.create({
+            title,
+            description,
+            videoId,
+            thumbnail,
+            category: category || 'general',
+            tags: tags || [],
+            isFeatured: isFeatured || false,
+            isPublished: true,
+            views: 0,
+            publishedAt: new Date()
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Video added successfully!",
+            video
+        });
+    } catch (error) {
+        console.error("Error creating video manually:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!",
+            error: error.message
+        });
     }
 };

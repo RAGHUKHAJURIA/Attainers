@@ -45,6 +45,8 @@ const Navbar = () => {
       items: [
         { name: 'Blogs', href: '/blogs' },
         { name: 'YouTube', href: '/youtube' },
+        { name: 'Updates', href: '/updates' },
+        { name: 'Schedules', href: '/schedules' },
       ]
     }
   ];

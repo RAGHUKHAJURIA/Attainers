@@ -1,6 +1,6 @@
 import React from "react";
 
-const YouTubeCard = ({ video, onClick }) => {
+const YouTubeCard = ({ video, onClick, isAdmin, onDelete }) => {
     const handleClick = () => {
         if (onClick) {
             onClick(video);
@@ -59,6 +59,22 @@ const YouTubeCard = ({ video, onClick }) => {
                             ⭐ Featured
                         </span>
                     </div>
+                )}
+
+                {/* Admin Delete Button */}
+                {isAdmin && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(video._id);
+                        }}
+                        className="absolute top-3 right-3 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors z-20 shadow-sm"
+                        title="Delete Video"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
                 )}
             </div>
 

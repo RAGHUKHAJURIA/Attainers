@@ -1,6 +1,6 @@
 import React from 'react';
 
-const UpdateCard = ({ update }) => {
+const UpdateCard = ({ update, isAdmin, onDelete }) => {
     const getTypeColor = (type) => {
         const colors = {
             'urgent': 'bg-red-100 text-red-700 border-red-200',
@@ -22,13 +22,13 @@ const UpdateCard = ({ update }) => {
 
     return (
         <div className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all duration-300 hover:shadow-xl ${update.type === 'urgent' ? 'border-red-200' :
-                update.type === 'important' ? 'border-orange-200' :
-                    'border-gray-200'
+            update.type === 'important' ? 'border-orange-200' :
+                'border-gray-200'
             }`}>
             {/* Header */}
             <div className={`px-6 py-4 border-b ${update.type === 'urgent' ? 'bg-red-50' :
-                    update.type === 'important' ? 'bg-orange-50' :
-                        'bg-gray-50'
+                update.type === 'important' ? 'bg-orange-50' :
+                    'bg-gray-50'
                 }`}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -40,11 +40,27 @@ const UpdateCard = ({ update }) => {
                             Priority {update.priority}
                         </span>
                     </div>
-                    {isExpired && (
-                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
-                            Expired
-                        </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {isExpired && (
+                            <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
+                                Expired
+                            </span>
+                        )}
+                        {isAdmin && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(update._id);
+                                }}
+                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                                title="Delete Update"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -57,6 +73,30 @@ const UpdateCard = ({ update }) => {
                 <p className="text-gray-600 mb-4 leading-relaxed">
                     {update.content}
                 </p>
+
+                {update.image && (
+                    <div className="mb-4">
+                        {update.image.toLowerCase().endsWith('.pdf') ? (
+                            <a
+                                href={update.image}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <span>Download Attachment (PDF)</span>
+                            </a>
+                        ) : (
+                            <img
+                                src={update.image}
+                                alt="Attachment"
+                                className="rounded-lg max-h-64 object-cover border border-gray-100 w-full md:w-auto"
+                            />
+                        )}
+                    </div>
+                )}
 
                 {/* Footer */}
                 <div className="flex items-center justify-between text-sm text-gray-500">

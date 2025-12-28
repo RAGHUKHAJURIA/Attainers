@@ -28,7 +28,7 @@ const YouTubePage = () => {
 
     const fetchVideos = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/admin/youtube');
+            const response = await fetch('http://localhost:5000/api/public/youtube');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -118,6 +118,31 @@ const YouTubePage = () => {
         }
     };
 
+    const handleDeleteVideo = async (id) => {
+        if (!confirm("Are you sure you want to delete this video?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`http://localhost:5000/api/admin/youtube/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                // Remove from local state immediately
+                setVideos(videos.filter(video => video._id !== id));
+            } else {
+                const data = await response.json();
+                alert(`Delete failed: ${data.message}`);
+            }
+        } catch (error) {
+            console.error('Error deleting video:', error);
+            alert("Error deleting video.");
+        }
+    };
+
     const handleDeleteShorts = async () => {
         if (!confirm("This will permanently delete all YouTube Shorts. Continue?")) return;
 
@@ -131,11 +156,12 @@ const YouTubePage = () => {
                 }
             });
 
-            const data = await response.json();
             if (response.ok) {
+                const data = await response.json();
                 alert(data.message);
                 fetchVideos();
             } else {
+                const data = await response.json();
                 alert(`Delete failed: ${data.message}`);
             }
         } catch (error) {
@@ -227,6 +253,8 @@ const YouTubePage = () => {
                             <YouTubeCard
                                 key={video._id}
                                 video={video}
+                                isAdmin={isAdmin}
+                                onDelete={handleDeleteVideo}
                             />
                         ))}
                     </div>

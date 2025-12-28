@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CourseCard from '../components/CourseCard';
 import AddCourseModal from '../components/AddCourseModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+
 
 const CoursesPage = () => {
     const { user, isLoaded } = useUser();
@@ -21,7 +23,7 @@ const CoursesPage = () => {
 
     const fetchCourses = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/admin/courses');
+            const response = await fetch('http://localhost:5000/api/public/courses');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -39,27 +41,34 @@ const CoursesPage = () => {
         }
     }, [isLoaded, user]);
 
+    const { createContent } = useContext(AppContext);
+
     const handleAddCourse = async (newCourse) => {
+        const result = await createContent('courses', newCourse);
+        if (result) {
+            fetchCourses();
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this course?")) return;
+
         try {
             const token = await getToken();
-            const response = await fetch('http://localhost:5000/api/admin/courses', {
-                method: 'POST',
+            const response = await fetch(`http://localhost:5000/api/admin/courses/${id}`, {
+                method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(newCourse)
+                }
             });
 
             if (response.ok) {
-                fetchCourses(); // Refresh
+                setCourses(courses.filter(course => course._id !== id));
             } else {
-                const errData = await response.json();
-                alert(`Failed to add course: ${errData.message || response.statusText}`);
+                alert("Failed to delete course");
             }
         } catch (error) {
-            console.error('Error adding course:', error);
-            alert("Error adding course. Check console.");
+            console.error("Error deleting course:", error);
         }
     };
 
@@ -142,6 +151,8 @@ const CoursesPage = () => {
                                     key={course._id}
                                     course={course}
                                     onClick={handleCardClick}
+                                    isAdmin={isAdmin}
+                                    onDelete={handleDelete}
                                 />
                             ))}
                         </div>

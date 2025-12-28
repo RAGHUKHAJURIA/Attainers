@@ -19,7 +19,7 @@ const PreviousPapersPage = () => {
 
     const fetchPapers = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/admin/previous-papers');
+            const response = await fetch('http://localhost:5000/api/public/previous-papers');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -37,16 +37,58 @@ const PreviousPapersPage = () => {
         }
     }, [isLoaded, user]);
 
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this paper?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`http://localhost:5000/api/admin/previous-papers/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                fetchPapers(); // Refresh list
+            } else {
+                const errData = await response.json();
+                alert(`Failed to delete paper: ${errData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error deleting paper:', error);
+            alert("Error deleting paper. Check console for details.");
+        }
+    };
+
     const handleAddPaper = async (newPaper) => {
         try {
             const token = await getToken();
+            let body;
+            let headers = {
+                'Authorization': `Bearer ${token}`
+            };
+
+            if (newPaper.file) {
+                const formData = new FormData();
+                // Append all fields manually
+                Object.keys(newPaper).forEach(key => {
+                    if (key === 'file') {
+                        formData.append('file', newPaper.file);
+                    } else {
+                        formData.append(key, newPaper[key]);
+                    }
+                });
+                body = formData;
+            } else {
+                body = JSON.stringify(newPaper);
+                headers['Content-Type'] = 'application/json';
+            }
+
             const response = await fetch('http://localhost:5000/api/admin/previous-papers', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(newPaper)
+                headers: headers,
+                body: body
             });
 
             if (response.ok) {
@@ -136,6 +178,8 @@ const PreviousPapersPage = () => {
                                 <PreviousPaperCard
                                     key={paper._id}
                                     paper={paper}
+                                    isAdmin={isAdmin}
+                                    onDelete={handleDelete}
                                 />
                             ))}
                         </div>

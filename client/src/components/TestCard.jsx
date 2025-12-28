@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const TestCard = ({ id, _id, title, examName, totalQuestions, duration, difficulty }) => {
+const TestCard = ({ id, _id, title, examName, totalQuestions, duration, difficulty, isAdmin, onDelete }) => {
     const testId = id || _id;
     return (
-        <div className="modern-card p-6 flex flex-col h-full hover-lift">
+        <div className="modern-card p-6 flex flex-col h-full hover-lift relative group">
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <span className="badge-primary mb-2 inline-block">
@@ -14,11 +14,28 @@ const TestCard = ({ id, _id, title, examName, totalQuestions, duration, difficul
                         {title}
                     </h3>
                 </div>
-                <div className={`px-2 py-1 rounded-md text-xs font-semibold ${difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
-                    difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
-                    }`}>
-                    {difficulty}
+                <div className="flex items-center gap-2">
+                    <div className={`px-2 py-1 rounded-md text-xs font-semibold ${difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                        difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
+                        }`}>
+                        {difficulty}
+                    </div>
+                    {isAdmin && (
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onDelete(testId);
+                            }}
+                            className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                            title="Delete Test"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
             </div>
 

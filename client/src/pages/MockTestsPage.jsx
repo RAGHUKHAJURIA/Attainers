@@ -22,7 +22,7 @@ const MockTestsPage = () => {
 
     const fetchTests = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/admin/mock-tests');
+            const response = await fetch('http://localhost:5000/api/public/mock-tests');
             if (response.ok) {
                 const data = await response.json();
                 setTests(data);
@@ -65,6 +65,28 @@ const MockTestsPage = () => {
         } catch (error) {
             console.error('Error adding mock test:', error);
             alert("Error adding mock test. Check console for details.");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this test?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`http://localhost:5000/api/admin/mock-tests/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setTests(tests.filter(test => (test.id || test._id) !== id));
+            } else {
+                alert("Failed to delete test");
+            }
+        } catch (error) {
+            console.error("Error deleting test:", error);
         }
     };
 
@@ -142,6 +164,8 @@ const MockTestsPage = () => {
                                 <TestCard
                                     key={test.id || test._id}
                                     {...test}
+                                    isAdmin={isAdmin}
+                                    onDelete={handleDelete}
                                 />
                             ))}
                         </div>

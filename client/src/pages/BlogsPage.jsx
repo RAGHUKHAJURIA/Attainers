@@ -36,7 +36,7 @@ const BlogsPage = () => {
 
     const fetchBlogs = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/admin/blogs');
+            const response = await fetch('http://localhost:5000/api/public/blogs');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -72,6 +72,28 @@ const BlogsPage = () => {
         }
     };
 
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`http://localhost:5000/api/admin/blogs/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setBlogs(blogs.filter(blog => blog._id !== id));
+            } else {
+                alert("Failed to delete post");
+            }
+        } catch (error) {
+            console.error("Error deleting post:", error);
+        }
+    };
+
     const handleCardClick = (blog) => {
         navigate(`/blogs/${blog._id}`);
     };
@@ -104,8 +126,8 @@ const BlogsPage = () => {
                                     key={category.value}
                                     onClick={() => setSelectedCategory(category.value)}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${selectedCategory === category.value
-                                            ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                                            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                        ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                                         }`}
                                 >
                                     {category.label}
@@ -137,6 +159,8 @@ const BlogsPage = () => {
                                     key={blog._id}
                                     blog={blog}
                                     onClick={handleCardClick}
+                                    isAdmin={isAdmin}
+                                    onDelete={handleDelete}
                                 />
                             ))}
                         </div>

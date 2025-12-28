@@ -1,17 +1,31 @@
 import Blog from "../models/blogModel.js";
+import fs from 'fs';
+import path from 'path';
 
 export const createBlog = async (req, res) => {
     try {
         const { title, content, excerpt, category, tags, featuredImage, author } = req.body;
+        let finalFeaturedImage = featuredImage;
+
+        if (req.file) {
+            finalFeaturedImage = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
+
+        // Handle tags if they come as string (FormData)
+        let finalTags = tags;
+        if (typeof tags === 'string') {
+            finalTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        }
 
         const blog = new Blog({
             title,
             content,
             excerpt,
             category,
-            tags: tags || [],
-            featuredImage,
-            author: author || 'Admin'
+            tags: finalTags || [],
+            featuredImage: finalFeaturedImage,
+            author: author || 'Admin',
+            isPublished: true
         });
 
         await blog.save();
@@ -44,6 +58,8 @@ export const getAllBlogs = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit);
+
+
 
         const total = await Blog.countDocuments(query);
 
@@ -99,6 +115,15 @@ export const updateBlog = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
+        if (req.file) {
+            updateData.featuredImage = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
+
+        // Handle tags if they come as string (FormData)
+        if (typeof updateData.tags === 'string') {
+            updateData.tags = updateData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        }
+
         const blog = await Blog.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!blog) {
@@ -133,6 +158,21 @@ export const deleteBlog = async (req, res) => {
                 success: false,
                 message: "Blog not found"
             });
+        }
+
+        // Delete associated file
+        if (blog.featuredImage && blog.featuredImage.includes('/uploads/')) {
+            try {
+                const filename = blog.featuredImage.split('/uploads/')[1];
+                if (filename) {
+                    const filePath = path.join(process.cwd(), 'uploads', filename);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+            } catch (err) {
+                console.error("Error deleting image file:", err);
+            }
         }
 
         res.status(200).json({
