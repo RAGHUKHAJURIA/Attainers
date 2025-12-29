@@ -19,7 +19,7 @@ const PreviousPapersPage = () => {
 
     const fetchPapers = async () => {
         try {
-            const response = await fetch('https://attainers.vercel.app/api/public/previous-papers');
+            const response = await fetch('https://attainers-272i.vercel.app/api/public/previous-papers');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -42,7 +42,7 @@ const PreviousPapersPage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`https://attainers.vercel.app/api/admin/previous-papers/${id}`, {
+            const response = await fetch(`https://attainers-272i.vercel.app/api/admin/previous-papers/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -85,7 +85,7 @@ const PreviousPapersPage = () => {
                 headers['Content-Type'] = 'application/json';
             }
 
-            const response = await fetch('https://attainers.vercel.app/api/admin/previous-papers', {
+            const response = await fetch('https://attainers-272i.vercel.app/api/admin/previous-papers', {
                 method: 'POST',
                 headers: headers,
                 body: body
