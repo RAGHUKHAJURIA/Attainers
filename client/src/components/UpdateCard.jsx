@@ -76,9 +76,12 @@ const UpdateCard = ({ update, isAdmin, onDelete }) => {
 
                 {update.image && (
                     <div className="mb-4">
-                        {update.image.toLowerCase().endsWith('.pdf') ? (
+                        {(update.contentType === 'application/pdf' ||
+                            update.fileName?.toLowerCase().endsWith('.pdf') ||
+                            update.image.toLowerCase().endsWith('.pdf')) ? (
                             <a
-                                href={update.image}
+                                href={`/api/public/download/update/${update._id}`}
+                                download={update.fileName || "download.pdf"}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
@@ -92,6 +95,11 @@ const UpdateCard = ({ update, isAdmin, onDelete }) => {
                             <img
                                 src={update.image}
                                 alt="Attachment"
+                                onError={(e) => {
+                                    // Fallback: if image fails, it might be a file that isn't a PDF but also not renderable as image (e.g. invalid type)
+                                    // or just assume rendering error
+                                    e.target.style.display = 'none';
+                                }}
                                 className="rounded-lg max-h-64 object-cover border border-gray-100 w-full md:w-auto"
                             />
                         )}

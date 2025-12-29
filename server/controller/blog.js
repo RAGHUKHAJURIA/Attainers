@@ -48,10 +48,21 @@ export const createBlog = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating blog:", error);
+
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({
+                success: false,
+                message: "Validation Error",
+                errors: messages
+            });
+        }
+
         res.status(500).json({
             success: false,
-            message: "Something went wrong!",
+            message: "Something went wrong while creating the blog.",
             error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };
@@ -160,10 +171,21 @@ export const updateBlog = async (req, res) => {
         });
     } catch (error) {
         console.error("Error updating blog:", error);
+
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({
+                success: false,
+                message: "Validation Error",
+                errors: messages
+            });
+        }
+
         res.status(500).json({
             success: false,
-            message: "Something went wrong!",
+            message: "Something went wrong while updating the blog.",
             error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };

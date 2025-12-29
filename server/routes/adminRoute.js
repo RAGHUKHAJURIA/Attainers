@@ -34,10 +34,10 @@ router.post('/news', protectAdminRoute, createNews);
 router.get('/all-news', getAllNews);
 
 // Blog routes
-router.post('/blogs', protectAdminRoute, upload.single('file'), createBlog);
+router.post('/blogs', protectAdminRoute, handleCloudinaryUpload, createBlog);
 router.get('/blogs', getAllBlogs);
 router.get('/blogs/:id', getBlogById);
-router.put('/blogs/:id', protectAdminRoute, upload.single('file'), updateBlog);
+router.put('/blogs/:id', protectAdminRoute, handleCloudinaryUpload, updateBlog);
 router.delete('/blogs/:id', protectAdminRoute, deleteBlog);
 
 // Table routes
