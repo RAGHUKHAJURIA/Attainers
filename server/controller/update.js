@@ -42,7 +42,9 @@ export const createUpdate = async (req, res) => {
             expiryDate: expiryDate ? new Date(expiryDate) : null,
             image,
             imageData,
-            contentType
+            contentType,
+            fileName: req.file ? req.file.originalname : null,
+            fileSize: req.file ? req.file.size : null
         });
 
         await update.save();
@@ -172,6 +174,8 @@ export const updateUpdate = async (req, res) => {
             } else {
                 updateData.image = req.file.path;
             }
+            updateData.fileName = req.file.originalname;
+            updateData.fileSize = req.file.size;
         }
 
         const update = await Update.findByIdAndUpdate(id, updateData, { new: true });

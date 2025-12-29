@@ -12,6 +12,9 @@ export const downloadFile = async (req, res) => {
             model = PDF;
         } else if (type === 'paper') {
             model = PreviousPaper;
+        } else if (type === 'update') {
+            const { default: Update } = await import('../models/updateModel.js');
+            model = Update;
         } else {
             return res.status(400).json({ success: false, message: "Invalid download type" });
         }
@@ -23,14 +26,15 @@ export const downloadFile = async (req, res) => {
         }
 
         // 0. Check if file is stored in DB (Buffer)
-        if (item.fileData) {
+        const fileBuffer = item.fileData || item.imageData;
+        if (fileBuffer) {
             res.setHeader('Content-Type', item.contentType || 'application/pdf');
             const safeFileName = (item.fileName || 'download.pdf').replace(/[^a-zA-Z0-9.-]/g, '_');
             res.setHeader('Content-Disposition', `attachment; filename="${safeFileName}"`);
             if (item.fileSize) {
                 res.setHeader('Content-Length', item.fileSize);
             }
-            return res.send(item.fileData);
+            return res.send(fileBuffer);
         }
 
         const fileUrl = item.fileUrl;

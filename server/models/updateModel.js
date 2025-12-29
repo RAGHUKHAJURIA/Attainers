@@ -38,6 +38,14 @@ const updateSchema = new mongoose.Schema({
     contentType: {
         type: String,
         required: false
+    },
+    fileName: {
+        type: String,
+        required: false
+    },
+    fileSize: {
+        type: Number,
+        required: false
     }
 }, { timestamps: true });
 
