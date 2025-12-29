@@ -3,9 +3,17 @@ import path from 'path';
 import fs from 'fs';
 
 // Ensure upload directory exists
-const uploadDir = 'uploads/';
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+
+// Ensure upload directory exists
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+const uploadDir = isProduction ? '/tmp' : 'uploads/';
+
+if (!isProduction && !fs.existsSync(uploadDir)) {
+    try {
+        fs.mkdirSync(uploadDir);
+    } catch (err) {
+        console.error("Error creating upload directory:", err);
+    }
 }
 
 const storage = multer.diskStorage({

@@ -13,7 +13,9 @@ app.use(cors());
 app.use(express.json());
 // Parse XML/Atom feeds as raw text for the webhook
 app.use(express.text({ type: 'application/atom+xml' }));
-app.use('/uploads', express.static('uploads'));
+
+const uploadDir = (process.env.NODE_ENV === 'production' || process.env.VERCEL) ? '/tmp' : 'uploads';
+app.use('/uploads', express.static(uploadDir));
 
 import { initCronJobs } from './services/cronService.js';
 
