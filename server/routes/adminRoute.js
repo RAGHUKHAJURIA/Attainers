@@ -13,7 +13,29 @@ import { protectAdminRoute } from "../middleware/clerkMiddleware.js";
 import { upload } from "../middleware/upload.js";
 import { uploadMemory } from "../middleware/uploadMemory.js";
 
+
 const router = express.Router();
+
+// Wrapper to handle Multer errors (File size, etc.)
+const handleMemoryUpload = (req, res, next) => {
+    uploadMemory.single('file')(req, res, (err) => {
+        if (err) {
+            console.error("Upload Error:", err);
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    success: false,
+                    message: "File is too large! Maximum limit is 15MB."
+                });
+            }
+            return res.status(400).json({
+                success: false,
+                message: "Image upload failed",
+                error: err.message
+            });
+        }
+        next();
+    });
+};
 
 const handleCloudinaryUpload = (req, res, next) => {
     upload.single('file')(req, res, (err) => {
@@ -48,26 +70,7 @@ router.put('/tables/:id', protectAdminRoute, updateTable);
 router.delete('/tables/:id', protectAdminRoute, deleteTable);
 
 // Update routes
-// Wrapper to handle Multer errors (File size, etc.)
-const handleMemoryUpload = (req, res, next) => {
-    uploadMemory.single('file')(req, res, (err) => {
-        if (err) {
-            console.error("Upload Error:", err);
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({
-                    success: false,
-                    message: "File is too large! Maximum limit is 15MB."
-                });
-            }
-            return res.status(400).json({
-                success: false,
-                message: "Image upload failed",
-                error: err.message
-            });
-        }
-        next();
-    });
-};
+
 
 router.post('/updates', protectAdminRoute, handleMemoryUpload, createUpdate);
 router.get('/updates', getAllUpdates);
