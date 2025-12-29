@@ -8,7 +8,8 @@ export const createUpdate = async (req, res) => {
         let image = null;
 
         if (req.file) {
-            image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+            image = `${baseUrl}/uploads/${req.file.filename}`;
         } else if (req.body.image) {
             // Handle if image is sent as a URL string (e.g. from existing update)
             image = req.body.image;
@@ -116,7 +117,8 @@ export const updateUpdate = async (req, res) => {
         }
 
         if (req.file) {
-            updateData.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+            updateData.image = `${baseUrl}/uploads/${req.file.filename}`;
         }
 
         const update = await Update.findByIdAndUpdate(id, updateData, { new: true });

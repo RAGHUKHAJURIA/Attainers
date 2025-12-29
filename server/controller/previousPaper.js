@@ -5,7 +5,8 @@ export const createPreviousPaper = async (req, res) => {
         const paperData = req.body;
 
         if (req.file) {
-            paperData.fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+            paperData.fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
             paperData.fileName = req.file.originalname; // Override/Set filename from upload
             paperData.fileSize = req.file.size;
         }

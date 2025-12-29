@@ -8,7 +8,8 @@ export const createBlog = async (req, res) => {
         let finalFeaturedImage = featuredImage;
 
         if (req.file) {
-            finalFeaturedImage = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+            finalFeaturedImage = `${baseUrl}/uploads/${req.file.filename}`;
         }
 
         // Handle tags if they come as string (FormData)
@@ -116,7 +117,8 @@ export const updateBlog = async (req, res) => {
         const updateData = req.body;
 
         if (req.file) {
-            updateData.featuredImage = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+            updateData.featuredImage = `${baseUrl}/uploads/${req.file.filename}`;
         }
 
         // Handle tags if they come as string (FormData)

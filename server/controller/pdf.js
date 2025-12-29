@@ -10,7 +10,8 @@ export const createPDF = async (req, res) => {
         let finalFileSize = fileSize;
 
         if (req.file) {
-            finalFileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+            finalFileUrl = `${baseUrl}/uploads/${req.file.filename}`;
             finalFileName = req.file.originalname; // Or keep it simple
             finalFileSize = req.file.size;
         }
@@ -117,7 +118,8 @@ export const updatePDF = async (req, res) => {
         const updateData = req.body;
 
         if (req.file) {
-            updateData.fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+            updateData.fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
             updateData.fileName = req.file.originalname;
             updateData.fileSize = req.file.size;
         }
