@@ -1,17 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 
 const PDFCard = ({ pdf, onClick, isAdmin, onDelete }) => {
+    const { backendUrl } = useContext(AppContext);
+
     const handleClick = () => {
         if (onClick) {
             onClick(pdf);
         } else {
             // Use the secure download endpoint
-            const apiUrl = 'https://attainers-272i.vercel.app/api/public';
-            // For paid PDFs, we might still want to open/preview or check payment, 
-            // but for now applying download link as requested for general usage.
-            // If isPaid is true, typical flow might correspond to a proper purchase check,
-            // but assuming public PDFs or unlocked ones for this context.
-            window.location.href = `${apiUrl}/download/pdf/${pdf._id}`;
+            window.location.href = `${backendUrl}/api/public/download/pdf/${pdf._id}`;
         }
     };
 

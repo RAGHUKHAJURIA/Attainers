@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 
 const UpdateCard = ({ update, isAdmin, onDelete }) => {
+    const { backendUrl } = useContext(AppContext);
     const getTypeColor = (type) => {
         const colors = {
             'urgent': 'bg-red-100 text-red-700 border-red-200',
@@ -80,7 +82,7 @@ const UpdateCard = ({ update, isAdmin, onDelete }) => {
                             update.fileName?.toLowerCase().endsWith('.pdf') ||
                             update.image.toLowerCase().endsWith('.pdf')) ? (
                             <a
-                                href={`/api/public/download/update/${update._id}`}
+                                href={`${backendUrl}/api/public/download/update/${update._id}`}
                                 download={update.fileName || "download.pdf"}
                                 target="_blank"
                                 rel="noopener noreferrer"

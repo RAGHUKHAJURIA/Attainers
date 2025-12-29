@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 
 const PreviousPaperCard = ({ paper, onClick, isAdmin, onDelete }) => {
+    const { backendUrl } = useContext(AppContext);
+
     const handleClick = () => {
         if (onClick) {
             onClick(paper);
         } else {
             // Use the secure download endpoint
-            const apiUrl = 'https://attainers-272i.vercel.app/api/public'; // Hardcoded based on provided file
-            window.location.href = `${apiUrl}/download/paper/${paper._id}`;
+            window.location.href = `${backendUrl}/api/public/download/paper/${paper._id}`;
         }
     };
 
