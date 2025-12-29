@@ -47,6 +47,11 @@ app.get('/', (req, res) => {
 app.use('/api/admin', clerkMiddleware(), router)
 app.use('/api/public', publicRoute)
 
+// Global 404 Handler for API
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: "API Route not found" });
+});
+
 const PORT = process.env.PORT || 5000
 
 const startServer = async () => {
