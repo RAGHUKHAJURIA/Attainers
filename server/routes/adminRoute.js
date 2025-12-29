@@ -15,6 +15,20 @@ import { uploadMemory } from "../middleware/uploadMemory.js";
 
 const router = express.Router();
 
+const handleCloudinaryUpload = (req, res, next) => {
+    upload.single('file')(req, res, (err) => {
+        if (err) {
+            console.error("Cloudinary Upload Error:", err);
+            return res.status(500).json({
+                success: false,
+                message: "Image upload failed",
+                error: err.message
+            });
+        }
+        next();
+    });
+};
+
 // News routes
 router.post('/news', protectAdminRoute, createNews);
 router.get('/all-news', getAllNews);
@@ -34,10 +48,10 @@ router.put('/tables/:id', protectAdminRoute, updateTable);
 router.delete('/tables/:id', protectAdminRoute, deleteTable);
 
 // Update routes
-router.post('/updates', protectAdminRoute, upload.single('file'), createUpdate);
+router.post('/updates', protectAdminRoute, handleCloudinaryUpload, createUpdate);
 router.get('/updates', getAllUpdates);
 router.get('/updates/:id', getUpdateById);
-router.put('/updates/:id', protectAdminRoute, upload.single('file'), updateUpdate);
+router.put('/updates/:id', protectAdminRoute, handleCloudinaryUpload, updateUpdate);
 router.delete('/updates/:id', protectAdminRoute, deleteUpdate);
 
 // YouTube routes
