@@ -16,9 +16,19 @@ export const createPreviousPaper = async (req, res) => {
         const paperData = req.body;
 
         if (req.file) {
-            paperData.fileUrl = req.file.path;
-            paperData.fileName = req.file.originalname; // Override/Set filename from upload
-            paperData.fileSize = req.file.size;
+            if (req.file.buffer) {
+                // Buffer upload
+                paperData.fileData = req.file.buffer;
+                paperData.contentType = req.file.mimetype;
+                paperData.fileName = req.file.originalname;
+                paperData.fileSize = req.file.size;
+                paperData.fileUrl = `db-storage-${Date.now()}`;
+            } else {
+                // Cloudinary upload
+                paperData.fileUrl = req.file.path;
+                paperData.fileName = req.file.originalname;
+                paperData.fileSize = req.file.size;
+            }
         }
 
         const paper = new PreviousPaper({
@@ -120,6 +130,20 @@ export const updatePreviousPaper = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
+
+        if (req.file) {
+            if (req.file.buffer) {
+                updateData.fileData = req.file.buffer;
+                updateData.contentType = req.file.mimetype;
+                updateData.fileName = req.file.originalname;
+                updateData.fileSize = req.file.size;
+                updateData.fileUrl = `db-storage-${Date.now()}`;
+            } else {
+                updateData.fileUrl = req.file.path;
+                updateData.fileName = req.file.originalname;
+                updateData.fileSize = req.file.size;
+            }
+        }
 
         const paper = await PreviousPaper.findByIdAndUpdate(id, updateData, { new: true });
 

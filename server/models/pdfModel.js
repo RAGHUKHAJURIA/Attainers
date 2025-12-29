@@ -20,11 +20,19 @@ const pdfSchema = new mongoose.Schema({
     },
     fileUrl: {
         type: String,
-        required: true
+        required: false
     },
     fileName: {
         type: String,
-        required: true
+        required: false
+    },
+    fileData: {
+        type: Buffer,
+        required: false
+    },
+    contentType: {
+        type: String,
+        required: false
     },
     fileSize: {
         type: Number,

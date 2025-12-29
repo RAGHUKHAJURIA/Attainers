@@ -11,6 +11,7 @@ import { createPreviousPaper, getAllPreviousPapers, getPreviousPaperById, update
 import { createMockTest, getAllMockTests, getMockTestById, updateMockTest, deleteMockTest, addQuestions } from "../controller/mockTest.js";
 import { protectAdminRoute } from "../middleware/clerkMiddleware.js";
 import { upload } from "../middleware/upload.js";
+import { uploadMemory } from "../middleware/uploadMemory.js";
 
 const router = express.Router();
 
@@ -50,10 +51,10 @@ router.post('/youtube/delete-shorts', protectAdminRoute, deleteYouTubeShorts);
 router.delete('/youtube/:id', protectAdminRoute, deleteYouTubeVideo);
 
 // PDF routes
-router.post('/pdfs', protectAdminRoute, upload.single('file'), createPDF);
+router.post('/pdfs', protectAdminRoute, uploadMemory.single('file'), createPDF);
 router.get('/pdfs', getAllPDFs);
 router.get('/pdfs/:id', getPDFById);
-router.put('/pdfs/:id', protectAdminRoute, upload.single('file'), updatePDF);
+router.put('/pdfs/:id', protectAdminRoute, uploadMemory.single('file'), updatePDF);
 router.delete('/pdfs/:id', protectAdminRoute, deletePDF);
 
 // Course routes
@@ -71,10 +72,10 @@ router.put('/video-lectures/:id', protectAdminRoute, updateVideoLecture);
 router.delete('/video-lectures/:id', protectAdminRoute, deleteVideoLecture);
 
 // Previous Paper routes
-router.post('/previous-papers', protectAdminRoute, upload.single('file'), createPreviousPaper);
+router.post('/previous-papers', protectAdminRoute, uploadMemory.single('file'), createPreviousPaper);
 router.get('/previous-papers', getAllPreviousPapers);
 router.get('/previous-papers/:id', getPreviousPaperById);
-router.put('/previous-papers/:id', protectAdminRoute, upload.single('file'), updatePreviousPaper);
+router.put('/previous-papers/:id', protectAdminRoute, uploadMemory.single('file'), updatePreviousPaper);
 router.delete('/previous-papers/:id', protectAdminRoute, deletePreviousPaper);
 
 // Mock Test routes

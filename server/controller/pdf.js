@@ -20,12 +20,23 @@ export const createPDF = async (req, res) => {
         let finalFileUrl = fileUrl;
         let finalFileName = fileName;
         let finalFileSize = fileSize;
+        let finalFileData = null;
+        let finalContentType = null;
 
         if (req.file) {
-            // Cloudinary provides the full URL in req.file.path
-            finalFileUrl = req.file.path;
-            finalFileName = req.file.originalname; // Or keep it simple
-            finalFileSize = req.file.size;
+            if (req.file.buffer) {
+                // Buffer upload (Memory Storage)
+                finalFileData = req.file.buffer;
+                finalContentType = req.file.mimetype;
+                finalFileName = req.file.originalname;
+                finalFileSize = req.file.size;
+                finalFileUrl = `db-storage-${Date.now()}`; // Placeholder
+            } else {
+                // Cloudinary upload (if we kept that path open, though route changed)
+                finalFileUrl = req.file.path;
+                finalFileName = req.file.originalname;
+                finalFileSize = req.file.size;
+            }
         }
 
         const pdf = new PDF({
@@ -36,6 +47,8 @@ export const createPDF = async (req, res) => {
             fileUrl: finalFileUrl,
             fileName: finalFileName,
             fileSize: finalFileSize,
+            fileData: finalFileData,
+            contentType: finalContentType,
             pages,
             tags: tags || [],
             isPaid: isPaid || false,
@@ -139,9 +152,17 @@ export const updatePDF = async (req, res) => {
         const updateData = req.body;
 
         if (req.file) {
-            updateData.fileUrl = req.file.path;
-            updateData.fileName = req.file.originalname;
-            updateData.fileSize = req.file.size;
+            if (req.file.buffer) {
+                updateData.fileData = req.file.buffer;
+                updateData.contentType = req.file.mimetype;
+                updateData.fileName = req.file.originalname;
+                updateData.fileSize = req.file.size;
+                updateData.fileUrl = `db-storage-${Date.now()}`;
+            } else {
+                updateData.fileUrl = req.file.path;
+                updateData.fileName = req.file.originalname;
+                updateData.fileSize = req.file.size;
+            }
         }
 
         const pdf = await PDF.findByIdAndUpdate(id, updateData, { new: true });

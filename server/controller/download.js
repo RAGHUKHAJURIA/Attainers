@@ -22,14 +22,23 @@ export const downloadFile = async (req, res) => {
             return res.status(404).json({ success: false, message: "File not found" });
         }
 
+        // 0. Check if file is stored in DB (Buffer)
+        if (item.fileData) {
+            res.setHeader('Content-Type', item.contentType || 'application/pdf');
+            const safeFileName = (item.fileName || 'download.pdf').replace(/[^a-zA-Z0-9.-]/g, '_');
+            res.setHeader('Content-Disposition', `attachment; filename="${safeFileName}"`);
+            if (item.fileSize) {
+                res.setHeader('Content-Length', item.fileSize);
+            }
+            return res.send(item.fileData);
+        }
+
         const fileUrl = item.fileUrl;
         if (!fileUrl) {
             return res.status(404).json({ success: false, message: "No file attached" });
         }
 
-        // Increment download count
-        item.downloadCount = (item.downloadCount || 0) + 1;
-        await item.save();
+        // Increment download count (already done above, but good to keep flow clear)
 
         // 1. Check if it is a Cloudinary URL (or any remote URL)
         if (fileUrl.startsWith('http') && (fileUrl.includes('cloudinary') || !fileUrl.includes(req.get('host')))) {
