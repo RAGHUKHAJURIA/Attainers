@@ -42,4 +42,14 @@ const startServer = async () => {
     }
 };
 
-startServer();
+
+if (process.env.VERCEL) {
+    // Vercel Serverless environment
+    connectDB().catch(err => console.error("MongoDB Connection Error:", err));
+    initCronJobs();
+} else {
+    // Local development
+    startServer();
+}
+
+export default app;
