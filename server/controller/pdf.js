@@ -2,6 +2,15 @@ import PDF from "../models/pdfModel.js";
 import fs from 'fs';
 import path from 'path';
 
+const fixUrl = (url, req) => {
+    if (!url) return url;
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+        const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+        return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
+    }
+    return url;
+};
+
 export const createPDF = async (req, res) => {
     try {
         const { title, description, category, subject, fileUrl, fileName, fileSize, pages, tags, isPaid, price, author } = req.body;
@@ -63,11 +72,17 @@ export const getAllPDFs = async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
+        const sanitizedPdfs = pdfs.map(p => {
+            const pdfObj = p.toObject();
+            pdfObj.fileUrl = fixUrl(pdfObj.fileUrl, req);
+            return pdfObj;
+        });
+
         const total = await PDF.countDocuments(query);
 
         res.status(200).json({
             success: true,
-            pdfs,
+            pdfs: sanitizedPdfs,
             totalPages: Math.ceil(total / limit),
             currentPage: page,
             total
@@ -100,7 +115,10 @@ export const getPDFById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            pdf
+            pdf: {
+                ...pdf.toObject(),
+                fileUrl: fixUrl(pdf.fileUrl, req)
+            }
         });
     } catch (error) {
         console.error("Error fetching PDF:", error);

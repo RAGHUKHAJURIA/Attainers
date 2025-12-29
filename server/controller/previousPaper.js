@@ -1,5 +1,14 @@
 import PreviousPaper from "../models/previousPaperModel.js";
 
+const fixUrl = (url, req) => {
+    if (!url) return url;
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+        const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+        return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
+    }
+    return url;
+};
+
 export const createPreviousPaper = async (req, res) => {
     try {
         const paperData = req.body;
@@ -48,11 +57,17 @@ export const getAllPreviousPapers = async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
+        const sanitizedPapers = papers.map(p => {
+            const paperObj = p.toObject();
+            paperObj.fileUrl = fixUrl(paperObj.fileUrl, req);
+            return paperObj;
+        });
+
         const total = await PreviousPaper.countDocuments(query);
 
         res.status(200).json({
             success: true,
-            papers,
+            papers: sanitizedPapers,
             totalPages: Math.ceil(total / limit),
             currentPage: page,
             total
@@ -85,7 +100,10 @@ export const getPreviousPaperById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            paper
+            paper: {
+                ...paper.toObject(),
+                fileUrl: fixUrl(paper.fileUrl, req)
+            }
         });
     } catch (error) {
         console.error("Error fetching previous paper:", error);

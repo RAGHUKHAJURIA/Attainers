@@ -5,7 +5,13 @@ const PDFCard = ({ pdf, onClick, isAdmin, onDelete }) => {
         if (onClick) {
             onClick(pdf);
         } else {
-            window.open(pdf.fileUrl, '_blank');
+            // Use the secure download endpoint
+            const apiUrl = 'https://attainers-272i.vercel.app/api/public';
+            // For paid PDFs, we might still want to open/preview or check payment, 
+            // but for now applying download link as requested for general usage.
+            // If isPaid is true, typical flow might correspond to a proper purchase check,
+            // but assuming public PDFs or unlocked ones for this context.
+            window.location.href = `${apiUrl}/download/pdf/${pdf._id}`;
         }
     };
 
@@ -95,10 +101,12 @@ const PDFCard = ({ pdf, onClick, isAdmin, onDelete }) => {
                 </div>
 
                 {/* Footer Action */}
-                <button className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${pdf.isPaid
+                <button
+                    onClick={handleClick}
+                    className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${pdf.isPaid
                         ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                         : 'bg-gray-900 text-white hover:bg-blue-600 hover:shadow-blue-200'
-                    }`}>
+                        }`}>
                     <span>{pdf.isPaid ? 'Unlock Now' : 'Download Now'}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

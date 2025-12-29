@@ -2,6 +2,15 @@ import Update from "../models/updateModel.js";
 import fs from 'fs';
 import path from 'path';
 
+const fixUrl = (url, req) => {
+    if (!url) return url;
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+        const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+        return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
+    }
+    return url;
+};
+
 export const createUpdate = async (req, res) => {
     try {
         const { title, content, type, priority, expiryDate } = req.body;
@@ -62,11 +71,17 @@ export const getAllUpdates = async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
+        const sanitizedUpdates = updates.map(u => {
+            const updateObj = u.toObject();
+            updateObj.image = fixUrl(updateObj.image, req);
+            return updateObj;
+        });
+
         const total = await Update.countDocuments(query);
 
         res.status(200).json({
             success: true,
-            updates,
+            updates: sanitizedUpdates,
             totalPages: Math.ceil(total / limit),
             currentPage: page,
             total
@@ -95,7 +110,10 @@ export const getUpdateById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            update
+            update: {
+                ...update.toObject(),
+                image: fixUrl(update.image, req)
+            }
         });
     } catch (error) {
         console.error("Error fetching update:", error);

@@ -2,6 +2,15 @@ import Blog from "../models/blogModel.js";
 import fs from 'fs';
 import path from 'path';
 
+const fixUrl = (url, req) => {
+    if (!url) return url;
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+        const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+        return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
+    }
+    return url;
+};
+
 export const createBlog = async (req, res) => {
     try {
         const { title, content, excerpt, category, tags, featuredImage, author } = req.body;
@@ -60,13 +69,19 @@ export const getAllBlogs = async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
+        const sanitizedBlogs = blogs.map(b => {
+            const blogObj = b.toObject();
+            blogObj.featuredImage = fixUrl(blogObj.featuredImage, req);
+            return blogObj;
+        });
+
 
 
         const total = await Blog.countDocuments(query);
 
         res.status(200).json({
             success: true,
-            blogs,
+            blogs: sanitizedBlogs,
             totalPages: Math.ceil(total / limit),
             currentPage: page,
             total
@@ -99,7 +114,10 @@ export const getBlogById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            blog
+            blog: {
+                ...blog.toObject(),
+                featuredImage: fixUrl(blog.featuredImage, req)
+            }
         });
     } catch (error) {
         console.error("Error fetching blog:", error);
