@@ -8,7 +8,26 @@ import { clerkMiddleware } from '@clerk/express';
 
 const app = express();
 
-app.use(cors());
+
+const allowedOrigins = [
+    'https://attainers-yerb.vercel.app',
+    'https://attainers.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5000'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
+}));
 // Parse JSON for standard requests
 app.use(express.json());
 // Parse XML/Atom feeds as raw text for the webhook
