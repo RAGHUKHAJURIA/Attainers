@@ -22,7 +22,7 @@ const MockTestsPage = () => {
 
     const fetchTests = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/public/mock-tests');
+            const response = await fetch('https://attainers.vercel.app/api/public/mock-tests');
             if (response.ok) {
                 const data = await response.json();
                 setTests(data);
@@ -44,7 +44,7 @@ const MockTestsPage = () => {
             const token = await getToken();
 
 
-            const response = await fetch('http://localhost:5000/api/admin/mock-tests', {
+            const response = await fetch('https://attainers.vercel.app/api/admin/mock-tests', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ const MockTestsPage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`http://localhost:5000/api/admin/mock-tests/${id}`, {
+            const response = await fetch(`https://attainers.vercel.app/api/admin/mock-tests/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

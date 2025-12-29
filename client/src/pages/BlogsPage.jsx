@@ -36,7 +36,7 @@ const BlogsPage = () => {
 
     const fetchBlogs = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/public/blogs');
+            const response = await fetch('https://attainers.vercel.app/api/public/blogs');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -51,7 +51,7 @@ const BlogsPage = () => {
     const handleAddBlog = async (newBlog) => {
         try {
             const token = await getToken();
-            const response = await fetch('http://localhost:5000/api/admin/blogs', {
+            const response = await fetch('https://attainers.vercel.app/api/admin/blogs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ const BlogsPage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`http://localhost:5000/api/admin/blogs/${id}`, {
+            const response = await fetch(`https://attainers.vercel.app/api/admin/blogs/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

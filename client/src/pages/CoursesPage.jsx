@@ -23,7 +23,7 @@ const CoursesPage = () => {
 
     const fetchCourses = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/public/courses');
+            const response = await fetch('https://attainers.vercel.app/api/public/courses');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -55,7 +55,7 @@ const CoursesPage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`http://localhost:5000/api/admin/courses/${id}`, {
+            const response = await fetch(`https://attainers.vercel.app/api/admin/courses/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

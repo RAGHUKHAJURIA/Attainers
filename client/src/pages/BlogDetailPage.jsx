@@ -12,7 +12,7 @@ const BlogDetailPage = () => {
     useEffect(() => {
         const fetchBlog = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/public/blogs/${id}`);
+                const response = await fetch(`https://attainers.vercel.app/api/public/blogs/${id}`);
                 const data = await response.json();
                 if (data.success) {
                     setBlog(data.blog);
