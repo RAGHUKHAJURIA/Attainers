@@ -37,7 +37,7 @@ export const downloadFile = async (req, res) => {
             return res.send(fileBuffer);
         }
 
-        const fileUrl = item.fileUrl;
+        const fileUrl = item.fileUrl || item.image;
         if (!fileUrl) {
             return res.status(404).json({ success: false, message: "No file attached" });
         }
