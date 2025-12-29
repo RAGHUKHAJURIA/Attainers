@@ -17,10 +17,8 @@ app.use('/uploads', express.static('uploads'));
 
 import { initCronJobs } from './services/cronService.js';
 
-await connectDB();
-initCronJobs();
 
-
+// Define routes before starting server
 app.get('/', (req, res) => {
     res.send('Home Page...')
 })
@@ -30,6 +28,18 @@ app.use('/api/public', publicRoute)
 
 const PORT = process.env.PORT || 5000
 
-app.listen(PORT, (req, res) => {
+const startServer = async () => {
+    try {
+        await connectDB();
+        initCronJobs();
 
-})
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("Failed to start server:", error);
+        process.exit(1);
+    }
+};
+
+startServer();
