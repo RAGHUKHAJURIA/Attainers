@@ -27,34 +27,33 @@ export const downloadFile = async (req, res) => {
             return res.status(404).json({ success: false, message: "No file attached" });
         }
 
-        // Extract filename from URL (assuming /uploads/filename structure)
-        // This regex handles both localhost and production URLs we might have fixed earlier
+        // Increment download count
+        item.downloadCount = (item.downloadCount || 0) + 1;
+        await item.save();
+
+        // 1. Check if it is a Cloudinary URL (or any remote URL)
+        if (fileUrl.startsWith('http') && (fileUrl.includes('cloudinary') || !fileUrl.includes(req.get('host')))) {
+            // For Cloudinary, we want to force download if possible.
+            // Cloudinary allows adding flags to URL for attachment.
+            // If regular remote URL, just redirect.
+            return res.redirect(fileUrl);
+        }
+
+        // 2. Fallback for legacy local files
         const matches = fileUrl.match(/\/uploads\/(.+)$/);
 
         if (!matches || !matches[1]) {
-            // Fallback: try to just get the basename if simple structure
-            // But ideally we rely on the path we know
-            return res.status(500).json({ success: false, message: "Invalid file path in database" });
+            // Try to use fileUrl as relative path if it doesn't match
+            return res.redirect(fileUrl);
         }
 
         const filename = matches[1];
 
-        // Determine file path based on environment
-        // In local: root/uploads/filename
-        // In Vercel/Prod: /tmp/filename (if uploaded there) or we might need another strategy if using persistent storage service like S3/Cloudinary.
-        // NOTE: If using Vercel file system, files uploaded to /tmp persist only for that request. 
-        // If the user is using simple disk storage on a stateful server (VPS), this works.
-        // If on Vercel without S3, previous uploads are lost anyway. 
-        // Assuming VPS/Stateful server based on 'uploads' usage.
-
+        // Assume legacy files are in 'uploads' folder locally (dev) or lost (prod)
         const uploadDir = (process.env.NODE_ENV === 'production' && process.env.VERCEL) ? '/tmp' : 'uploads';
         const filePath = path.join(process.cwd(), uploadDir, filename);
 
         if (fs.existsSync(filePath)) {
-            // Increment download count
-            item.downloadCount = (item.downloadCount || 0) + 1;
-            await item.save();
-
             res.download(filePath, item.fileName || filename, (err) => {
                 if (err) {
                     console.error("Error downloading file:", err);
@@ -64,9 +63,7 @@ export const downloadFile = async (req, res) => {
                 }
             });
         } else {
-            console.error(`File not found on server: ${filePath}`);
-            // Check if it's a full remote URL (e.g. if moved to S3 later)
-            // For now, assuming local filesystem per user workspace
+            // If local file is missing (common in Vercel for old uploads), we can't do much.
             return res.status(404).json({ success: false, message: "File not found on server storage." });
         }
 

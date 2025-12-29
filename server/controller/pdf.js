@@ -4,6 +4,9 @@ import path from 'path';
 
 const fixUrl = (url, req) => {
     if (!url) return url;
+    // Don't modify Cloudinary URLs
+    if (url.includes('cloudinary.com')) return url;
+
     if (url.includes('localhost') || url.includes('127.0.0.1')) {
         const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
         return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
@@ -19,8 +22,8 @@ export const createPDF = async (req, res) => {
         let finalFileSize = fileSize;
 
         if (req.file) {
-            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
-            finalFileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+            // Cloudinary provides the full URL in req.file.path
+            finalFileUrl = req.file.path;
             finalFileName = req.file.originalname; // Or keep it simple
             finalFileSize = req.file.size;
         }
@@ -136,8 +139,7 @@ export const updatePDF = async (req, res) => {
         const updateData = req.body;
 
         if (req.file) {
-            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
-            updateData.fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+            updateData.fileUrl = req.file.path;
             updateData.fileName = req.file.originalname;
             updateData.fileSize = req.file.size;
         }

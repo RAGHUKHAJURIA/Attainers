@@ -2,6 +2,8 @@ import PreviousPaper from "../models/previousPaperModel.js";
 
 const fixUrl = (url, req) => {
     if (!url) return url;
+    if (url.includes('cloudinary.com')) return url;
+
     if (url.includes('localhost') || url.includes('127.0.0.1')) {
         const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
         return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
@@ -14,8 +16,7 @@ export const createPreviousPaper = async (req, res) => {
         const paperData = req.body;
 
         if (req.file) {
-            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
-            paperData.fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+            paperData.fileUrl = req.file.path;
             paperData.fileName = req.file.originalname; // Override/Set filename from upload
             paperData.fileSize = req.file.size;
         }

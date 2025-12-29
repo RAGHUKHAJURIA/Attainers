@@ -4,6 +4,8 @@ import path from 'path';
 
 const fixUrl = (url, req) => {
     if (!url) return url;
+    if (url.includes('cloudinary.com')) return url;
+
     if (url.includes('localhost') || url.includes('127.0.0.1')) {
         const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
         return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
@@ -17,8 +19,7 @@ export const createBlog = async (req, res) => {
         let finalFeaturedImage = featuredImage;
 
         if (req.file) {
-            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
-            finalFeaturedImage = `${baseUrl}/uploads/${req.file.filename}`;
+            finalFeaturedImage = req.file.path;
         }
 
         // Handle tags if they come as string (FormData)
@@ -135,8 +136,7 @@ export const updateBlog = async (req, res) => {
         const updateData = req.body;
 
         if (req.file) {
-            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
-            updateData.featuredImage = `${baseUrl}/uploads/${req.file.filename}`;
+            updateData.featuredImage = req.file.path;
         }
 
         // Handle tags if they come as string (FormData)

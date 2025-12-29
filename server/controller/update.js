@@ -4,6 +4,8 @@ import path from 'path';
 
 const fixUrl = (url, req) => {
     if (!url) return url;
+    if (url.includes('cloudinary.com')) return url;
+
     if (url.includes('localhost') || url.includes('127.0.0.1')) {
         const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
         return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
@@ -17,8 +19,7 @@ export const createUpdate = async (req, res) => {
         let image = null;
 
         if (req.file) {
-            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
-            image = `${baseUrl}/uploads/${req.file.filename}`;
+            image = req.file.path;
         } else if (req.body.image) {
             // Handle if image is sent as a URL string (e.g. from existing update)
             image = req.body.image;
@@ -135,8 +136,7 @@ export const updateUpdate = async (req, res) => {
         }
 
         if (req.file) {
-            const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
-            updateData.image = `${baseUrl}/uploads/${req.file.filename}`;
+            updateData.image = req.file.path;
         }
 
         const update = await Update.findByIdAndUpdate(id, updateData, { new: true });
