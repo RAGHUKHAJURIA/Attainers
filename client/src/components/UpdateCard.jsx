@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
+import { downloadFile } from '../utils/downloadFile';
 
 const UpdateCard = ({ update, isAdmin, onDelete }) => {
     const { backendUrl } = useContext(AppContext);
@@ -81,18 +82,27 @@ const UpdateCard = ({ update, isAdmin, onDelete }) => {
                         {(update.contentType === 'application/pdf' ||
                             update.fileName?.toLowerCase().endsWith('.pdf') ||
                             update.image.toLowerCase().endsWith('.pdf')) ? (
-                            <a
-                                href={`${backendUrl}/api/public/download/update/${update._id}`}
-                                download={update.fileName || "download.pdf"}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <button
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    try {
+                                        await downloadFile(
+                                            `${backendUrl}/api/public/download/update/${update._id}`,
+                                            update.fileName || "download.pdf"
+                                        );
+                                    } catch (error) {
+                                        console.error('Failed to download attachment:', error);
+                                        alert('Failed to download attachment. Please try again.');
+                                    }
+                                }}
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                                 <span>Download Attachment (PDF)</span>
-                            </a>
+                            </button>
                         ) : (
                             <img
                                 src={update.image}
