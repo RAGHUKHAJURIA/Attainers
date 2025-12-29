@@ -18,7 +18,7 @@ export const AppProvider = (props) => {
   const [allPreviousPapers, setAllPreviousPapers] = useState([]);
 
   const logToken = async () => {
-    console.log(await getToken());
+
   }
 
   const { getToken } = useAuth()

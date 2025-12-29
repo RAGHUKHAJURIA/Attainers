@@ -203,7 +203,7 @@ export const handleWebhook = async (req, res) => {
                     publishedAt
                 });
 
-                console.log("Webhook added:", title);
+
             }
         }
 

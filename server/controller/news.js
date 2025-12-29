@@ -32,12 +32,12 @@ export const createNews = async (req, res) => {
 export const getAllNews = async (req, res) => {
   try {
     const newsList = await News.find();
-    console.log(newsList);
+
 
     res.status(200).json({
       success: true,
       news: newsList,
-      
+
     });
   } catch (error) {
     console.error("Error fetching news:", error);

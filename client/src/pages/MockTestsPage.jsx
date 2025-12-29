@@ -40,9 +40,9 @@ const MockTestsPage = () => {
 
     const handleAddTest = async (newTest) => {
         try {
-            console.log("Adding new test:", newTest);
+
             const token = await getToken();
-            console.log("Token retrieved:", token ? "Yes" : "No");
+
 
             const response = await fetch('http://localhost:5000/api/admin/mock-tests', {
                 method: 'POST',
@@ -54,7 +54,7 @@ const MockTestsPage = () => {
             });
 
             if (response.ok) {
-                console.log("Test added successfully!");
+
                 fetchTests(); // Refresh list
             } else {
                 console.error("Failed to add test. Status:", response.status);

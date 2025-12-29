@@ -318,17 +318,18 @@ const MockTestDetailPage = () => {
         return (
             <div className="h-screen bg-gray-50 flex flex-col overflow-hidden relative">
                 {/* Header */}
-                <header className="bg-white shadow-sm px-4 py-3 sm:px-6 sm:py-4 flex justify-between items-center z-20 shrink-0">
-                    <h1 className="text-lg sm:text-xl font-bold text-gray-800 truncate mr-2">
+                <header className="bg-white shadow-sm px-4 py-3 sm:px-6 sm:py-4 flex justify-between items-center z-20 shrink-0 h-16 sm:h-auto">
+                    {/* Explicit text size to override global h1 */}
+                    <h1 className="text-[16px] sm:text-xl font-bold text-gray-800 break-words line-clamp-2 mr-2 flex-grow leading-tight">
                         {test.examName}
                         <span className="hidden sm:inline"> - {test.title}</span>
                     </h1>
 
-                    <div className="flex items-center gap-2 sm:gap-4">
-                        <div className="bg-gray-100 px-2 py-1 sm:px-4 sm:py-2 rounded-lg flex flex-col items-center min-w-[70px] sm:min-w-[100px]">
-                            <span className="leading-none text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider hidden sm:inline">Time Left</span>
-                            <span className="leading-none text-[10px] sm:hidden text-gray-500 font-bold uppercase tracking-wider mb-0.5">Time</span>
-                            <span className={`leading-none text-base sm:text-xl font-mono font-bold whitespace-nowrap ${timeLeft < 300 ? 'text-red-600 animate-pulse' : 'text-blue-600'}`}>
+                    <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+                        <div className="bg-gray-100 px-2 py-1 sm:px-4 sm:py-2 rounded-lg flex flex-col items-center min-w-[60px] sm:min-w-[100px]">
+                            <span className="leading-none text-[8px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider hidden sm:inline">Time Left</span>
+                            <span className="leading-none text-[8px] sm:hidden text-gray-500 font-bold uppercase tracking-wider mb-0.5">Time</span>
+                            <span className={`leading-none text-sm sm:text-xl font-mono font-bold whitespace-nowrap ${timeLeft < 300 ? 'text-red-600 animate-pulse' : 'text-blue-600'}`}>
                                 {formatTime(timeLeft)}
                             </span>
                         </div>
@@ -351,15 +352,15 @@ const MockTestDetailPage = () => {
 
                 <div className="flex-grow flex relative overflow-hidden">
                     {/* Left: Question Area */}
-                    <div className="flex-grow flex flex-col p-4 sm:p-6 overflow-y-auto w-full lg:w-3/4 bg-gray-50">
+                    <div className="flex-grow flex flex-col p-3 sm:p-6 overflow-y-auto w-full lg:w-3/4 bg-gray-50">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex-grow flex flex-col max-h-full overflow-hidden">
                             {/* Question Header */}
                             <div className="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
-                                <h2 className="text-base sm:text-lg font-bold text-gray-800">
+                                <h2 className="text-sm sm:text-lg font-bold text-gray-800">
                                     Question {currentQuestionIndex + 1}
-                                    <span className="text-gray-400 font-normal text-sm ml-2">/ {test.questions.length}</span>
+                                    <span className="text-gray-400 font-normal text-xs sm:text-sm ml-2">/ {test.questions.length}</span>
                                 </h2>
-                                <span className="text-xs sm:text-sm font-medium bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                <span className="text-xs sm:text-sm font-medium bg-blue-50 text-blue-700 px-2 py-1 rounded whitespace-nowrap">
                                     +{currentQ.marks} Marks
                                 </span>
                             </div>
@@ -394,33 +395,33 @@ const MockTestDetailPage = () => {
                             </div>
 
                             {/* Footer Actions */}
-                            <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row gap-3 justify-between items-center shrink-0">
-                                <div className="flex gap-2 w-full sm:w-auto">
+                            <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center shrink-0">
+                                <div className="flex gap-3 w-full sm:w-auto">
                                     <button
                                         onClick={handleMarkForReview}
-                                        className="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 text-sm font-medium transition-colors text-center whitespace-nowrap"
+                                        className="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 text-sm font-medium transition-colors text-center whitespace-nowrap"
                                     >
                                         Review
                                     </button>
                                     <button
                                         onClick={clearResponse}
-                                        className="flex-1 sm:flex-none px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-200 text-sm font-medium transition-colors border border-gray-200 bg-white"
+                                        className="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-lg text-gray-600 hover:bg-gray-200 text-sm font-medium transition-colors border border-gray-200 bg-white"
                                     >
                                         Clear
                                     </button>
                                 </div>
 
-                                <div className="flex gap-2 w-full sm:w-auto">
+                                <div className="flex gap-3 w-full sm:w-auto">
                                     <button
                                         onClick={handlePrevious}
                                         disabled={currentQuestionIndex === 0}
-                                        className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold border text-sm ${currentQuestionIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'}`}
+                                        className={`flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-lg font-semibold border text-sm ${currentQuestionIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'}`}
                                     >
                                         Prev
                                     </button>
                                     <button
                                         onClick={handleNext}
-                                        className="flex-1 sm:flex-none px-6 py-2 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700 shadow-md hover:shadow-lg transition-all"
+                                        className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700 shadow-md hover:shadow-lg transition-all"
                                     >
                                         {currentQuestionIndex === test.questions.length - 1 ? 'Submit' : 'Save & Next'}
                                     </button>
@@ -435,9 +436,9 @@ const MockTestDetailPage = () => {
                         ${showPalette ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
                     `}>
                         {/* Mobile Header for Palette */}
-                        <div className="lg:hidden p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                        <div className="lg:hidden p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 h-16">
                             <h3 className="font-bold text-gray-800">Question Palette</h3>
-                            <button onClick={() => setShowPalette(false)} className="text-gray-500 hover:text-gray-700">
+                            <button onClick={() => setShowPalette(false)} className="text-gray-500 hover:text-gray-700 p-2">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -458,11 +459,11 @@ const MockTestDetailPage = () => {
 
                         {/* Legend (Visible on Mobile inside palette) */}
                         <div className="p-4 border-b border-gray-200 bg-white">
-                            <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs text-gray-600">
-                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-green-600"></span> Answered</div>
-                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-red-600"></span> Not Answered</div>
-                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-gray-200 border border-gray-300"></span> Not Visited</div>
-                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-purple-600"></span> Review</div>
+                            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs text-gray-600">
+                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-green-600 flex-shrink-0"></span> Answered</div>
+                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-red-600 flex-shrink-0"></span> Not Answered</div>
+                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-gray-200 border border-gray-300 flex-shrink-0"></span> Not Visited</div>
+                                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-purple-600 flex-shrink-0"></span> Review</div>
                             </div>
                         </div>
 

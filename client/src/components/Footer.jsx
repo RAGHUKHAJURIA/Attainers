@@ -17,9 +17,7 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="max-w-md mb-12 md:mb-0">
                         <div className="flex items-center gap-2 mb-6">
-                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                                A
-                            </div>
+                            <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full" />
                             <span className="text-2xl font-bold text-gray-900">Attainers</span>
                         </div>
                         <h2 className="text-4xl font-bold text-gray-900 leading-tight mb-6">
@@ -46,7 +44,7 @@ const Footer = () => {
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                             Latest Updates
                         </Link>
-                        <Link to="/video-lectures" className="group flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors">
+                        <Link to="/youtube" className="group flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors">
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                             Video Lectures
                         </Link>

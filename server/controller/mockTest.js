@@ -3,7 +3,7 @@ import MockTest from "../models/mockTestModel.js";
 // Create a new Mock Test
 export const createMockTest = async (req, res) => {
     try {
-        console.log("Creating new mock test:", req.body);
+
         const { title, examName, difficulty, duration, totalQuestions, description } = req.body;
 
         const newTest = new MockTest({
@@ -16,7 +16,7 @@ export const createMockTest = async (req, res) => {
         });
 
         const savedTest = await newTest.save();
-        console.log("Mock test saved:", savedTest);
+
         res.status(201).json(savedTest);
     } catch (error) {
         console.error("Error creating mock test:", error);
@@ -74,25 +74,25 @@ export const deleteMockTest = async (req, res) => {
 // Add Questions to Mock Test
 export const addQuestions = async (req, res) => {
     try {
-        console.log(`Adding questions to test ID: ${req.params.id}`);
-        console.log("Payload:", JSON.stringify(req.body, null, 2));
+
+
 
         const { questions } = req.body;
         const test = await MockTest.findById(req.params.id);
 
         if (!test) {
-            console.log("Mock Test not found.");
+
             return res.status(404).json({ message: "Mock Test not found" });
         }
 
         if (questions && Array.isArray(questions)) {
             test.questions.push(...questions);
         } else {
-            console.log("Invalid questions format (not an array)");
+
         }
 
         const updatedTest = await test.save();
-        console.log("Questions added successfully.");
+
         res.status(200).json(updatedTest);
     } catch (error) {
         console.error("Error adding questions:", error); // Log full error object

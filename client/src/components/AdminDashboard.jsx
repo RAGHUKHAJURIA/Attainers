@@ -88,9 +88,7 @@ const AdminDashboard = ({ user }) => {
             <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 {/* Logo Area */}
                 <div className="h-20 flex items-center px-8 border-b border-gray-100">
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg mr-3">
-                        <span className="text-white font-bold text-xl">A</span>
-                    </div>
+                    <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full shadow-lg mr-3" />
                     <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
                         Admin Panel
                     </span>

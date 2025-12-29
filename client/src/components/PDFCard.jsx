@@ -5,141 +5,108 @@ const PDFCard = ({ pdf, onClick, isAdmin, onDelete }) => {
         if (onClick) {
             onClick(pdf);
         } else {
-            // Default behavior: open PDF in new tab
             window.open(pdf.fileUrl, '_blank');
         }
     };
 
-    const getCategoryColor = (category) => {
-        const colors = {
-            'study-material': 'bg-blue-100 text-blue-700',
-            'syllabus': 'bg-green-100 text-green-700',
-            'notes': 'bg-yellow-100 text-yellow-700',
-            'reference-books': 'bg-purple-100 text-purple-700',
-            'question-banks': 'bg-red-100 text-red-700',
-            'solved-papers': 'bg-indigo-100 text-indigo-700'
+    const getCategoryStyle = (category) => {
+        const styles = {
+            'study-material': { bg: 'bg-blue-50', text: 'text-blue-600', icon: '📚' },
+            'syllabus': { bg: 'bg-green-50', text: 'text-green-600', icon: '📋' },
+            'notes': { bg: 'bg-yellow-50', text: 'text-yellow-600', icon: '📝' },
+            'reference-books': { bg: 'bg-purple-50', text: 'text-purple-600', icon: '📖' },
+            'question-banks': { bg: 'bg-red-50', text: 'text-red-600', icon: '❓' },
+            'solved-papers': { bg: 'bg-indigo-50', text: 'text-indigo-600', icon: '✅' }
         };
-        return colors[category] || colors['study-material'];
+        return styles[category] || styles['study-material'];
     };
 
     const formatFileSize = (bytes) => {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return '0 B';
         const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const sizes = ['B', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
+
+    const style = getCategoryStyle(pdf.category);
 
     return (
         <div
-            className="modern-card hover-lift cursor-pointer group"
+            className="group relative bg-white rounded-[2rem] p-6 shadow-sm hover:shadow-xl border border-gray-100 hover:border-blue-100 transition-all duration-300 cursor-pointer overflow-hidden"
             onClick={handleClick}
         >
-            {/* PDF Icon Header */}
-            <div className="gradient-primary p-4 text-white">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-lg line-clamp-1">{pdf.title}</h3>
-                            <p className="text-red-100 text-sm">{pdf.subject}</p>
-                        </div>
+            {/* Background Blob */}
+            <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full ${style.bg} opacity-50 group-hover:scale-150 transition-transform duration-500 ease-out`} />
+
+            <div className="relative z-10">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                    <div className={`w-14 h-14 rounded-2xl ${style.bg} flex items-center justify-center text-2xl shadow-sm group-hover:rotate-12 transition-transform duration-300`}>
+                        {style.icon}
                     </div>
-                    {pdf.isPaid && (
-                        <div className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                            ₹{pdf.price}
-                        </div>
-                    )}
-                    {isAdmin && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDelete(pdf._id);
-                            }}
-                            className="ml-2 p-1.5 text-white bg-red-500 hover:bg-red-600 rounded-full transition-colors shadow-sm"
-                            title="Delete PDF"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    )}
-                </div>
-            </div>
 
-            {/* Content */}
-            <div className="p-4">
-                {/* Category Badge */}
-                <div className="flex items-center justify-between mb-3">
-                    <span className="badge-primary">
-                        {pdf.category.replace('-', ' ').toUpperCase()}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                        {pdf.pages ? `${pdf.pages} pages` : 'PDF'}
-                    </span>
-                </div>
-
-                {/* Description */}
-                <p className="text-gray-600 mb-4 line-clamp-2 text-sm">
-                    {pdf.description}
-                </p>
-
-                {/* File Info */}
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                    <div className="flex items-center space-x-4">
-                        <span className="flex items-center space-x-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                            </svg>
-                            {pdf.downloadCount} downloads
-                        </span>
-                        <span className="flex items-center space-x-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            {formatFileSize(pdf.fileSize)}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Tags */}
-                {pdf.tags && pdf.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-4">
-                        {pdf.tags.slice(0, 3).map((tag, index) => (
-                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                #{tag}
-                            </span>
-                        ))}
-                        {pdf.tags.length > 3 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                +{pdf.tags.length - 3} more
+                    <div className="flex flex-col items-end gap-2">
+                        {pdf.isPaid && (
+                            <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200">
+                                ₹{pdf.price}
                             </span>
                         )}
+                        {isAdmin && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(pdf._id);
+                                }}
+                                className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                title="Delete PDF"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
-                )}
-
-                {/* Action Button */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-xs text-gray-500">
-                        <span>by {pdf.author}</span>
-                        <span>•</span>
-                        <span>{new Date(pdf.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <button className="btn-primary flex items-center space-x-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span>{pdf.isPaid ? 'Buy Now' : 'Download'}</span>
-                    </button>
                 </div>
+
+                {/* Content */}
+                <div className="mb-4">
+                    <span className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-1 block">
+                        {pdf.subject}
+                    </span>
+                    <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {pdf.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm line-clamp-2 h-10">
+                        {pdf.description}
+                    </p>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="flex items-center gap-2 text-xs font-medium text-gray-500 bg-gray-50 p-2 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <span>{formatFileSize(pdf.fileSize)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-medium text-gray-500 bg-gray-50 p-2 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                        <span>{pdf.pages || '?'} Pages</span>
+                    </div>
+                </div>
+
+                {/* Footer Action */}
+                <button className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${pdf.isPaid
+                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                        : 'bg-gray-900 text-white hover:bg-blue-600 hover:shadow-blue-200'
+                    }`}>
+                    <span>{pdf.isPaid ? 'Unlock Now' : 'Download Now'}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                </button>
             </div>
         </div>
     );
 };
 
 export default PDFCard;
-

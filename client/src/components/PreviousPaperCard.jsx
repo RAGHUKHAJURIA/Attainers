@@ -5,173 +5,99 @@ const PreviousPaperCard = ({ paper, onClick, isAdmin, onDelete }) => {
         if (onClick) {
             onClick(paper);
         } else {
-            // Default behavior: open paper in new tab
             window.open(paper.fileUrl, '_blank');
         }
     };
 
-    const getCategoryColor = (category) => {
-        const colors = {
-            'upsc': 'bg-blue-100 text-blue-700',
-            'ssc': 'bg-green-100 text-green-700',
-            'banking': 'bg-purple-100 text-purple-700',
-            'railway': 'bg-orange-100 text-orange-700',
-            'defense': 'bg-red-100 text-red-700',
-            'state-psc': 'bg-indigo-100 text-indigo-700',
-            'other': 'bg-gray-100 text-gray-700'
-        };
-        return colors[category] || colors['other'];
+    const getExamStyle = (examName) => {
+        const lowerName = examName?.toLowerCase() || '';
+        if (lowerName.includes('upsc')) return { bg: 'bg-orange-50', text: 'text-orange-600', icon: '🏛️' };
+        if (lowerName.includes('ssc')) return { bg: 'bg-green-50', text: 'text-green-600', icon: '📊' };
+        if (lowerName.includes('banking')) return { bg: 'bg-indigo-50', text: 'text-indigo-600', icon: '🏦' };
+        if (lowerName.includes('jkssb')) return { bg: 'bg-blue-50', text: 'text-blue-600', icon: '🏔️' };
+        return { bg: 'bg-gray-50', text: 'text-gray-600', icon: '📝' };
     };
 
-    const getDifficultyColor = (difficulty) => {
-        const colors = {
-            'easy': 'bg-green-100 text-green-700',
-            'medium': 'bg-yellow-100 text-yellow-700',
-            'hard': 'bg-red-100 text-red-700'
-        };
-        return colors[difficulty] || colors['medium'];
-    };
-
-    const getPaperTypeColor = (paperType) => {
-        const colors = {
-            'prelims': 'bg-blue-100 text-blue-700',
-            'mains': 'bg-green-100 text-green-700',
-            'interview': 'bg-purple-100 text-purple-700',
-            'written': 'bg-orange-100 text-orange-700',
-            'objective': 'bg-yellow-100 text-yellow-700',
-            'subjective': 'bg-red-100 text-red-700'
-        };
-        return colors[paperType] || colors['objective'];
-    };
+    const style = getExamStyle(paper.examName);
 
     return (
         <div
-            className="modern-card hover-lift cursor-pointer group"
+            className="group relative bg-white rounded-[2rem] p-6 shadow-sm hover:shadow-xl border border-gray-100 hover:border-indigo-100 transition-all duration-300 cursor-pointer overflow-hidden"
             onClick={handleClick}
         >
-            {/* Header */}
-            <div className="gradient-primary p-4 text-white">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-lg line-clamp-1">{paper.examName}</h3>
-                            <p className="text-orange-100 text-sm">{paper.year}</p>
-                        </div>
+            {/* Background Blob */}
+            <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full ${style.bg} opacity-50 group-hover:scale-150 transition-transform duration-500 ease-out`} />
+
+            <div className="relative z-10">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                    <div className={`w-14 h-14 rounded-2xl ${style.bg} flex items-center justify-center text-2xl shadow-sm group-hover:-rotate-12 transition-transform duration-300`}>
+                        {style.icon}
                     </div>
-                    {paper.isPaid && (
-                        <div className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                            ₹{paper.price}
-                        </div>
-                    )}
-                    {isAdmin && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDelete(paper._id);
-                            }}
-                            className="ml-2 p-1.5 text-white bg-red-500 hover:bg-red-600 rounded-full transition-colors shadow-sm"
-                            title="Delete Paper"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    )}
-                </div>
-            </div>
 
-            {/* Content */}
-            <div className="p-4">
-                {/* Title */}
-                <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {paper.title}
-                </h4>
-
-                {/* Subject */}
-                <p className="text-gray-600 mb-3 text-sm">
-                    Subject: {paper.subject}
-                </p>
-
-                {/* Badges */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="badge-primary">
-                        {paper.category.replace('-', ' ').toUpperCase()}
-                    </span>
-                    <span className="badge-secondary">
-                        {paper.paperType.toUpperCase()}
-                    </span>
-                    <span className="badge-secondary">
-                        {paper.difficulty.toUpperCase()}
-                    </span>
+                    <div className="flex flex-col items-end gap-2">
+                        <span className="bg-gray-900 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                            {paper.year}
+                        </span>
+                        {isAdmin && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(paper._id);
+                                }}
+                                className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                title="Delete Paper"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
-                {/* Paper Details */}
-                <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
-                    {paper.totalMarks && (
-                        <div className="flex items-center space-x-2">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{paper.totalMarks} marks</span>
-                        </div>
-                    )}
-                    {paper.duration && (
-                        <div className="flex items-center space-x-2">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{paper.duration}</span>
-                        </div>
-                    )}
-                    {paper.pages && (
-                        <div className="flex items-center space-x-2">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span>{paper.pages} pages</span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Tags */}
-                {paper.tags && paper.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-4">
-                        {paper.tags.slice(0, 3).map((tag, index) => (
-                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                #{tag}
-                            </span>
-                        ))}
-                        {paper.tags.length > 3 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                +{paper.tags.length - 3} more
+                {/* Content */}
+                <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold tracking-wider text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md uppercase">
+                            {paper.examName}
+                        </span>
+                        {paper.difficulty && (
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-md uppercase ${paper.difficulty === 'hard' ? 'bg-red-50 text-red-500' :
+                                    paper.difficulty === 'medium' ? 'bg-yellow-50 text-yellow-600' :
+                                        'bg-green-50 text-green-600'
+                                }`}>
+                                {paper.difficulty}
                             </span>
                         )}
                     </div>
-                )}
+                    <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                        {paper.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm">
+                        Subject: <span className="font-medium text-gray-700">{paper.subject}</span>
+                    </p>
+                </div>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-xs text-gray-500">
-                        <span className="flex items-center space-x-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                            </svg>
-                            {paper.downloadCount} downloads
-                        </span>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="flex items-center gap-2 text-xs font-medium text-gray-500 bg-gray-50 p-2 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{paper.duration || '3 Hrs'}</span>
                     </div>
-                    <div className="text-xs text-gray-500">
-                        by {paper.uploadedBy}
+                    <div className="flex items-center gap-2 text-xs font-medium text-gray-500 bg-gray-50 p-2 rounded-lg">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{paper.totalMarks || '100'} Marks</span>
                     </div>
                 </div>
 
-                {/* Action Button */}
-                <button className="btn-primary w-full mt-4">
-                    {paper.isPaid ? 'Buy Now' : 'Download'}
+                {/* Footer Action */}
+                <button className="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow-md hover:bg-indigo-700 hover:shadow-indigo-200 transition-all flex items-center justify-center gap-2">
+                    <span>View Paper</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -179,4 +105,3 @@ const PreviousPaperCard = ({ paper, onClick, isAdmin, onDelete }) => {
 };
 
 export default PreviousPaperCard;
-

@@ -17,12 +17,10 @@ const ModernHero = () => {
             <div className="relative z-10 text-center max-w-4xl mx-auto px-4 mt-8">
                 {/* Floating Central Logo */}
                 <div className="w-20 h-20 mx-auto mb-8 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-gray-100 animate-bounce-slow">
-                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
-                        <span className="text-white font-bold text-2xl">A</span>
-                    </div>
+                    <img src="/logo.jpg" alt="Logo" className="w-12 h-12 rounded-full" />
                 </div>
 
-                <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
+                <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
                     Prepare, Track, and <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                         Achieve Your Dreams
@@ -47,31 +45,29 @@ const ModernHero = () => {
                 </div>
             </div>
 
-            {/* Floating Elements (Hidden on mobile, visible on lg screens) */}
-            <div className="absolute inset-0 pointer-events-none hidden lg:block max-w-7xl mx-auto">
+            {/* Floating Elements (Visible on large screens) */}
+            <div className="absolute inset-0 pointer-events-none hidden xl:block max-w-[1400px] mx-auto">
 
                 {/* Left Top: Yellow Sticky Note - Study Plan */}
                 <div className="absolute top-1/4 left-10 transform -rotate-6 transition-transform hover:-rotate-3 duration-300 pointer-events-auto">
-                    <div className="w-56 h-56 bg-[#fef08a] rounded-sm shadow-xl p-6 relative">
+                    <div className="w-56 h-auto bg-[#fef08a] rounded-sm shadow-xl p-6 relative font-handwriting">
                         {/* Pin */}
-                        <div className="absolute -top-3 left-1/2 w-4 h-4 bg-red-500 rounded-full shadow-md z-20"></div>
-                        <div className="font-handwriting text-gray-800">
-                            <h3 className="font-bold text-lg mb-4 border-b border-gray-800/20 pb-2">Top Priorities</h3>
-                            <ul className="space-y-3 font-medium text-sm">
-                                <li className="flex items-center gap-2">
-                                    <span className="w-4 h-4 border-2 border-gray-800 rounded-sm"></span>
-                                    <span>JKSSB Revision</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <span className="w-4 h-4 bg-gray-800 border-2 border-gray-800 rounded-sm flex items-center justify-center text-white text-xs">✓</span>
-                                    <span className="line-through decoration-2 opacity-60">Watch History Lec</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <span className="w-4 h-4 border-2 border-gray-800 rounded-sm"></span>
-                                    <span>Download PDFs</span>
-                                </li>
-                            </ul>
-                        </div>
+                        <div className="absolute -top-3 left-1/2 w-4 h-4 bg-red-500 rounded-full shadow-md z-20 border-2 border-white/30"></div>
+                        <h3 className="font-bold text-lg text-gray-800 mb-4 border-b border-gray-800/20 pb-2">Top Priorities</h3>
+                        <ul className="space-y-3 font-medium text-sm text-gray-800">
+                            <li className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-gray-800 rounded-sm"></span>
+                                <span>JKSSB Revision</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-4 h-4 bg-gray-800 border-2 border-gray-800 rounded-sm flex items-center justify-center text-white text-xs">✓</span>
+                                <span className="line-through decoration-2 opacity-60">Watch History Lec</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-gray-800 rounded-sm"></span>
+                                <span>Download PDFs</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
@@ -114,7 +110,7 @@ const ModernHero = () => {
                     </div>
                 </div>
 
-                {/* Left Bottom: Files Card */}
+                {/* Left Bottom: Study Resources */}
                 <div className="absolute bottom-12 left-20 transform rotate-3 transition-transform hover:rotate-0 duration-300 pointer-events-auto">
                     <Link to="/pdfs" className="block w-60 bg-white rounded-3xl shadow-2xl p-5 border border-gray-200 hover:border-indigo-100 transition-colors">
                         <div className="flex items-center gap-3 mb-4">
@@ -135,20 +131,9 @@ const ModernHero = () => {
                     </Link>
                 </div>
 
-                {/* Right Bottom: Student Avatar */}
-                <div className="absolute bottom-20 right-1/3 transform translate-x-12 rotate-6 transition-transform hover:rotate-3 duration-300 pointer-events-auto">
-                    <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-full shadow-xl border border-gray-100">
-                        <div className="flex -space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white"></div>
-                            <div className="w-8 h-8 rounded-full bg-pink-500 border-2 border-white"></div>
-                            <div className="w-8 h-8 rounded-full bg-green-500 border-2 border-white"></div>
-                        </div>
-                        <span className="text-sm font-bold text-gray-700">10k+ Students</span>
-                    </div>
-                </div>
-
-                {/* Middle Right: Mock Test Card */}
-                <div className="absolute top-[65%] right-4 lg:right-10 transform -translate-y-1/2 rotate-12 transition-transform hover:rotate-6 duration-300 z-20 pointer-events-auto">
+                {/* Right Bottom: Mock Test Card */}
+                {/* MOVED TO BOTTOM RIGHT AS REQUESTED, REPLACING OVERLAPPING POSITION */}
+                <div className="absolute bottom-12 right-20 transform -rotate-3 transition-transform hover:rotate-0 duration-300 z-20 pointer-events-auto">
                     <div className="w-64 bg-white rounded-3xl shadow-2xl p-6 border border-gray-200 group cursor-pointer hover:bg-blue-50 transition-colors">
                         <div className="flex justify-between items-start mb-4">
                             <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center">
