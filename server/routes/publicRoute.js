@@ -10,7 +10,7 @@ import { getAllCourses, getCourseById } from "../controller/course.js";
 import { getAllVideoLectures, getVideoLectureById } from "../controller/videoLecture.js";
 import { getAllPreviousPapers, getPreviousPaperById } from "../controller/previousPaper.js";
 import { getAllMockTests, getMockTestById } from "../controller/mockTest.js";
-import { downloadFile } from "../controller/download.js";
+import { downloadFile, viewFile } from "../controller/download.js";
 
 const router = express.Router();
 
@@ -61,5 +61,6 @@ router.get('/mock-tests/:id', getMockTestById);
 
 // Secure Download
 router.get('/download/:type/:id', downloadFile);
+router.get('/view/:type/:id', viewFile);
 
 export default router;

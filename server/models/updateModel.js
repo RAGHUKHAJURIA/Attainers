@@ -28,8 +28,16 @@ const updateSchema = new mongoose.Schema({
         type: Date
     },
     image: {
-        type: String, // URL to uploaded image
+        type: String, // URL to uploaded image (Cloudinary or local path or view URL)
         default: null
+    },
+    imageData: {
+        type: Buffer,
+        required: false
+    },
+    contentType: {
+        type: String,
+        required: false
     }
 }, { timestamps: true });
 

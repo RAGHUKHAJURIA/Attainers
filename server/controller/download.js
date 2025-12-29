@@ -80,4 +80,49 @@ export const downloadFile = async (req, res) => {
         console.error("Download Error:", error);
         res.status(500).json({ success: false, message: "Server Error" });
     }
-};
+    export const viewFile = async (req, res) => {
+        try {
+            const { type, id } = req.params;
+            let model;
+
+            if (type === 'pdf') {
+                model = PDF;
+            } else if (type === 'paper') {
+                model = PreviousPaper;
+            } else if (type === 'update') {
+                // Needed to import Update model
+                const { default: Update } = await import('../models/updateModel.js');
+                model = Update;
+            } else {
+                return res.status(400).send("Invalid type");
+            }
+
+            const item = await model.findById(id);
+
+            if (!item) {
+                return res.status(404).send("File not found");
+            }
+
+            // Check for imageData (Updates) or fileData (PDFs/Papers)
+            const buffer = item.imageData || item.fileData;
+            const contentType = item.contentType || 'application/octet-stream';
+
+            if (buffer) {
+                res.setHeader('Content-Type', contentType);
+                // Inline disposition to view in browser
+                res.setHeader('Content-Disposition', `inline; filename="${item.fileName || 'file'}"`);
+                return res.send(buffer);
+            }
+
+            // Fallback to URL redirection if not in DB
+            if (item.image) return res.redirect(item.image);
+            if (item.fileUrl) return res.redirect(item.fileUrl);
+
+            return res.status(404).send("No content found");
+
+        } catch (error) {
+            console.error("View Error:", error);
+            res.status(500).send("Server Error");
+        }
+    }
+}
