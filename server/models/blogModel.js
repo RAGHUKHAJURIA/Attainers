@@ -24,6 +24,12 @@ const blogSchema = new mongoose.Schema({
     featuredImage: {
         type: String
     },
+    imageData: {
+        type: Buffer
+    },
+    contentType: {
+        type: String
+    },
     author: {
         type: String,
         default: 'Admin'

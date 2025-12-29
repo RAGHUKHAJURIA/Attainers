@@ -96,9 +96,11 @@ export const viewFile = async (req, res) => {
         } else if (type === 'paper') {
             model = PreviousPaper;
         } else if (type === 'update') {
-            // Needed to import Update model
             const { default: Update } = await import('../models/updateModel.js');
             model = Update;
+        } else if (type === 'blog') {
+            const { default: Blog } = await import('../models/blogModel.js');
+            model = Blog;
         } else {
             return res.status(400).send("Invalid type");
         }
@@ -109,7 +111,7 @@ export const viewFile = async (req, res) => {
             return res.status(404).send("File not found");
         }
 
-        // Check for imageData (Updates) or fileData (PDFs/Papers)
+        // Check for imageData (Updates/Blogs) or fileData (PDFs/Papers)
         const buffer = item.imageData || item.fileData;
         const contentType = item.contentType || 'application/octet-stream';
 
@@ -122,6 +124,7 @@ export const viewFile = async (req, res) => {
 
         // Fallback to URL redirection if not in DB
         if (item.image) return res.redirect(item.image);
+        if (item.featuredImage) return res.redirect(item.featuredImage);
         if (item.fileUrl) return res.redirect(item.fileUrl);
 
         return res.status(404).send("No content found");

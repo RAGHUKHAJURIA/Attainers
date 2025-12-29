@@ -17,9 +17,17 @@ export const createBlog = async (req, res) => {
     try {
         const { title, content, excerpt, category, tags, featuredImage, author } = req.body;
         let finalFeaturedImage = featuredImage;
+        let finalImageData = null;
+        let finalContentType = null;
 
         if (req.file) {
-            finalFeaturedImage = req.file.path;
+            if (req.file.buffer) {
+                finalImageData = req.file.buffer;
+                finalContentType = req.file.mimetype;
+                finalFeaturedImage = `placeholder`; // Will be updated after save
+            } else {
+                finalFeaturedImage = req.file.path;
+            }
         }
 
         // Handle tags if they come as string (FormData)
@@ -35,11 +43,18 @@ export const createBlog = async (req, res) => {
             category,
             tags: finalTags || [],
             featuredImage: finalFeaturedImage,
+            imageData: finalImageData,
+            contentType: finalContentType,
             author: author || 'Admin',
             isPublished: true
         });
 
         await blog.save();
+
+        if (blog.imageData) {
+            blog.featuredImage = `/api/public/view/blog/${blog._id}`;
+            await blog.save();
+        }
 
         res.status(201).json({
             success: true,
@@ -147,7 +162,13 @@ export const updateBlog = async (req, res) => {
         const updateData = req.body;
 
         if (req.file) {
-            updateData.featuredImage = req.file.path;
+            if (req.file.buffer) {
+                updateData.imageData = req.file.buffer;
+                updateData.contentType = req.file.mimetype;
+                updateData.featuredImage = `/api/public/view/blog/${id}`;
+            } else {
+                updateData.featuredImage = req.file.path;
+            }
         }
 
         // Handle tags if they come as string (FormData)
