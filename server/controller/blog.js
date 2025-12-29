@@ -6,8 +6,13 @@ const fixUrl = (url, req) => {
     if (!url) return url;
     if (url.includes('cloudinary.com')) return url;
 
+    const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+
+    if (url.startsWith('/api')) {
+        return `${baseUrl}${url}`;
+    }
+
     if (url.includes('localhost') || url.includes('127.0.0.1')) {
-        const baseUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
         return url.replace(/http:\/\/localhost:\d+/, baseUrl).replace(/http:\/\/127\.0\.0\.1:\d+/, baseUrl);
     }
     return url;
