@@ -7,11 +7,7 @@ import { createRoot } from "react-dom/client";
 import { AppProvider } from "./context/AppContext";
 import { ClerkProvider } from '@clerk/react-router'
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Add your Clerk Publishable Key to the .env file')
-}
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'mock-key'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
