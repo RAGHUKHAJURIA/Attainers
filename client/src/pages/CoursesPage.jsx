@@ -6,6 +6,7 @@ import CourseCard from '../components/CourseCard';
 import AddCourseModal from '../components/AddCourseModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 
 const CoursesPage = () => {
@@ -83,6 +84,11 @@ const CoursesPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+            <SEO
+                title="Courses & Playlists - Video Lectures"
+                description="Access comprehensive video courses and curated playlists for competitive exam preparation. Learn from experts."
+                keywords="Video Courses, Online Classes, JKSSB Lectures, SSC Coaching, Free Playlists"
+            />
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">

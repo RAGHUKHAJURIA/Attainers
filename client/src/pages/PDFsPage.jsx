@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import PDFCard from '../components/PDFCard';
 import AddPDFModal from '../components/AddPDFModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import SEO from '../components/SEO';
 
 const PDFsPage = () => {
     const { user, isLoaded } = useUser();
@@ -120,6 +121,11 @@ const PDFsPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+            <SEO
+                title="PDF Library - Study Material & Notes"
+                description="Download high-quality PDF study materials, notes, and previous year papers for JKSSB, SSC, and other exams."
+                keywords="PDF Notes, Study Material, JKSSB PDFs, SSC Notes, Free Download"
+            />
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">

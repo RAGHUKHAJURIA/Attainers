@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useUser, useAuth } from '@clerk/clerk-react';
@@ -562,7 +563,14 @@ const MockTestDetailPage = () => {
     // --- RENDER OVERVIEW MODE (Original) - Fallback / Loading State ---
     // Since we auto-start, this might briefly flash or be used if there's a delay or logic change
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-800">
+            <SEO
+                title={test?.title || "Mock Test"}
+                description={test?.description || `Attempt ${test?.title} for ${test?.examName}. Improve your score with this practice test.`}
+                keywords={`${test?.examName}, ${test?.title}, Mock Test, Practice Exam`}
+            />
+
+            {/* Navbar */}
             <Navbar />
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
                 {/* Test Header */}
