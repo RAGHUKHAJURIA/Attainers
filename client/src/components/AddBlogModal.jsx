@@ -7,7 +7,7 @@ const AddBlogModal = ({ isOpen, onClose, onAdd }) => {
         content: '',
         category: 'study-material',
         featuredImage: '',
-        featuredImage: '',
+
         file: null, // For upload
         tags: ''
     });
