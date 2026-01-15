@@ -399,14 +399,7 @@ const MockTestDetailPage = () => {
                                         </label>
                                     ))}
                                 </div>
-                                {currentQ.explanation && (
-                                    <div className="mt-6 sm:mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                        <h4 className="text-sm font-bold text-gray-700 mb-2">Explanation:</h4>
-                                        <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                                            {currentQ.explanation}
-                                        </p>
-                                    </div>
-                                )}
+{/* Explanation removed during test */}
                             </div>
 
                             {/* Footer Actions */}
@@ -515,46 +508,126 @@ const MockTestDetailPage = () => {
     }
 
     // --- SCORE MODAL ---
+    // --- DETAILED RESULTS VIEW ---
     if (showScoreModal) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans p-4">
-                <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center">
-                    <div className="mb-6">
-                        <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
+            <div className="min-h-screen bg-gray-50 font-sans pb-12">
+                <Navbar />
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                    
+                    {/* Header Score Card */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 text-center">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Test Result</h2>
+                        <p className="text-gray-600 mb-6">Performance Summary for <span className="font-bold text-gray-800">{user?.fullName || 'Candidate'}</span></p>
+                        
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-8 mb-8">
+                            <div className="text-center">
+                                <div className="text-5xl font-extrabold text-blue-600 mb-1">{Number(scoreData.score).toFixed(2).replace(/\.00$/, '')}</div>
+                                <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Score</div>
+                            </div>
+                            <div className="h-12 w-px bg-gray-200 hidden sm:block"></div>
+                            <div className="flex gap-8">
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-green-600">{scoreData.correct}</div>
+                                    <div className="text-xs text-gray-500 font-medium uppercase">Correct</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-red-600">{scoreData.wrong}</div>
+                                    <div className="text-xs text-gray-500 font-medium uppercase">Wrong</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-gray-600">{scoreData.totalQuestions - scoreData.answered}</div>
+                                    <div className="text-xs text-gray-500 font-medium uppercase">Unattempted</div>
+                                </div>
+                            </div>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">Test Submitted!</h2>
-                        <p className="text-gray-500 mt-2">Here is your performance summary</p>
+
+                        <button
+                            onClick={() => navigate('/mock-tests')}
+                            className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-transform hover:-translate-y-0.5"
+                        >
+                            Back to All Tests
+                        </button>
                     </div>
 
-                    <div className="bg-gray-50 rounded-xl p-6 mb-8">
-                        <div className="text-4xl font-extrabold text-blue-600 mb-2">{Number(scoreData.score).toFixed(2).replace(/\.00$/, '')}</div>
-                        <div className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Total Score</div>
+                    {/* Detailed Question Analysis */}
+                    <div className="space-y-6">
+                        <h3 className="text-xl font-bold text-gray-800 border-l-4 border-blue-600 pl-4 mb-6">
+                            Detailed Solutions
+                        </h3>
+                        
+                        {test.questions.map((q, index) => {
+                            const userAnswerIndex = answers[q._id];
+                            const correctOptionIndex = q.options.findIndex(opt => opt.isCorrect);
+                            const isCorrect = userAnswerIndex === correctOptionIndex;
+                            const isUnattempted = userAnswerIndex === undefined;
+                            
+                            // Determine status Badge
+                            let statusBadge;
+                            if (isUnattempted) {
+                                statusBadge = <span className="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full border border-gray-200">Unattempted</span>;
+                            } else if (isCorrect) {
+                                statusBadge = <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200">Correct</span>;
+                            } else {
+                                statusBadge = <span className="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Wrong</span>;
+                            }
 
-                        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
-                            <div>
-                                <div className="text-xl font-bold text-gray-800">{scoreData.totalQuestions}</div>
-                                <div className="text-xs text-gray-500">Total</div>
-                            </div>
-                            <div>
-                                <div className="text-xl font-bold text-green-600">{scoreData.correct}</div>
-                                <div className="text-xs text-gray-500">Correct</div>
-                            </div>
-                            <div>
-                                <div className="text-xl font-bold text-red-600">{scoreData.wrong}</div>
-                                <div className="text-xs text-gray-500">Wrong</div>
-                            </div>
-                        </div>
+                            return (
+                                <div key={q._id || index} className={`bg-white rounded-xl shadow-sm border p-6 ${isCorrect ? 'border-green-100' : isUnattempted ? 'border-gray-200' : 'border-red-100'}`}>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <span className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 font-bold flex items-center justify-center text-sm">
+                                                {index + 1}
+                                            </span>
+                                            <h4 className="font-semibold text-gray-900 text-lg leading-snug">{q.questionText}</h4>
+                                        </div>
+                                        <div className="shrink-0 ml-4">
+                                            {statusBadge}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3 ml-0 sm:ml-11">
+                                        {q.options.map((opt, optIndex) => {
+                                            let optionClass = "border-gray-200 bg-white";
+                                            let icon = null;
+
+                                            // Styling Logic
+                                            if (optIndex === correctOptionIndex) {
+                                                // Always highlight correct answer in green in the review
+                                                optionClass = "border-green-500 bg-green-50 text-green-900 ring-1 ring-green-500";
+                                                icon = <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>;
+                                            } else if (optIndex === userAnswerIndex && !isCorrect) {
+                                                // User chose wrong answer
+                                                optionClass = "border-red-500 bg-red-50 text-red-900 ring-1 ring-red-500";
+                                                icon = <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>;
+                                            } else if (optIndex === userAnswerIndex && isCorrect) {
+                                                // User chose correct answer (covered by first if, but purely for logic clarity)
+                                                optionClass = "border-green-500 bg-green-50 text-green-900";
+                                            }
+
+                                            return (
+                                                <div key={optIndex} className={`flex items-center justify-between p-3 rounded-lg border-2 text-sm sm:text-base ${optionClass}`}>
+                                                    <span className="font-medium">{opt.text}</span>
+                                                    {icon}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Explanation Section - ALWAYS SHOW IN RESULTS */}
+                                    <div className="mt-6 ml-0 sm:ml-11 p-4 bg-yellow-50 border border-yellow-100 rounded-lg">
+                                        <h5 className="text-xs font-bold text-yellow-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Explanation
+                                        </h5>
+                                        <p className="text-gray-700 text-sm leading-relaxed">
+                                            {q.explanation || "No explanation provided."}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-
-                    <button
-                        onClick={() => navigate('/mock-tests')}
-                        className="w-full btn-primary py-3 rounded-xl text-lg shadow-lg hover:shadow-xl"
-                    >
-                        Go to Home
-                    </button>
                 </div>
             </div>
         );
