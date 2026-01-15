@@ -15,7 +15,46 @@ import { downloadFile, viewFile } from "../controller/download.js";
 
 const router = express.Router();
 
-// ... (existing routes)
+// YouTube PubSubHubbub Webhook
+router.get('/youtube/webhook', verifyWebhook);
+router.post('/youtube/webhook', handleWebhook);
+
+// Public API Routes
+
+// News
+router.get('/news', getAllNews);
+
+// Blogs
+router.get('/blogs', getAllBlogs);
+router.get('/blogs/:id', getBlogById);
+
+// Tables
+router.get('/tables', getAllTables);
+router.get('/tables/:id', getTableById);
+
+// Updates
+router.get('/updates', getAllUpdates);
+router.get('/updates/:id', getUpdateById);
+
+// YouTube Videos
+router.get('/youtube', getAllYouTubeVideos);
+router.get('/youtube/:id', getYouTubeVideoById);
+
+// PDFs
+router.get('/pdfs', getAllPDFs);
+router.get('/pdfs/:id', getPDFById);
+
+// Courses
+router.get('/courses', getAllCourses);
+router.get('/courses/:id', getCourseById);
+
+// Video Lectures
+router.get('/video-lectures', getAllVideoLectures);
+router.get('/video-lectures/:id', getVideoLectureById);
+
+// Previous Papers
+router.get('/previous-papers', getAllPreviousPapers);
+router.get('/previous-papers/:id', getPreviousPaperById);
 
 // Mock Tests
 router.get('/mock-tests', getAllMockTests);
