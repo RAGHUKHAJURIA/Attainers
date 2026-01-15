@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import SEO from '../components/SEO';
+
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useUser, useAuth } from '@clerk/clerk-react';
@@ -399,7 +399,7 @@ const MockTestDetailPage = () => {
                                         </label>
                                     ))}
                                 </div>
-{/* Explanation removed during test */}
+                                {/* Explanation removed during test */}
                             </div>
 
                             {/* Footer Actions */}
@@ -514,12 +514,12 @@ const MockTestDetailPage = () => {
             <div className="min-h-screen bg-gray-50 font-sans pb-12">
                 <Navbar />
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    
+
                     {/* Header Score Card */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 text-center">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">Test Result</h2>
                         <p className="text-gray-600 mb-6">Performance Summary for <span className="font-bold text-gray-800">{user?.fullName || 'Candidate'}</span></p>
-                        
+
                         <div className="flex flex-col sm:flex-row justify-center items-center gap-8 mb-8">
                             <div className="text-center">
                                 <div className="text-5xl font-extrabold text-blue-600 mb-1">{Number(scoreData.score).toFixed(2).replace(/\.00$/, '')}</div>
@@ -555,13 +555,13 @@ const MockTestDetailPage = () => {
                         <h3 className="text-xl font-bold text-gray-800 border-l-4 border-blue-600 pl-4 mb-6">
                             Detailed Solutions
                         </h3>
-                        
+
                         {test.questions.map((q, index) => {
                             const userAnswerIndex = answers[q._id];
                             const correctOptionIndex = q.options.findIndex(opt => opt.isCorrect);
                             const isCorrect = userAnswerIndex === correctOptionIndex;
                             const isUnattempted = userAnswerIndex === undefined;
-                            
+
                             // Determine status Badge
                             let statusBadge;
                             if (isUnattempted) {
@@ -637,11 +637,7 @@ const MockTestDetailPage = () => {
     // Since we auto-start, this might briefly flash or be used if there's a delay or logic change
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-800">
-            <SEO
-                title={test?.title || "Mock Test"}
-                description={test?.description || `Attempt ${test?.title} for ${test?.examName}. Improve your score with this practice test.`}
-                keywords={`${test?.examName}, ${test?.title}, Mock Test, Practice Exam`}
-            />
+
 
             {/* Navbar */}
             <Navbar />

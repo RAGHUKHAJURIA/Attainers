@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SEO from '../components/SEO';
+
 import Navbar from '../components/Navbar';
 import YouTubeCard from '../components/YouTubeCard';
 import Footer from '../components/Footer';
@@ -180,11 +180,7 @@ const YouTubePage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-            <SEO
-                title="YouTube Library - Video Tutorials"
-                description="Watch curated video tutorials and exam guidance from Attainers. Learn complex topics easily."
-                keywords="Video Tutorials, Exam Guidance, Online Classes, Free Lectures, Attainers YouTube"
-            />
+
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">

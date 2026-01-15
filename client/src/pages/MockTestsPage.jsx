@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import TestCard from '../components/TestCard';
 import AddTestModal from '../components/AddTestModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
-import SEO from '../components/SEO';
+
 
 const MockTestsPage = () => {
     const { user, isLoaded } = useUser();
@@ -98,11 +98,7 @@ const MockTestsPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-            <SEO
-                title="Mock Tests - JKSSB, SSC, Banking"
-                description="Practice high-quality mock tests for JKSSB, SSC, Banking and other competitive exams. Improve your speed and accuracy with detailed analysis."
-                keywords="Mock Tests, JKSSB Mock Test, SSC Mock Test, Online Practice, Test Series"
-            />
+
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">

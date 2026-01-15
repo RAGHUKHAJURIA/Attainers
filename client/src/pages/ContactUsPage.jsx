@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
-import SEO from '../components/SEO';
+
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -62,11 +62,7 @@ const ContactUsPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            <SEO
-                title="Contact Us - Attainers Support"
-                description="Get in touch with the Attainers team. We are here to help you with your queries and feedback."
-                keywords="Contact Us, Support, Help, Feedback, Attainers Contact"
-            />
+
             <Navbar />
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">

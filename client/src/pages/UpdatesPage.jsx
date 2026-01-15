@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
-import SEO from '../components/SEO';
+
 import Navbar from '../components/Navbar';
 import UpdateCard from '../components/UpdateCard';
 import Footer from '../components/Footer';
@@ -69,11 +69,7 @@ const UpdatesPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-            <SEO
-                title="Latest Updates - Job Notifications & Announcements"
-                description="Get the latest job notifications, exam dates,/results, and important announcements for J&K and National exams."
-                keywords="Job Notifications, Exam Updates, Sarkari Result, JKSSB Updates, Vacancy Alerts"
-            />
+
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">

@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import AddBlogModal from '../components/AddBlogModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import SEO from '../components/SEO';
+
 
 const BlogsPage = () => {
     const { user, isLoaded } = useUser();
@@ -105,11 +105,7 @@ const BlogsPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
-            <SEO
-                title="Educational Hub - Blogs & Updates"
-                description="Stay updated with the latest exam news, career guidance, and study tips. Read our expert blogs."
-                keywords="Exam Updates, Career Guidance, Study Tips, JKSSB News, Educational Blog"
-            />
+
             <Navbar />
             <div className="pt-24 pb-12">
                 {/* Header */}

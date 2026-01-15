@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import PreviousPaperCard from '../components/PreviousPaperCard';
 import AddPreviousPaperModal from '../components/AddPreviousPaperModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
-import SEO from '../components/SEO';
+
 
 const PreviousPapersPage = () => {
     const { user, isLoaded } = useUser();
@@ -112,11 +112,7 @@ const PreviousPapersPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-            <SEO
-                title="Previous Year Papers - UPSC, SSC, JKSSB"
-                description="Download previous year question papers for UPSC, SSC, JKSSB, and Banking exams. Practice with real exam papers."
-                keywords="Previous Year Papers, Old Question Papers, JKSSB Papers, SSC CGL Papers, UPSC PYQ"
-            />
+
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">

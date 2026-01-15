@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import SEO from './components/SEO';
+
 import Hero from './pages/Hero'
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer } from 'react-toastify'
@@ -39,7 +39,7 @@ function App() {
 
   return (
     <AppProvider>
-      <SEO />
+
       <ToastContainer />
       <Routes>
         <Route path='/' element={<Hero />} />

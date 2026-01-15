@@ -1,6 +1,6 @@
 
 import { BrowserRouter } from "react-router-dom";
-import { HelmetProvider } from 'react-helmet-async';
+
 import "./index.css";
 import App from "./App";
 import { createRoot } from "react-dom/client";
@@ -16,11 +16,9 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <HelmetProvider>
-        <AppProvider>
-          <App />
-        </AppProvider>
-      </HelmetProvider>
+      <AppProvider>
+        <App />
+      </AppProvider>
     </ClerkProvider>
   </BrowserRouter>,
 )

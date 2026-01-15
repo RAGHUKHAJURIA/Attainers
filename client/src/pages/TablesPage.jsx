@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
-import SEO from '../components/SEO';
+
 import Navbar from '../components/Navbar';
 import TableCard from '../components/TableCard';
 import Footer from '../components/Footer';
@@ -63,11 +63,7 @@ const TablesPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-            <SEO
-                title="Data Tables - Schedules & Results"
-                description="View exam schedules, syllabus, results, and cutoff marks in an organized table format."
-                keywords="Exam Schedule, Syllabus, Results, Cutoff Marks, Date Sheet"
-            />
+
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
