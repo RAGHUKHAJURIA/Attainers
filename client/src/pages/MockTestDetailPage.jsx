@@ -398,6 +398,14 @@ const MockTestDetailPage = () => {
                                         </label>
                                     ))}
                                 </div>
+                                {currentQ.explanation && (
+                                    <div className="mt-6 sm:mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                        <h4 className="text-sm font-bold text-gray-700 mb-2">Explanation:</h4>
+                                        <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                                            {currentQ.explanation}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Footer Actions */}
