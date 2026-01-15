@@ -10,7 +10,8 @@ const MockTestForm = ({ onSuccess }) => {
         difficulty: 'Medium',
         duration: 60,
         totalQuestions: 0,
-        description: ''
+        description: '',
+        negativeMarks: 0
     });
 
     const handleChange = (e) => {
@@ -34,7 +35,8 @@ const MockTestForm = ({ onSuccess }) => {
                 difficulty: 'Medium',
                 duration: 60,
                 totalQuestions: 0,
-                description: ''
+                description: '',
+                negativeMarks: 0
             });
             if (onSuccess) onSuccess();
         }
@@ -80,7 +82,7 @@ const MockTestForm = ({ onSuccess }) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
                         <input
@@ -117,6 +119,20 @@ const MockTestForm = ({ onSuccess }) => {
                             value={formData.totalQuestions}
                             onChange={handleChange}
                             placeholder="Actual count updates as you add qs"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Negative Marks</label>
+                        <input
+                            type="number"
+                            name="negativeMarks"
+                            className="modern-input w-full"
+                            required
+                            min="0"
+                            step="0.01"
+                            value={formData.negativeMarks}
+                            onChange={handleChange}
+                            placeholder="e.g. 1 or 0.25"
                         />
                     </div>
                 </div>

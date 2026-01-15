@@ -16,6 +16,7 @@ import UpdatesPage from './pages/UpdatesPage';
 import TablesPage from './pages/TablesPage';
 import MockTestsPage from './pages/MockTestsPage';
 import MockTestDetailPage from './pages/MockTestDetailPage';
+import ContactUsPage from './pages/ContactUsPage';
 // import VideoLecturesPage from './pages/VideoLecturesPage';
 import { useUser } from '@clerk/clerk-react';
 
@@ -53,6 +54,7 @@ function App() {
         <Route path='/schedules' element={<TablesPage />} />
         <Route path='/mock-tests' element={<MockTestsPage />} />
         <Route path='/mock-tests/:id' element={<MockTestDetailPage />} />
+        <Route path='/contact' element={<ContactUsPage />} />
       </Routes>
     </AppProvider>
   )

@@ -4,7 +4,7 @@ import MockTest from "../models/mockTestModel.js";
 export const createMockTest = async (req, res) => {
     try {
 
-        const { title, examName, difficulty, duration, totalQuestions, description } = req.body;
+        const { title, examName, difficulty, duration, totalQuestions, description, negativeMarks } = req.body;
 
         const newTest = new MockTest({
             title,
@@ -12,7 +12,8 @@ export const createMockTest = async (req, res) => {
             difficulty,
             duration,
             totalQuestions,
-            description
+            description,
+            negativeMarks: negativeMarks || 0
         });
 
         const savedTest = await newTest.save();
@@ -34,10 +35,25 @@ export const getAllMockTests = async (req, res) => {
     }
 };
 
-// Get single Mock Test by ID
+// Get single Mock Test by ID (Admin)
 export const getMockTestById = async (req, res) => {
     try {
         const test = await MockTest.findById(req.params.id);
+        if (!test) return res.status(404).json({ message: "Mock Test not found" });
+        res.status(200).json(test);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Get single Mock Test by ID (Public) - Increments view count
+export const getPublicMockTestById = async (req, res) => {
+    try {
+        const test = await MockTest.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { viewCount: 1 } },
+            { new: true }
+        );
         if (!test) return res.status(404).json({ message: "Mock Test not found" });
         res.status(200).json(test);
     } catch (error) {

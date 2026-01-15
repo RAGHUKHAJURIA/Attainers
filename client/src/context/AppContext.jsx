@@ -6,7 +6,21 @@ import { useAuth, useUser, useSession } from '@clerk/clerk-react'
 export const AppContext = createContext();
 
 export const AppProvider = (props) => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL
+  // --- Configuration for Backend URL ---
+  // Set this to true to force using local backend (http://localhost:5000)
+  // Set to false to use the hosted backend (from .env or hardcoded)
+  const USE_LOCAL_BACKEND = false;
+
+  // Auto-detect: if running on localhost, default to local backend unless overridden
+  // const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  const localBackend = 'http://localhost:5000';
+  // Fallback to hosted if VITE_BACKEND_URL not set
+  const hostedBackend = import.meta.env.VITE_BACKEND_URL || 'https://attainers-272i.vercel.app';
+
+  const backendUrl = USE_LOCAL_BACKEND ? localBackend : hostedBackend;
+
+
   const [allNews, setAllNews] = useState([]);
   const [allBlogs, setAllBlogs] = useState([]);
   const [allTables, setAllTables] = useState([]);

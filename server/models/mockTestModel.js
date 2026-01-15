@@ -41,6 +41,14 @@ const mockTestSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    negativeMarks: {
+        type: Number,
+        default: 0
+    },
+    viewCount: {
+        type: Number,
+        default: 0
+    },
     description: {
         type: String,
         default: ''

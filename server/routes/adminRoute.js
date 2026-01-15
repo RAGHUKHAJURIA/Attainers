@@ -9,6 +9,7 @@ import { createCourse, getAllCourses, getCourseById, updateCourse, deleteCourse 
 import { createVideoLecture, getAllVideoLectures, getVideoLectureById, updateVideoLecture, deleteVideoLecture } from "../controller/videoLecture.js";
 import { createPreviousPaper, getAllPreviousPapers, getPreviousPaperById, updatePreviousPaper, deletePreviousPaper } from "../controller/previousPaper.js";
 import { createMockTest, getAllMockTests, getMockTestById, updateMockTest, deleteMockTest, addQuestions } from "../controller/mockTest.js";
+import { getAllFeedback, getFeedbackById, updateFeedbackStatus, deleteFeedback, deleteMultipleFeedback } from "../controller/feedback.js";
 import { protectAdminRoute } from "../middleware/clerkMiddleware.js";
 import { upload } from "../middleware/upload.js";
 import { uploadMemory } from "../middleware/uploadMemory.js";
@@ -123,5 +124,12 @@ router.get('/mock-tests/:id', getMockTestById);
 router.put('/mock-tests/:id', protectAdminRoute, updateMockTest);
 router.delete('/mock-tests/:id', protectAdminRoute, deleteMockTest);
 router.post('/mock-tests/:id/questions', protectAdminRoute, addQuestions);
+
+// Feedback routes (Admin)
+router.get('/feedback', protectAdminRoute, getAllFeedback);
+router.get('/feedback/:id', protectAdminRoute, getFeedbackById);
+router.put('/feedback/:id', protectAdminRoute, updateFeedbackStatus);
+router.delete('/feedback/:id', protectAdminRoute, deleteFeedback);
+router.post('/feedback/delete-multiple', protectAdminRoute, deleteMultipleFeedback);
 
 export default router;

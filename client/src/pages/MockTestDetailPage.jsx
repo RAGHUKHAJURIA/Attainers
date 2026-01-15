@@ -149,7 +149,7 @@ const MockTestDetailPage = () => {
 
     // --- Test Taking Handlers ---
     const startTest = (testData = test) => {
-        if (!testData) return;
+        if (!testData || !testData.questions || testData.questions.length === 0) return;
         setIsTestActive(true);
         // Initialize status
         const initialStatus = {};
@@ -241,6 +241,12 @@ const MockTestDetailPage = () => {
         let wrong = 0;
         let answered = 0;
 
+        if (!test || !test.questions || test.questions.length === 0) {
+            setScoreData({ score: 0, totalQuestions: 0, answered: 0, correct: 0, wrong: 0 });
+            setShowScoreModal(true);
+            return;
+        }
+
         test.questions.forEach(q => {
             const userAnswerIndex = answers[q._id];
             if (userAnswerIndex !== undefined) {
@@ -250,8 +256,8 @@ const MockTestDetailPage = () => {
                     score += q.marks;
                     correct++;
                 } else {
-                    // Determine negative marking if applicable, for now assuming 0 or define logic
-                    // Assuming simple scoring for this demo
+                    // Apply negative marking
+                    score -= (test.negativeMarks || 0);
                     wrong++;
                 }
             }
@@ -515,7 +521,7 @@ const MockTestDetailPage = () => {
                     </div>
 
                     <div className="bg-gray-50 rounded-xl p-6 mb-8">
-                        <div className="text-4xl font-extrabold text-blue-600 mb-2">{scoreData.score}</div>
+                        <div className="text-4xl font-extrabold text-blue-600 mb-2">{Number(scoreData.score).toFixed(2).replace(/\.00$/, '')}</div>
                         <div className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Total Score</div>
 
                         <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
@@ -573,6 +579,13 @@ const MockTestDetailPage = () => {
                                         'bg-green-100 text-green-700'
                                     }`}>
                                     {test.difficulty}
+                                </span>
+                                <span className="flex items-center text-indigo-600 font-medium">
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    {test.viewCount || 0} Views
                                 </span>
                             </div>
                             <p className="mt-4 text-gray-600 max-w-2xl">{test.description || "No description provided."}</p>
