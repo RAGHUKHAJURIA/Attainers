@@ -14,7 +14,7 @@ export const AppProvider = (props) => {
   // If true, will use local backend when running in dev mode (npm run dev)
   // If false, will use hosted backend even in dev mode
   // In production (npm run build), it will ALWAYS use hostedBackend
-  const PREFER_LOCAL_IN_DEV = true;
+  const PREFER_LOCAL_IN_DEV = false;
 
   const backendUrl = (import.meta.env.DEV && PREFER_LOCAL_IN_DEV) ? localBackend : hostedBackend;
 

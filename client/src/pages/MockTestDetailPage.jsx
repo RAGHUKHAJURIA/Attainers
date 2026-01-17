@@ -59,6 +59,17 @@ const MockTestDetailPage = () => {
         fetchTestDetails();
     }, [id]);
 
+    // Auto-start test for students ONLY (not admins)
+    useEffect(() => {
+        // Wait for user to be loaded and test data to be available
+        if (isLoaded && test && test.questions && test.questions.length > 0) {
+            // Only start if NOT admin and test hasn't started yet
+            if (!isAdmin && !isTestActive) {
+                startTest(test); // Now safe to call
+            }
+        }
+    }, [isLoaded, test, isAdmin, isTestActive]);
+
     // Timer Effect
     useEffect(() => {
         let timer;
@@ -98,9 +109,10 @@ const MockTestDetailPage = () => {
                 setTimeLeft(data.duration * 60); // Set timer based on duration
 
                 // Auto-start test for students (or everyone as requested) ONLY if questions exist
-                if (data.questions && data.questions.length > 0) {
-                    startTest(data);
-                }
+                // Auto-start is now handled by a useEffect to respect admin status
+                // if (data.questions && data.questions.length > 0) {
+                //     startTest(data);
+                // }
             }
         } catch (error) {
             console.error('Error fetching test details:', error);
