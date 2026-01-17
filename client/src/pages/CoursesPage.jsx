@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CourseCard from '../components/CourseCard';
 import AddCourseModal from '../components/AddCourseModal';
+import CardSkeleton from '../components/CardSkeleton';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +18,7 @@ const CoursesPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchCourses();
@@ -33,6 +35,8 @@ const CoursesPage = () => {
             }
         } catch (error) {
             console.error('Error fetching courses:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -145,7 +149,13 @@ const CoursesPage = () => {
                 </div>
 
                 {/* Content Grid */}
-                {filteredCourses.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
+                        {[...Array(6)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredCourses.length > 0 ? (
                     <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                             {filteredCourses.map((course) => (

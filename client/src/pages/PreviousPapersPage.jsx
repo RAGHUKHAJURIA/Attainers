@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import PreviousPaperCard from '../components/PreviousPaperCard';
 import AddPreviousPaperModal from '../components/AddPreviousPaperModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import CardSkeleton from '../components/CardSkeleton';
 
 
 const PreviousPapersPage = () => {
@@ -13,6 +14,7 @@ const PreviousPapersPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [papers, setPapers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchPapers();
@@ -29,6 +31,8 @@ const PreviousPapersPage = () => {
             }
         } catch (error) {
             console.error('Error fetching previous papers:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -173,7 +177,13 @@ const PreviousPapersPage = () => {
                 </div>
 
                 {/* Content Grid */}
-                {filteredPapers.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
+                        {[...Array(6)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredPapers.length > 0 ? (
                     <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                             {filteredPapers.map((paper) => (

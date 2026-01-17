@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import YouTubeCard from '../components/YouTubeCard';
 import Footer from '../components/Footer';
 import AddYouTubeModal from '../components/AddYouTubeModal';
+import CardSkeleton from '../components/CardSkeleton';
 import { useUser, useAuth } from '@clerk/clerk-react';
 
 const YouTubePage = () => {
@@ -14,6 +15,7 @@ const YouTubePage = () => {
     const [videos, setVideos] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const categories = ['All', 'Tutorial', 'Exam Guidance', 'Current Affairs', 'Motivation', 'General'];
 
@@ -38,6 +40,8 @@ const YouTubePage = () => {
             }
         } catch (error) {
             console.error('Error fetching videos:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -249,7 +253,13 @@ const YouTubePage = () => {
                 </div>
 
                 {/* Content Grid */}
-                {filteredVideos.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {[...Array(8)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredVideos.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredVideos.map((video) => (
                             <YouTubeCard

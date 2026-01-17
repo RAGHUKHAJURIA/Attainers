@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import PDFCard from '../components/PDFCard';
 import AddPDFModal from '../components/AddPDFModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import CardSkeleton from '../components/CardSkeleton';
 
 
 const PDFsPage = () => {
@@ -19,6 +20,7 @@ const PDFsPage = () => {
     // Ideally should use context data, but refactoring to context entirely might break local search/filter if not careful.
     // For now, just use backendUrl to fix hardcoding.
     const [pdfs, setPdfs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchPDFs();
@@ -35,6 +37,8 @@ const PDFsPage = () => {
             }
         } catch (error) {
             console.error('Error fetching PDFs:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -182,7 +186,13 @@ const PDFsPage = () => {
                 </div>
 
                 {/* Content Grid */}
-                {filteredPDFs.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
+                        {[...Array(6)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredPDFs.length > 0 ? (
                     <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                             {filteredPDFs.map((pdf) => (

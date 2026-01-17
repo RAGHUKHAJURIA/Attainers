@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Loading from '../components/Loading';
 
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -367,7 +368,11 @@ const MockTestDetailPage = () => {
         return baseClass;
     };
 
-    if (loading) return <div className="flex justify-center pt-24"><div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div></div>;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <Loading size="medium" />
+        </div>
+    );
     if (!test) return <div className="pt-24 text-center">Test not found</div>;
 
     // Auto-hide palette on mobile, show on desktop
@@ -702,29 +707,29 @@ const MockTestDetailPage = () => {
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
                 {/* Test Header */}
                 <div className="bg-white rounded-2xl shadow-sm p-8 mb-8">
-                    <div className="flex justify-between items-start">
-                        <div>
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                        <div className="w-full md:w-auto">
                             <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mb-3">
                                 {test.examName}
                             </span>
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">{test.title}</h1>
-                            <div className="flex gap-6 text-gray-600 text-sm">
+                            <div className="flex flex-wrap gap-4 md:gap-6 text-gray-600 text-sm">
                                 <span className="flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <svg className="w-4 h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     {test.duration} mins
                                 </span>
                                 <span className="flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                    <svg className="w-4 h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                     {test.questions?.length || 0} Questions
                                 </span>
-                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${test.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                                <span className={`px-2 py-0.5 rounded text-xs font-semibold h-fit ${test.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
                                     test.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
                                         'bg-green-100 text-green-700'
                                     }`}>
                                     {test.difficulty}
                                 </span>
                                 <span className="flex items-center text-indigo-600 font-medium">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
@@ -734,7 +739,7 @@ const MockTestDetailPage = () => {
                             <p className="mt-4 text-gray-600 max-w-2xl">{test.description || "No description provided."}</p>
                         </div>
                         {/* Start Button */}
-                        <button onClick={() => startTest()} className="btn-primary text-lg px-8 py-3 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                        <button onClick={() => startTest()} className="btn-primary text-lg px-8 py-3 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all w-full md:w-auto shrink-0 text-center justify-center">
                             Start Test Now
                         </button>
                     </div>
@@ -743,7 +748,7 @@ const MockTestDetailPage = () => {
                 {/* Admin: Add Question Section */}
                 {isAdmin && (
                     <div className="bg-white rounded-2xl shadow-sm p-8 mb-8 border-2 border-dashed border-gray-300">
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                             <h3 className="text-xl font-bold text-gray-800">Manage Questions</h3>
                             <button
                                 onClick={() => {
@@ -850,9 +855,9 @@ const MockTestDetailPage = () => {
                     <h3 className="text-xl font-bold text-gray-800 ml-1">Questions Preview ({test.questions?.length || 0})</h3>
                     {test.questions?.map((q, qIndex) => (
                         <div key={q._id || qIndex} className="bg-white rounded-xl shadow-sm p-6">
-                            <div className="flex justify-between mb-4">
-                                <h4 className="font-semibold text-gray-900 text-lg">Q{qIndex + 1}. {q.questionText}</h4>
-                                <span className="text-xs font-semibold bg-gray-100 px-2 py-1 rounded text-gray-600 h-fit">
+                            <div className="flex flex-col sm:flex-row justify-between gap-2 mb-4">
+                                <h4 className="font-semibold text-gray-900 text-lg leading-snug">Q{qIndex + 1}. {q.questionText}</h4>
+                                <span className="text-xs font-semibold bg-gray-100 px-2 py-1 rounded text-gray-600 h-fit w-fit whitespace-nowrap shrink-0">
                                     {q.marks} Marks
                                 </span>
                             </div>

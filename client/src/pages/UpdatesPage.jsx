@@ -4,6 +4,7 @@ import { AppContext } from '../context/AppContext';
 import Navbar from '../components/Navbar';
 import UpdateCard from '../components/UpdateCard';
 import Footer from '../components/Footer';
+import CardSkeleton from '../components/CardSkeleton';
 import { useUser, useAuth } from '@clerk/clerk-react';
 
 const UpdatesPage = () => {
@@ -12,6 +13,7 @@ const UpdatesPage = () => {
     const { getToken } = useAuth();
     const [isAdmin, setIsAdmin] = useState(false);
     const [selectedType, setSelectedType] = useState('all');
+    const [loading, setLoading] = useState(true);
 
     const updateTypes = [
         { value: 'all', label: 'All Updates' },
@@ -22,7 +24,11 @@ const UpdatesPage = () => {
     ];
 
     useEffect(() => {
-        fetchAllUpdates();
+        const loadUpdates = async () => {
+            await fetchAllUpdates();
+            setLoading(false);
+        };
+        loadUpdates();
     }, []);
 
     useEffect(() => {
@@ -117,7 +123,13 @@ const UpdatesPage = () => {
                 </div>
 
                 {/* Content Grid */}
-                {sortedUpdates.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                        {[...Array(4)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : sortedUpdates.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                         {sortedUpdates.map((update) => (
                             <UpdateCard

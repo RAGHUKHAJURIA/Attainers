@@ -4,6 +4,7 @@ import { AppContext } from '../context/AppContext';
 import Navbar from '../components/Navbar';
 import TableCard from '../components/TableCard';
 import Footer from '../components/Footer';
+import CardSkeleton from '../components/CardSkeleton';
 import { useUser, useAuth } from '@clerk/clerk-react';
 
 const TablesPage = () => {
@@ -12,6 +13,7 @@ const TablesPage = () => {
     const { getToken } = useAuth();
     const [isAdmin, setIsAdmin] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [loading, setLoading] = useState(true);
 
     const categories = [
         { value: 'all', label: 'All Tables' },
@@ -24,7 +26,11 @@ const TablesPage = () => {
     ];
 
     useEffect(() => {
-        fetchAllTables();
+        const loadTables = async () => {
+            await fetchAllTables();
+            setLoading(false);
+        };
+        loadTables();
     }, []);
 
     useEffect(() => {
@@ -111,7 +117,13 @@ const TablesPage = () => {
                 </div>
 
                 {/* Content Grid */}
-                {filteredTables.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {[...Array(4)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredTables.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {filteredTables.map((table) => (
                             <TableCard

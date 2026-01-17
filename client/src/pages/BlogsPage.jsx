@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import BlogCard from '../components/BlogCard';
 import Footer from '../components/Footer';
 import AddBlogModal from '../components/AddBlogModal';
+import CardSkeleton from '../components/CardSkeleton';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ const BlogsPage = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [blogs, setBlogs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
 
     const categories = [
@@ -46,6 +48,8 @@ const BlogsPage = () => {
             }
         } catch (error) {
             console.error('Error fetching blogs:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -154,7 +158,13 @@ const BlogsPage = () => {
 
                 {/* Blogs Grid */}
                 <div className="max-w-7xl mx-auto px-6">
-                    {filteredBlogs.length > 0 ? (
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {[...Array(6)].map((_, i) => (
+                                <CardSkeleton key={i} />
+                            ))}
+                        </div>
+                    ) : filteredBlogs.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredBlogs.map((blog) => (
                                 <BlogCard

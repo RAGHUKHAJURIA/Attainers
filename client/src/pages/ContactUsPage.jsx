@@ -89,7 +89,7 @@ const ContactUsPage = () => {
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">Email Us</h3>
                                 <p className="text-gray-600 text-sm mb-3">Send us an email anytime</p>
                                 <a href="mailto:support@attainers.com" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                                    support@attainers.com
+                                    teamattainers@gmail.com
                                 </a>
                             </div>
 
@@ -103,7 +103,7 @@ const ContactUsPage = () => {
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">Call Us</h3>
                                 <p className="text-gray-600 text-sm mb-3">Mon-Fri from 9am to 6pm</p>
                                 <a href="tel:+911234567890" className="text-green-600 hover:text-green-700 font-medium text-sm">
-                                    +91 123 456 7890
+                                    +91 xxxxxxxxxx
                                 </a>
                             </div>
 

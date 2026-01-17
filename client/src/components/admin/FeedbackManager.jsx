@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
+import Loading from '../Loading';
 import { useAuth } from '@clerk/clerk-react';
 
 const FeedbackManager = () => {
@@ -123,8 +124,17 @@ const FeedbackManager = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center py-12">
-                <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent" />
+            <div className="flex justify-center py-12">
+                <Loading size="medium" />
+            </div>
+        );
+    }
+
+    if (feedbacks.length === 0) {
+        return (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                <div className="text-gray-400 text-5xl mb-4">📭</div>
+                <p className="text-gray-500">No feedback found</p>
             </div>
         );
     }
@@ -158,8 +168,8 @@ const FeedbackManager = () => {
                         key={status}
                         onClick={() => setFilter(status)}
                         className={`px-4 py-2 font-medium text-sm capitalize whitespace-nowrap transition-colors ${filter === status
-                                ? 'border-b-2 border-blue-600 text-blue-600'
-                                : 'text-gray-600 hover:text-gray-900'
+                            ? 'border-b-2 border-blue-600 text-blue-600'
+                            : 'text-gray-600 hover:text-gray-900'
                             }`}
                     >
                         {status} {status !== 'all' && `(${stats[status]})`}

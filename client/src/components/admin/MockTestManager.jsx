@@ -3,6 +3,7 @@ import MockTestForm from './MockTestForm';
 import AddQuestionForm from './AddQuestionForm';
 import { useAuth } from '@clerk/clerk-react';
 import { AppContext } from '../../context/AppContext';
+import Loading from '../Loading';
 
 const MockTestManager = () => {
     const [view, setView] = useState('list'); // 'list', 'create', 'add-questions'
@@ -103,7 +104,7 @@ const MockTestManager = () => {
             </div>
 
             {loading ? (
-                <div className="text-center py-12"><div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent mx-auto"></div></div>
+                <div className="text-center py-12"><Loading size="medium" /></div>
             ) : (
                 <div className="grid grid-cols-1 gap-4">
                     {tests.length === 0 ? (

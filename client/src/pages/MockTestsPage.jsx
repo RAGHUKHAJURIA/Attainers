@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import TestCard from '../components/TestCard';
 import AddTestModal from '../components/AddTestModal';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import CardSkeleton from '../components/CardSkeleton';
 
 
 const MockTestsPage = () => {
@@ -16,6 +17,7 @@ const MockTestsPage = () => {
 
 
     const [tests, setTests] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchTests();
@@ -30,6 +32,8 @@ const MockTestsPage = () => {
             }
         } catch (error) {
             console.error('Error fetching mock tests:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -159,7 +163,13 @@ const MockTestsPage = () => {
                 </div>
 
                 {/* Scrollable Grid Container */}
-                {filteredTests.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
+                        {[...Array(6)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredTests.length > 0 ? (
                     <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                             {filteredTests.map((test) => (
