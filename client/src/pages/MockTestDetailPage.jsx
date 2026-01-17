@@ -498,7 +498,7 @@ const MockTestDetailPage = () => {
 
                     {/* Right: Sidebar Palette (Responsive) */}
                     <div className={`
-                        fixed inset-0 z-30 bg-white lg:static lg:w-1/4 lg:border-l lg:border-gray-200 lg:flex lg:flex-col lg:shadow-xl lg:z-auto transition-transform duration-300 ease-in-out
+                        fixed inset-0 z-30 bg-white flex flex-col h-full lg:static lg:w-1/4 lg:border-l lg:border-gray-200 lg:flex lg:flex-col lg:shadow-xl lg:z-auto transition-transform duration-300 ease-in-out
                         ${showPalette ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
                     `}>
                         {/* Mobile Header for Palette */}
@@ -734,7 +734,7 @@ const MockTestDetailPage = () => {
                             <p className="mt-4 text-gray-600 max-w-2xl">{test.description || "No description provided."}</p>
                         </div>
                         {/* Start Button */}
-                        <button onClick={startTest} className="btn-primary text-lg px-8 py-3 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                        <button onClick={() => startTest()} className="btn-primary text-lg px-8 py-3 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
                             Start Test Now
                         </button>
                     </div>
