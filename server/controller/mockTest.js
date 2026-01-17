@@ -120,3 +120,47 @@ export const addQuestions = async (req, res) => {
         res.status(500).json({ message: error.message, stack: error.stack });
     }
 };
+// Update a Question in Mock Test
+export const updateMockTestQuestion = async (req, res) => {
+    try {
+        const { testId, questionId } = req.params;
+        const { questionText, options, explanation, marks } = req.body;
+
+        const test = await MockTest.findById(testId);
+        if (!test) return res.status(404).json({ message: "Mock Test not found" });
+
+        const question = test.questions.id(questionId);
+        if (!question) return res.status(404).json({ message: "Question not found" });
+
+        if (questionText) question.questionText = questionText;
+        if (options) question.options = options;
+        if (explanation !== undefined) question.explanation = explanation;
+        if (marks) question.marks = marks;
+
+        await test.save();
+
+        res.status(200).json(test);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Delete a Question from Mock Test
+export const deleteMockTestQuestion = async (req, res) => {
+    try {
+        const { testId, questionId } = req.params;
+
+        const test = await MockTest.findById(testId);
+        if (!test) return res.status(404).json({ message: "Mock Test not found" });
+
+        // Use remove() if available, or pull from array
+        // Mongoose subdocument array handling
+        test.questions.pull({ _id: questionId });
+
+        await test.save();
+
+        res.status(200).json(test);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

@@ -20,6 +20,10 @@ const ModernHero = () => {
                     <img src="/logo.jpg" alt="Logo" className="w-12 h-12 rounded-full" />
                 </div>
 
+                <div className="inline-block px-4 py-1.5 mb-6 text-xs sm:text-sm font-semibold tracking-wide text-blue-700 bg-blue-50 rounded-full border border-blue-100 shadow-sm">
+                    An initiative by the Collaboration of Attainers x D Latest info
+                </div>
+
                 <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
                     Prepare, Track, and <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">

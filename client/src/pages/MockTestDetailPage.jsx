@@ -39,6 +39,7 @@ const MockTestDetailPage = () => {
     const [explanation, setExplanation] = useState('');
     const [marks, setMarks] = useState(1);
     const [showAddQuestion, setShowAddQuestion] = useState(false);
+    const [editingQuestionId, setEditingQuestionId] = useState(null); // Track which question is being edited
 
     // Score Modal State
     const [showScoreModal, setShowScoreModal] = useState(false);
@@ -125,26 +126,71 @@ const MockTestDetailPage = () => {
         try {
             const token = await getToken();
             const questionData = { questionText, options, explanation, marks };
-            const payload = { questions: [questionData] };
 
-            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}/questions`, {
-                method: 'POST',
+            let url = `${backendUrl}/api/admin/mock-tests/${id}/questions`;
+            let method = 'POST';
+            let body;
+
+            if (editingQuestionId) {
+                // Update existing question
+                url = `${backendUrl}/api/admin/mock-tests/${id}/questions/${editingQuestionId}`;
+                method = 'PUT';
+                body = JSON.stringify(questionData);
+            } else {
+                // Create new question (wrapped in array as per original API)
+                body = JSON.stringify({ questions: [questionData] });
+            }
+
+            const response = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(payload)
+                body: body
             });
 
             if (response.ok) {
-                // alert('Question added successfully!'); // Removing alert for smoother flow
+                // Reset form
                 setQuestionText('');
                 setOptions([{ text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }]);
                 setExplanation('');
+                setEditingQuestionId(null); // Clear editing state
+
                 if (shouldClose) {
                     setShowAddQuestion(false);
                 }
                 fetchTestDetails();
             }
         } catch (error) {
-            console.error('Error adding question:', error);
+            console.error('Error saving question:', error);
+        }
+    };
+
+    const handleEditQuestion = (question) => {
+        setQuestionText(question.questionText);
+        setOptions(JSON.parse(JSON.stringify(question.options))); // Deep copy
+        setExplanation(question.explanation || '');
+        setMarks(question.marks);
+        setEditingQuestionId(question._id);
+        setShowAddQuestion(true);
+        // smooth scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDeleteQuestion = async (questionId) => {
+        if (!confirm('Are you sure you want to delete this question?')) return;
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}/questions/${questionId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                fetchTestDetails();
+            } else {
+                alert('Failed to delete question');
+            }
+        } catch (error) {
+            console.error('Error deleting question:', error);
         }
     };
 
@@ -688,10 +734,16 @@ const MockTestDetailPage = () => {
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-bold text-gray-800">Manage Questions</h3>
                             <button
-                                onClick={() => setShowAddQuestion(!showAddQuestion)}
+                                onClick={() => {
+                                    setShowAddQuestion(!showAddQuestion);
+                                    setEditingQuestionId(null); // Reset editing state on toggle
+                                    setQuestionText('');
+                                    setOptions([{ text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }]);
+                                    setExplanation('');
+                                }}
                                 className="btn-primary"
                             >
-                                {showAddQuestion ? 'Cancel Adding' : 'Add New Question'}
+                                {showAddQuestion ? 'Cancel' : 'Add New Question'}
                             </button>
                         </div>
 
@@ -773,7 +825,7 @@ const MockTestDetailPage = () => {
                                         onClick={(e) => handleAddQuestion(e, true)}
                                         className="flex-1 btn-primary py-3 rounded-xl shadow-lg"
                                     >
-                                        Save & Finish
+                                        {editingQuestionId ? 'Update Question' : 'Save & Finish'}
                                     </button>
                                 </div>
                             </form>
@@ -805,6 +857,23 @@ const MockTestDetailPage = () => {
                             {q.explanation && (
                                 <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
                                     <span className="font-bold">Explanation:</span> {q.explanation}
+                                </div>
+                            )}
+
+                            {isAdmin && (
+                                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end gap-3">
+                                    <button
+                                        onClick={() => handleEditQuestion(q)}
+                                        className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteQuestion(q._id)}
+                                        className="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             )}
                         </div>

@@ -8,7 +8,7 @@ import { createPDF, getAllPDFs, getPDFById, updatePDF, deletePDF } from "../cont
 import { createCourse, getAllCourses, getCourseById, updateCourse, deleteCourse } from "../controller/course.js";
 import { createVideoLecture, getAllVideoLectures, getVideoLectureById, updateVideoLecture, deleteVideoLecture } from "../controller/videoLecture.js";
 import { createPreviousPaper, getAllPreviousPapers, getPreviousPaperById, updatePreviousPaper, deletePreviousPaper } from "../controller/previousPaper.js";
-import { createMockTest, getAllMockTests, getMockTestById, updateMockTest, deleteMockTest, addQuestions } from "../controller/mockTest.js";
+import { createMockTest, getAllMockTests, getMockTestById, updateMockTest, deleteMockTest, addQuestions, updateMockTestQuestion, deleteMockTestQuestion } from "../controller/mockTest.js";
 import { getAllFeedback, getFeedbackById, updateFeedbackStatus, deleteFeedback, deleteMultipleFeedback } from "../controller/feedback.js";
 import { protectAdminRoute } from "../middleware/clerkMiddleware.js";
 import { upload } from "../middleware/upload.js";
@@ -124,6 +124,8 @@ router.get('/mock-tests/:id', getMockTestById);
 router.put('/mock-tests/:id', protectAdminRoute, updateMockTest);
 router.delete('/mock-tests/:id', protectAdminRoute, deleteMockTest);
 router.post('/mock-tests/:id/questions', protectAdminRoute, addQuestions);
+router.put('/mock-tests/:testId/questions/:questionId', protectAdminRoute, updateMockTestQuestion);
+router.delete('/mock-tests/:testId/questions/:questionId', protectAdminRoute, deleteMockTestQuestion);
 
 // Feedback routes (Admin)
 router.get('/feedback', protectAdminRoute, getAllFeedback);
