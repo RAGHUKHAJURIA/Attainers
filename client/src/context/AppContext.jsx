@@ -18,7 +18,7 @@ export const AppProvider = (props) => {
 
   const backendUrl = (import.meta.env.DEV && PREFER_LOCAL_IN_DEV) ? localBackend : hostedBackend;
 
-  console.log("Current Backend URL:", backendUrl);
+
 
 
   const [allNews, setAllNews] = useState([]);
