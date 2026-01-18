@@ -239,18 +239,20 @@ const MockTestDetailPage = () => {
             updateStatus(currentQ._id, STATUS.NOT_ANSWERED);
         }
 
+        let nextIndex;
         if (currentQuestionIndex < test.questions.length - 1) {
-            const nextIndex = currentQuestionIndex + 1;
-            setCurrentQuestionIndex(nextIndex);
-
-            // Mark next as visited/not answered if fresh
-            const nextQ = test.questions[nextIndex];
-            if (questionStatus[nextQ._id] === STATUS.NOT_VISITED) { // Only change if fresh
-                updateStatus(nextQ._id, STATUS.NOT_ANSWERED);
-            }
+            nextIndex = currentQuestionIndex + 1;
         } else {
-            // Last Question - Submit
-            calculateAndSubmit();
+            // Last Question - Loop back to the first question
+            nextIndex = 0;
+        }
+
+        setCurrentQuestionIndex(nextIndex);
+
+        // Mark next (or first) as visited/not answered if fresh
+        const nextQ = test.questions[nextIndex];
+        if (questionStatus[nextQ._id] === STATUS.NOT_VISITED) { // Only change if fresh
+            updateStatus(nextQ._id, STATUS.NOT_ANSWERED);
         }
     };
 
@@ -267,9 +269,7 @@ const MockTestDetailPage = () => {
         } else {
             updateStatus(currentQ._id, STATUS.MARKED_FOR_REVIEW);
         }
-        if (currentQuestionIndex < test.questions.length - 1) {
-            handleNext();
-        }
+        handleNext();
     };
 
     const clearResponse = () => {
@@ -494,7 +494,7 @@ const MockTestDetailPage = () => {
                                         onClick={handleNext}
                                         className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700 shadow-md hover:shadow-lg transition-all"
                                     >
-                                        {currentQuestionIndex === test.questions.length - 1 ? 'Submit' : 'Save & Next'}
+                                        Save & Next
                                     </button>
                                 </div>
                             </div>
