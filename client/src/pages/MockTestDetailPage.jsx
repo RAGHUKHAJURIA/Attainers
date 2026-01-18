@@ -64,12 +64,12 @@ const MockTestDetailPage = () => {
     useEffect(() => {
         // Wait for user to be loaded and test data to be available
         if (isLoaded && test && test.questions && test.questions.length > 0) {
-            // Only start if NOT admin and test hasn't started yet
-            if (!isAdmin && !isTestActive) {
+            // Only start if NOT admin, test hasn't started yet, and NOT already submitted (score modal shown)
+            if (!isAdmin && !isTestActive && !showScoreModal) {
                 startTest(test); // Now safe to call
             }
         }
-    }, [isLoaded, test, isAdmin, isTestActive]);
+    }, [isLoaded, test, isAdmin, isTestActive, showScoreModal]);
 
     // Timer Effect
     useEffect(() => {
