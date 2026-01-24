@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import MockTestForm from './MockTestForm';
-import AddQuestionForm from './AddQuestionForm';
+import MockTestForm from './MockTestForm'; // Reuse existing form logic if possible, or adapt
+import AddQuestionForm from './AddQuestionForm'; // Reuse existing
 import { useAuth } from '@clerk/clerk-react';
 import { AppContext } from '../../context/AppContext';
 import Loading from '../Loading';
+import AddTestModal from '../AddTestModal'; // Import the modal we just updated
 
-const MockTestManager = () => {
+const PYQTestManager = () => {
     const [view, setView] = useState('list'); // 'list', 'create', 'add-questions'
     const [selectedTest, setSelectedTest] = useState(null);
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false); // Use modal for creation
     const { getToken } = useAuth();
     const { backendUrl } = useContext(AppContext);
 
@@ -28,7 +30,8 @@ const MockTestManager = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                setTests(data);
+                // Filter only PYQ tests
+                setTests(data.filter(t => t.testType === 'pyq'));
             }
         } catch (error) {
             console.error("Error fetching tests:", error);
@@ -37,8 +40,29 @@ const MockTestManager = () => {
         }
     };
 
-    const handleCreateSuccess = () => {
-        setView('list');
+    const handleCreateTest = async (newTest) => {
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newTest)
+            });
+
+            if (response.ok) {
+                fetchTests();
+                setIsModalOpen(false);
+            } else {
+                const errData = await response.json();
+                alert(`Failed to add test: ${errData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error adding mock test:', error);
+            alert("Error adding mock test. Check console for details.");
+        }
     };
 
     const handleManageQuestions = (test) => {
@@ -64,18 +88,6 @@ const MockTestManager = () => {
         }
     };
 
-    if (view === 'create') {
-        return (
-            <div>
-                <button onClick={() => setView('list')} className="mb-4 text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    Back to List
-                </button>
-                <MockTestForm onSuccess={handleCreateSuccess} />
-            </div>
-        );
-    }
-
     if (view === 'add-questions' && selectedTest) {
         return (
             <AddQuestionForm
@@ -89,52 +101,47 @@ const MockTestManager = () => {
         );
     }
 
-    // List View
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-800">Mock Tests</h2>
+                <h2 className="text-xl font-bold text-gray-800">PYQ Tests Manager</h2>
                 <button
-                    onClick={() => setView('create')}
+                    onClick={() => setIsModalOpen(true)}
                     className="btn-primary flex items-center gap-2"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                    Create New Test
+                    Add PYQ Test
                 </button>
             </div>
+
+            <AddTestModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAdd={handleCreateTest}
+                isPYQ={true}
+            />
 
             {loading ? (
                 <div className="text-center py-12"><Loading size="medium" /></div>
             ) : (
                 <div className="grid grid-cols-1 gap-4">
                     {tests.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed">No mock tests found. Create one to get started.</div>
+                        <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed">No PYQ tests found.</div>
                     ) : (
                         tests.map(test => (
                             <div key={test._id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-800">{test.title}</h3>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h3 className="text-lg font-bold text-gray-800">{test.title}</h3>
+                                    </div>
+
                                     <div className="flex flex-wrap gap-2 mt-1">
-                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${test.testType === 'pyq'
-                                                ? 'bg-purple-100 text-purple-800'
-                                                : 'bg-teal-100 text-teal-800'
-                                            }`}>
-                                            {test.testType === 'pyq' ? 'PYQ' : 'Mock Test'}
-                                        </span>
-                                        {test.testType === 'pyq' && (
-                                            <span className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded-full">
-                                                {test.year}{test.month ? ` - ${test.month}` : ''}
-                                            </span>
+                                        <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full font-medium">Year: {test.year}</span>
+                                        {test.month && (
+                                            <span className="text-xs px-2 py-1 bg-pink-100 text-pink-800 rounded-full font-medium">{test.month}</span>
                                         )}
                                         <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{test.examName}</span>
-                                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">{test.questions?.length || 0} Questions</span>
-                                        <span className={`text-xs px-2 py-1 rounded-full ${test.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                                            test.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                                            }`}>{test.difficulty}</span>
-                                        <span className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full flex items-center gap-1">
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                            {test.viewCount || 0}
-                                        </span>
+                                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">{test.questions?.length || 0} Qs</span>
                                     </div>
                                     <p className="text-sm text-gray-500 mt-2 line-clamp-1">{test.description}</p>
                                 </div>
@@ -162,4 +169,4 @@ const MockTestManager = () => {
     );
 };
 
-export default MockTestManager;
+export default PYQTestManager;

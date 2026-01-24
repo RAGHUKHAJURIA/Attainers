@@ -5,6 +5,9 @@ import Footer from '../components/Footer';
 import CourseCard from '../components/CourseCard';
 import AddCourseModal from '../components/AddCourseModal';
 import CardSkeleton from '../components/CardSkeleton';
+import SectionCard from '../components/SectionCard';
+import SubjectWiseCourses from '../components/courses/SubjectWiseCourses';
+import ExamWiseCourses from '../components/courses/ExamWiseCourses';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,6 +22,9 @@ const CoursesPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('All');
+    const [activeSection, setActiveSection] = useState(null); // 'subject-wise', 'exam-wise', etc.
+
 
     useEffect(() => {
         fetchCourses();
@@ -81,16 +87,102 @@ const CoursesPage = () => {
         navigate(`/courses/${course._id}`);
     };
 
-    const filteredCourses = courses.filter(course =>
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filter logic for non-"All" tabs
+    const filteredCourses = courses.filter(course => {
+        if (searchTerm) {
+            return course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                course.category.toLowerCase().includes(searchTerm.toLowerCase());
+        }
+        if (activeTab === 'All') return true;
+        // Map tabs to categories if needed, or simple string match
+        // Heuristic: Check if category includes tab name parts or exact match
+        // Adjust this mapping based on actual category values
+        const tabKey = activeTab.toLowerCase().replace(' ', '-');
+        return course.category.toLowerCase().includes(tabKey);
+    });
+
+    // Logic for "All" tab sections
+    const renderAllTabContent = () => {
+        if (activeSection === 'subject-wise') {
+            return (
+                <SubjectWiseCourses
+                    courses={courses}
+                    onCourseClick={handleCardClick}
+                    onBack={() => setActiveSection(null)}
+                    isAdmin={isAdmin}
+                    onDelete={handleDelete}
+                />
+            );
+        }
+
+        if (activeSection === 'exam-wise') {
+            return (
+                <ExamWiseCourses
+                    courses={courses}
+                    onCourseClick={handleCardClick}
+                    onBack={() => setActiveSection(null)}
+                    isAdmin={isAdmin}
+                    onDelete={handleDelete}
+                />
+            );
+        }
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 animate-fade-in">
+                <SectionCard
+                    title="Mock Tests"
+                    description="Practice with full-length mock tests designed to simulate real exam conditions."
+                    icon={
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                    }
+                    colorClass="bg-blue-500"
+                    onClick={() => navigate('/mock-tests')}
+                />
+
+                <SectionCard
+                    title="Previous Year Questions (PYQ)"
+                    description="Access past question papers to understand exam patterns and important topics."
+                    icon={
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    }
+                    colorClass="bg-purple-500"
+                    onClick={() => navigate('/pyq')}
+                />
+
+                <SectionCard
+                    title="Subject Wise"
+                    description="Browse courses and study materials organized by specific subjects."
+                    icon={
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    }
+                    colorClass="bg-green-500"
+                    onClick={() => setActiveSection('subject-wise')}
+                />
+
+                <SectionCard
+                    title="Exam Wise"
+                    description="Find targeted courses and resources for specific competitive exams."
+                    icon={
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    }
+                    colorClass="bg-red-500"
+                    onClick={() => setActiveSection('exam-wise')}
+                />
+            </div>
+        );
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-
             <Navbar />
-
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -132,50 +224,60 @@ const CoursesPage = () => {
                     </div>
                 </div>
 
-                {/* Filters */}
+                {/* Tabs */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                    {['All', 'Academic', 'Competitive Exams', 'Skill Development'].map((filter) => (
+                    {['All', 'Academic', 'Competitive Exams', 'Skill Development'].map((tab) => (
                         <button
-                            key={filter}
-                            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${searchTerm === '' && filter === 'All' ? 'bg-blue-600 text-white' :
-                                filter !== 'All' && searchTerm.toLowerCase().includes(filter.toLowerCase().replace(' ', '-')) ? 'bg-blue-600 text-white' :
-                                    'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                            key={tab}
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === tab
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                 }`}
-                            onClick={() => setSearchTerm(filter === 'All' ? '' : filter)}
+                            onClick={() => {
+                                setActiveTab(tab);
+                                setActiveSection(null); // Reset section when changing tabs
+                            }}
                         >
-                            {filter}
+                            {tab}
                         </button>
                     ))}
                 </div>
 
-                {/* Content Grid */}
+                {/* Content Area */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                         {[...Array(6)].map((_, i) => (
                             <CardSkeleton key={i} />
                         ))}
                     </div>
-                ) : filteredCourses.length > 0 ? (
-                    <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
-                            {filteredCourses.map((course) => (
-                                <CourseCard
-                                    key={course._id}
-                                    course={course}
-                                    onClick={handleCardClick}
-                                    isAdmin={isAdmin}
-                                    onDelete={handleDelete}
-                                />
-                            ))}
-                        </div>
-                    </div>
                 ) : (
-                    <div className="text-center py-12">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
-                        <p className="mt-1 text-sm text-gray-500">Try adjusting your search criteria.</p>
+                    <div className="min-h-[60vh]">
+                        {activeTab === 'All' && !searchTerm ? (
+                            renderAllTabContent()
+                        ) : (
+                            // Render standard course grid for other tabs or search
+                            filteredCourses.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4 animate-fade-in">
+                                    {filteredCourses.map((course) => (
+                                        <CourseCard
+                                            key={course._id}
+                                            course={course}
+                                            onClick={handleCardClick}
+                                            isAdmin={isAdmin}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <h3 className="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
+                                    <p className="mt-1 text-sm text-gray-500">Try adjusting your filters.</p>
+                                </div>
+                            )
+                        )}
                     </div>
                 )}
             </main>

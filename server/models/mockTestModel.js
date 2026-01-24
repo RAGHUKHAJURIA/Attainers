@@ -28,6 +28,22 @@ const mockTestSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    testType: {
+        type: String,
+        enum: ['mock-test', 'pyq'],
+        default: 'mock-test'
+    },
+    year: {
+        type: Number,
+        required: function () {
+            return this.testType === 'pyq';
+        }
+    },
+    month: {
+        type: String, // e.g., "January", "February"
+        enum: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        required: false
+    },
     difficulty: {
         type: String,
         enum: ['Easy', 'Medium', 'Hard'],

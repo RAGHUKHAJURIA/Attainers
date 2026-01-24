@@ -17,6 +17,8 @@ import UpdatesPage from './pages/UpdatesPage';
 import TablesPage from './pages/TablesPage';
 import MockTestsPage from './pages/MockTestsPage';
 import MockTestDetailPage from './pages/MockTestDetailPage';
+import PYQPage from './pages/PYQPage';
+import PYQYearPage from './pages/PYQYearPage';
 import ContactUsPage from './pages/ContactUsPage';
 // import VideoLecturesPage from './pages/VideoLecturesPage';
 import { useUser } from '@clerk/clerk-react';
@@ -56,6 +58,8 @@ function App() {
         <Route path='/schedules' element={<TablesPage />} />
         <Route path='/mock-tests' element={<MockTestsPage />} />
         <Route path='/mock-tests/:id' element={<MockTestDetailPage />} />
+        <Route path='/pyq' element={<PYQPage />} />
+        <Route path='/pyq/:year' element={<PYQYearPage />} />
         <Route path='/contact' element={<ContactUsPage />} />
       </Routes>
     </AppProvider>
