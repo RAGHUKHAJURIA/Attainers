@@ -1,24 +1,20 @@
 import React from 'react';
 
 const SectionCard = ({ title, description, icon, onClick, colorClass = "bg-blue-500" }) => {
-    // Extract the base color name (e.g., 'blue', 'red') to use for different opacities/shades
-    // This assumes colorClass is like 'bg-blue-500'
-    const colorName = colorClass.replace('bg-', '').split('-')[0];
-
     return (
         <div
             onClick={onClick}
-            className={`group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 border-l-4 ${colorClass.replace('bg-', 'border-')}`}
+            className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 hover:-translate-y-1"
         >
             <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                    <div className={`p-3 rounded-lg ${colorClass} bg-opacity-10 text-${colorName}-600 group-hover:scale-110 transition-transform duration-300`}>
+                    <div className={`p-3 rounded-xl ${colorClass} text-white group-hover:scale-105 transition-transform duration-300`}>
                         {icon}
                     </div>
                 </div>
 
                 <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                         {title}
                     </h3>
                     <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">

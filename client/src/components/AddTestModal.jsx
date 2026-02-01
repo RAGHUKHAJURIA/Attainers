@@ -9,7 +9,11 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
         difficulty: 'Medium',
         description: '',
         testType: isPYQ ? 'pyq' : 'mock-test',
-        year: year || ''
+        year: year || '',
+        month: '',
+        subject: '',
+        exam: '',
+        subExam: ''
     });
 
     useEffect(() => {
@@ -46,7 +50,11 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
             difficulty: 'Medium',
             description: '',
             testType: isPYQ ? 'pyq' : 'mock-test',
-            year: year || ''
+            year: year || '',
+            month: '',
+            subject: '',
+            exam: '',
+            subExam: ''
         });
         onClose();
     };
@@ -56,24 +64,44 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
+                {/* Backdrop with blur effect */}
+                <div
+                    className="fixed inset-0 transition-all duration-300 bg-gray-900/50 backdrop-blur-sm"
+                    onClick={onClose}
+                ></div>
 
                 <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
 
-                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10">
-                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">{modalTitle}</h3>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Modal container with modern styling */}
+                <div className="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10 border border-gray-100 animate-scaleIn">
+                    <div className="bg-white px-6 pt-6 pb-6 sm:p-8">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-2xl font-bold text-gray-900">{modalTitle}</h3>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-xl"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Test Type - Only show if not in PYQ mode */}
                             {!isPYQ && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Test Type</label>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Test Type</label>
                                     <select
                                         className="modern-select mt-1"
                                         value={formData.testType}
                                         onChange={(e) => setFormData({ ...formData, testType: e.target.value })}
                                     >
                                         <option value="mock-test">Mock Test</option>
+                                        <option value="current-affairs">Current Affairs</option>
+                                        <option value="subject-wise">Subject-wise</option>
+                                        <option value="exam-wise">Exam-wise</option>
                                         <option value="pyq">Previous Year Questions (PYQ)</option>
                                     </select>
                                 </div>
@@ -84,7 +112,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                                 <div className="grid grid-cols-2 gap-4">
                                     {!year && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Year</label>
+                                            <label className="block text-sm font-semibold text-gray-800 mb-2">Year</label>
                                             <input
                                                 type="number"
                                                 required
@@ -98,7 +126,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                                         </div>
                                     )}
                                     <div className={year ? "col-span-2" : ""}>
-                                        <label className="block text-sm font-medium text-gray-700">Month (Optional)</label>
+                                        <label className="block text-sm font-semibold text-gray-800 mb-2">Month (Optional)</label>
                                         <select
                                             className="modern-select mt-1"
                                             value={formData.month || ''}
@@ -113,8 +141,65 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                                 </div>
                             )}
 
+                            {/* Subject - Only show for subject-wise tests */}
+                            {formData.testType === 'subject-wise' && (
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Subject</label>
+                                    <select
+                                        required
+                                        className="modern-select mt-1"
+                                        value={formData.subject || ''}
+                                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                    >
+                                        <option value="">Select Subject</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="History">History</option>
+                                        <option value="Geography">Geography</option>
+                                        <option value="Politics">Politics</option>
+                                        <option value="General Knowledge">General Knowledge</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Exam - Only show for exam-wise tests */}
+                            {formData.testType === 'exam-wise' && (
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Exam</label>
+                                    <select
+                                        required
+                                        className="modern-select mt-1"
+                                        value={formData.exam || ''}
+                                        onChange={(e) => setFormData({ ...formData, exam: e.target.value, subExam: '' })}
+                                    >
+                                        <option value="">Select Exam</option>
+                                        <option value="JKSSB">JKSSB</option>
+                                        <option value="JKP">JKP</option>
+                                        <option value="SSC">SSC</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Sub-Exam - Only show for JKSSB exam */}
+                            {formData.testType === 'exam-wise' && formData.exam === 'JKSSB' && (
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">JKSSB Exam Type</label>
+                                    <select
+                                        required
+                                        className="modern-select mt-1"
+                                        value={formData.subExam || ''}
+                                        onChange={(e) => setFormData({ ...formData, subExam: e.target.value })}
+                                    >
+                                        <option value="">Select Exam Type</option>
+                                        <option value="SI">Sub-Inspector (SI)</option>
+                                        <option value="Junior Assistant">Junior Assistant</option>
+                                        <option value="Accounts Assistant">Accounts Assistant</option>
+                                        <option value="Panchayat Secretary">Panchayat Secretary</option>
+                                    </select>
+                                </div>
+                            )}
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Test Title</label>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Test Title</label>
                                 <input
                                     type="text"
                                     required
@@ -126,7 +211,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Description</label>
                                 <textarea
                                     className="modern-input mt-1 w-full"
                                     rows="2"
@@ -137,7 +222,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Exam Category</label>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Exam Category</label>
                                 <select
                                     required
                                     className="modern-select mt-1"
@@ -155,7 +240,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Questions</label>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Questions</label>
                                     <input
                                         type="number"
                                         required
@@ -166,7 +251,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Duration (mins)</label>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Duration (mins)</label>
                                     <input
                                         type="number"
                                         required
@@ -179,7 +264,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Difficulty</label>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Difficulty</label>
                                 <select
                                     className="modern-select mt-1"
                                     value={formData.difficulty}
@@ -191,19 +276,19 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                                 </select>
                             </div>
 
-                            <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                                <button
-                                    type="submit"
-                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm"
-                                >
-                                    Add Test
-                                </button>
+                            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                                 <button
                                     type="button"
-                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                                    className="w-full sm:w-auto px-6 py-3 bg-white text-gray-700 border-2 border-gray-200 rounded-2xl font-bold text-base hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 shadow-sm"
                                     onClick={onClose}
                                 >
                                     Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-base shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 transition-all duration-300"
+                                >
+                                    Add Test
                                 </button>
                             </div>
                         </form>

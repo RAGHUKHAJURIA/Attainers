@@ -20,6 +20,9 @@ import MockTestDetailPage from './pages/MockTestDetailPage';
 import PYQPage from './pages/PYQPage';
 import PYQYearPage from './pages/PYQYearPage';
 import ContactUsPage from './pages/ContactUsPage';
+import CurrentAffairsPage from './pages/CurrentAffairsPage';
+import SubjectWiseTestsPage from './pages/SubjectWiseTestsPage';
+import ExamWiseTestsPage from './pages/ExamWiseTestsPage';
 // import VideoLecturesPage from './pages/VideoLecturesPage';
 import { useUser } from '@clerk/clerk-react';
 
@@ -55,11 +58,14 @@ function App() {
         <Route path='/blogs/:id' element={<BlogDetailPage />} />
         <Route path='/youtube' element={<YouTubePage />} />
         <Route path='/updates' element={<UpdatesPage />} />
+        <Route path='/current-affairs' element={<CurrentAffairsPage />} />
         <Route path='/schedules' element={<TablesPage />} />
         <Route path='/mock-tests' element={<MockTestsPage />} />
         <Route path='/mock-tests/:id' element={<MockTestDetailPage />} />
         <Route path='/pyq' element={<PYQPage />} />
         <Route path='/pyq/:year' element={<PYQYearPage />} />
+        <Route path='/mock-tests/subject-wise' element={<SubjectWiseTestsPage />} />
+        <Route path='/mock-tests/exam-wise' element={<ExamWiseTestsPage />} />
         <Route path='/contact' element={<ContactUsPage />} />
       </Routes>
     </AppProvider>

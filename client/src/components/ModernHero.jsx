@@ -36,15 +36,21 @@ const ModernHero = () => {
                     video lectures, and previous papers all in one place.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <Link to="/courses" className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-1 transition-all duration-300">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-3xl mx-auto">
+                    <Link to="/courses" className="w-full sm:w-auto px-6 sm:px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-1 transition-all duration-300 text-center">
                         Start Learning Free
                     </Link>
-                    <Link to="/youtube" className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-300 flex items-center gap-2">
-                        <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                    <Link to="/mock-tests" className="w-full sm:w-auto px-6 sm:px-8 py-4 bg-purple-600 text-white rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 hover:-translate-y-1 transition-all duration-300 text-center flex items-center justify-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
-                        Watch Demo
+                        Mock Test
+                    </Link>
+                    <Link to="/current-affairs" className="w-full sm:w-auto px-6 sm:px-8 py-4 bg-white text-gray-700 border-2 border-gray-200 rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 text-center flex items-center justify-center gap-2">
+                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        </svg>
+                        Current Affairs
                     </Link>
                 </div>
             </div>
