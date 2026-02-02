@@ -3,17 +3,14 @@ import React, { useState, useEffect } from 'react';
 const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) => {
     const [formData, setFormData] = useState({
         title: '',
-        examName: '',
-        totalQuestions: '',
-        duration: '',
+        examName: 'J&K Current Affairs',
+        totalQuestions: 50,
+        duration: 60,
         difficulty: 'Medium',
         description: '',
-        testType: isPYQ ? 'pyq' : 'mock-test',
-        year: year || '',
-        month: '',
-        subject: '',
-        exam: '',
-        subExam: ''
+        testType: isPYQ ? 'pyq' : 'current-affairs',
+        year: year || new Date().getFullYear(),
+        month: ''
     });
 
     useEffect(() => {
@@ -33,33 +30,26 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
         const submitData = {
             ...formData,
             totalQuestions: parseInt(formData.totalQuestions, 10),
-            duration: parseInt(formData.duration, 10)
+            duration: parseInt(formData.duration, 10),
+            year: parseInt(formData.year, 10)
         };
-
-        // Add year for PYQ tests
-        if (formData.testType === 'pyq') {
-            submitData.year = parseInt(formData.year, 10);
-        }
 
         onAdd(submitData);
         setFormData({
             title: '',
-            examName: '',
-            totalQuestions: '',
-            duration: '',
+            examName: 'J&K Current Affairs',
+            totalQuestions: 50,
+            duration: 60,
             difficulty: 'Medium',
             description: '',
-            testType: isPYQ ? 'pyq' : 'mock-test',
-            year: year || '',
-            month: '',
-            subject: '',
-            exam: '',
-            subExam: ''
+            testType: isPYQ ? 'pyq' : 'current-affairs',
+            year: year || new Date().getFullYear(),
+            month: ''
         });
         onClose();
     };
 
-    const modalTitle = isPYQ ? `Add New PYQ Test (${year})` : 'Add New Mock Test';
+    const modalTitle = isPYQ ? `Add New PYQ Test (${year})` : 'Add New Current Affairs Test';
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -89,122 +79,43 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-5">
-                            {/* Test Type - Only show if not in PYQ mode */}
-                            {!isPYQ && (
+                            {/* Year and Month */}
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Test Type</label>
-                                    <select
-                                        className="modern-select mt-1"
-                                        value={formData.testType}
-                                        onChange={(e) => setFormData({ ...formData, testType: e.target.value })}
-                                    >
-                                        <option value="mock-test">Mock Test</option>
-                                        <option value="current-affairs">Current Affairs</option>
-                                        <option value="subject-wise">Subject-wise</option>
-                                        <option value="exam-wise">Exam-wise</option>
-                                        <option value="pyq">Previous Year Questions (PYQ)</option>
-                                    </select>
-                                </div>
-                            )}
-
-                            {/* Year - Only show for PYQ tests and if not pre-filled */}
-                            {formData.testType === 'pyq' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    {!year && (
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2">Year</label>
-                                            <input
-                                                type="number"
-                                                required
-                                                className="modern-input mt-1"
-                                                placeholder="2025"
-                                                min="2020"
-                                                max="2030"
-                                                value={formData.year}
-                                                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                                            />
-                                        </div>
-                                    )}
-                                    <div className={year ? "col-span-2" : ""}>
-                                        <label className="block text-sm font-semibold text-gray-800 mb-2">Month (Optional)</label>
-                                        <select
-                                            className="modern-select mt-1"
-                                            value={formData.month || ''}
-                                            onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                                        >
-                                            <option value="">Select Month</option>
-                                            {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
-                                                <option key={m} value={m}>{m}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Subject - Only show for subject-wise tests */}
-                            {formData.testType === 'subject-wise' && (
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Subject</label>
-                                    <select
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Year *</label>
+                                    <input
+                                        type="number"
                                         required
-                                        className="modern-select mt-1"
-                                        value={formData.subject || ''}
-                                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                    >
-                                        <option value="">Select Subject</option>
-                                        <option value="Mathematics">Mathematics</option>
-                                        <option value="History">History</option>
-                                        <option value="Geography">Geography</option>
-                                        <option value="Politics">Politics</option>
-                                        <option value="General Knowledge">General Knowledge</option>
-                                    </select>
+                                        className="modern-input mt-1"
+                                        placeholder="2025"
+                                        min="2020"
+                                        max="2030"
+                                        value={formData.year}
+                                        onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                                    />
                                 </div>
-                            )}
-
-                            {/* Exam - Only show for exam-wise tests */}
-                            {formData.testType === 'exam-wise' && (
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Exam</label>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Month (Optional)</label>
                                     <select
-                                        required
                                         className="modern-select mt-1"
-                                        value={formData.exam || ''}
-                                        onChange={(e) => setFormData({ ...formData, exam: e.target.value, subExam: '' })}
+                                        value={formData.month || ''}
+                                        onChange={(e) => setFormData({ ...formData, month: e.target.value })}
                                     >
-                                        <option value="">Select Exam</option>
-                                        <option value="JKSSB">JKSSB</option>
-                                        <option value="JKP">JKP</option>
-                                        <option value="SSC">SSC</option>
+                                        <option value="">Select Month</option>
+                                        {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                                            <option key={m} value={m}>{m}</option>
+                                        ))}
                                     </select>
                                 </div>
-                            )}
-
-                            {/* Sub-Exam - Only show for JKSSB exam */}
-                            {formData.testType === 'exam-wise' && formData.exam === 'JKSSB' && (
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">JKSSB Exam Type</label>
-                                    <select
-                                        required
-                                        className="modern-select mt-1"
-                                        value={formData.subExam || ''}
-                                        onChange={(e) => setFormData({ ...formData, subExam: e.target.value })}
-                                    >
-                                        <option value="">Select Exam Type</option>
-                                        <option value="SI">Sub-Inspector (SI)</option>
-                                        <option value="Junior Assistant">Junior Assistant</option>
-                                        <option value="Accounts Assistant">Accounts Assistant</option>
-                                        <option value="Panchayat Secretary">Panchayat Secretary</option>
-                                    </select>
-                                </div>
-                            )}
+                            </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-800 mb-2">Test Title</label>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Test Title *</label>
                                 <input
                                     type="text"
                                     required
                                     className="modern-input mt-1"
-                                    placeholder="e.g. JKSSB SI Full Mock Test 1"
+                                    placeholder="e.g. January 2025 Current Affairs - Week 1"
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 />
@@ -221,42 +132,25 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                                 ></textarea>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-800 mb-2">Exam Category</label>
-                                <select
-                                    required
-                                    className="modern-select mt-1"
-                                    value={formData.examName}
-                                    onChange={(e) => setFormData({ ...formData, examName: e.target.value })}
-                                >
-                                    <option value="">Select Exam</option>
-                                    <option value="JKSSB SI">JKSSB SI</option>
-                                    <option value="JKSSB Junior Assistant">JKSSB Junior Assistant</option>
-                                    <option value="SSC CGL">SSC CGL</option>
-                                    <option value="SSC CHSL">SSC CHSL</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Questions</label>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Questions *</label>
                                     <input
                                         type="number"
                                         required
                                         className="modern-input mt-1"
-                                        placeholder="100"
+                                        placeholder="50"
                                         value={formData.totalQuestions}
                                         onChange={(e) => setFormData({ ...formData, totalQuestions: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Duration (mins)</label>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Duration (mins) *</label>
                                     <input
                                         type="number"
                                         required
                                         className="modern-input mt-1"
-                                        placeholder="120"
+                                        placeholder="60"
                                         value={formData.duration}
                                         onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                                     />
@@ -264,7 +158,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-800 mb-2">Difficulty</label>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Difficulty *</label>
                                 <select
                                     className="modern-select mt-1"
                                     value={formData.difficulty}

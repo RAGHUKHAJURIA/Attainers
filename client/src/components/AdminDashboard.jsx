@@ -9,6 +9,9 @@ import YouTubeForm from './admin/YouTubeForm';
 import MockTestManager from './admin/MockTestManager';
 import PYQTestManager from './admin/PYQTestManager';
 import FeedbackManager from './admin/FeedbackManager';
+import CurrentAffairsTestManager from './admin/CurrentAffairsTestManager';
+import ExamWiseTestManager from './admin/ExamWiseTestManager';
+import SubjectWiseTestManager from './admin/SubjectWiseTestManager';
 
 const AdminDashboard = ({ user }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -48,18 +51,38 @@ const AdminDashboard = ({ user }) => {
             ]
         },
         {
-            category: 'Exams & Tests',
+            category: 'Mock Tests',
             items: [
                 {
-                    id: 'mock-tests', name: 'Mock Tests', icon: (
+                    id: 'current-affairs-tests', name: 'J & K Current Affairs', icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
+                    )
+                },
+                {
+                    id: 'exam-wise-tests', name: 'Exam-Wise Tests', icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     )
                 },
                 {
-                    id: 'pyq-tests', name: 'PYQ Tests', icon: (
+                    id: 'subject-wise-tests', name: 'Subject-Wise Tests', icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                     )
                 },
+                {
+                    id: 'mock-tests', name: 'General Mock Tests', icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                    )
+                },
+                {
+                    id: 'pyq-tests', name: 'PYQ Tests', icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    )
+                },
+            ]
+        },
+        {
+            category: 'Other',
+            items: [
                 {
                     id: 'tables', name: 'Tables / Schedules', icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
@@ -89,11 +112,14 @@ const AdminDashboard = ({ user }) => {
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard': return <DashboardView onNavigate={(tab) => setActiveTab(tab)} />;
-            case 'news': return <UpdateForm />; // Map news to UpdateForm if clicked via quick actions or legacy
+            case 'news': return <UpdateForm />;
             case 'updates': return <UpdateForm />;
             case 'blogs': return <BlogForm />;
             case 'tables': return <TableForm />;
             case 'youtube': return <YouTubeForm />;
+            case 'current-affairs-tests': return <CurrentAffairsTestManager />;
+            case 'exam-wise-tests': return <ExamWiseTestManager />;
+            case 'subject-wise-tests': return <SubjectWiseTestManager />;
             case 'mock-tests': return <MockTestManager />;
             case 'pyq-tests': return <PYQTestManager />;
             case 'feedback': return <FeedbackManager />;
@@ -193,28 +219,29 @@ const AdminDashboard = ({ user }) => {
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-30">
+                <header className="h-16 sm:h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30">
                     <div className="flex items-center">
                         <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden mr-4 text-gray-600">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <h2 className="text-2xl font-bold text-gray-800">
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-800">
                             {navItems.flatMap(g => g.items).find(i => i.id === activeTab)?.name || 'Dashboard'}
                         </h2>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         <button
                             onClick={() => navigate('/?view=user')}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                         >
-                            <span>View Site</span>
+                            <span className="hidden sm:inline">View Site</span>
+                            <span className="sm:hidden">Site</span>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         </button>
                     </div>
                 </header>
 
                 {/* Content Body */}
-                <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
                     <div className="max-w-7xl mx-auto">
                         {renderContent()}
                     </div>
@@ -239,10 +266,10 @@ const DashboardView = ({ onNavigate }) => {
     return (
         <div className="space-y-8">
             {/* Welcome Application */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
                 <div className="relative z-10">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-4">Admin Dashboard</h1>
-                    <p className="text-blue-100 text-lg max-w-2xl">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Admin Dashboard</h1>
+                    <p className="text-blue-100 text-sm sm:text-base md:text-lg max-w-2xl">
                         Manage your website's content, track performance, and keep your users updated—all from one place.
                     </p>
                 </div>
@@ -252,55 +279,55 @@ const DashboardView = ({ onNavigate }) => {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
                 {stats.map((stat, idx) => (
-                    <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 bg-${stat.color}-50 text-${stat.color}-600`}>
+                    <div key={idx} className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4 bg-${stat.color}-50 text-${stat.color}-600`}>
                             {stat.icon}
                         </div>
-                        <h3 className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</h3>
-                        <p className="text-sm font-medium text-gray-500">{stat.label}</p>
+                        <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{stat.value}</h3>
+                        <p className="text-xs sm:text-sm font-medium text-gray-500">{stat.label}</p>
                     </div>
                 ))}
             </div>
 
             {/* Actions Grid */}
-            <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Create Blog */}
                 <button
                     onClick={() => onNavigate('blogs')}
-                    className="p-6 bg-white rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all text-left group"
+                    className="p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all text-left group"
                 >
-                    <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </div>
-                    <h3 className="font-bold text-gray-900 mb-1">Write a Blog Post</h3>
-                    <p className="text-sm text-gray-500">Create engaging content for your students.</p>
+                    <h3 className="font-bold text-gray-900 mb-1 text-sm sm:text-base">Write a Blog Post</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">Create engaging content for your students.</p>
                 </button>
 
                 {/* Add Video */}
                 <button
                     onClick={() => onNavigate('youtube')}
-                    className="p-6 bg-white rounded-2xl border border-gray-100 hover:border-red-200 hover:shadow-lg transition-all text-left group"
+                    className="p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl border border-gray-100 hover:border-red-200 hover:shadow-lg transition-all text-left group"
                 >
-                    <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                     </div>
-                    <h3 className="font-bold text-gray-900 mb-1">Add YouTube Video</h3>
-                    <p className="text-sm text-gray-500">Share educational videos from your channel.</p>
+                    <h3 className="font-bold text-gray-900 mb-1 text-sm sm:text-base">Add YouTube Video</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">Share educational videos from your channel.</p>
                 </button>
 
                 {/* Post Update */}
                 <button
                     onClick={() => onNavigate('updates')}
-                    className="p-6 bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all text-left group"
+                    className="p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all text-left group"
                 >
-                    <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 00-15 0v5h5l-5 5-5-5h5v-5a7.5 7.5 0 0115 0v5z" /></svg>
                     </div>
-                    <h3 className="font-bold text-gray-900 mb-1">Post New Update</h3>
-                    <p className="text-sm text-gray-500">Announce important news or alerts.</p>
+                    <h3 className="font-bold text-gray-900 mb-1 text-sm sm:text-base">Post New Update</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">Announce important news or alerts.</p>
                 </button>
             </div>
         </div>

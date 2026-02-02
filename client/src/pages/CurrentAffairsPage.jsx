@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TestCard from '../components/TestCard';
-import AddTestModal from '../components/AddTestModal';
+import AddYearModal from '../components/AddYearModal';
+import AddMonthModal from '../components/AddMonthModal';
 import CategoryNavigator from '../components/CategoryNavigator';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import CardSkeleton from '../components/CardSkeleton';
@@ -11,12 +12,15 @@ const CurrentAffairsPage = () => {
     const { user, isLoaded } = useUser();
     const { getToken } = useAuth();
     const [isAdmin, setIsAdmin] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isYearModalOpen, setIsYearModalOpen] = useState(false);
+    const [isMonthModalOpen, setIsMonthModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState(null);
     const [selectedMonth, setSelectedMonth] = useState(null);
+    const [customYears, setCustomYears] = useState([]);
+    const [customMonths, setCustomMonths] = useState([]); // [{ year: 2026, month: 'January' }]
 
     // Dummy data for demonstration
     const dummyTests = [
@@ -47,16 +51,13 @@ const CurrentAffairsPage = () => {
             if (response.ok) {
                 const data = await response.json();
                 const currentAffairsTests = data.filter(test => test.testType === 'current-affairs');
-                // Merge with dummy data
-                setTests([...dummyTests, ...currentAffairsTests]);
+                setTests(currentAffairsTests);
             } else {
-                // Use only dummy data if API fails
-                setTests(dummyTests);
+                setTests([]);
             }
         } catch (error) {
             console.error('Error fetching Current Affairs tests:', error);
-            // Use dummy data as fallback
-            setTests(dummyTests);
+            setTests([]);
         } finally {
             setLoading(false);
         }
@@ -68,31 +69,156 @@ const CurrentAffairsPage = () => {
         }
     }, [isLoaded, user]);
 
-    const handleAddTest = async (newTest) => {
+    const handleAddYear = async (yearData) => {
         try {
+            setLoading(true);
             const token = await getToken();
-            const testData = { ...newTest, testType: 'current-affairs' };
-
             const response = await fetch('https://attainers-272i.vercel.app/api/admin/mock-tests', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(testData)
+                body: JSON.stringify({
+                    title: `_PLACEHOLDER_${yearData.year}`,
+                    examName: 'Current Affairs',
+                    totalQuestions: 0,
+                    duration: 0,
+                    difficulty: 'Easy',
+                    testType: 'current-affairs',
+                    year: yearData.year,
+                    month: 'January', // Default month for year placeholder
+                    description: yearData.description || `Placeholder for ${yearData.year}`,
+                    isPlaceholder: true
+                })
             });
 
             if (response.ok) {
-                fetchCurrentAffairsTests();
+                await fetchCurrentAffairsTests();
+                setIsYearModalOpen(false);
+                alert(`Year ${yearData.year} added successfully!`);
             } else {
-                console.error("Failed to add test. Status:", response.status);
-                const errData = await response.json();
-                console.error("Error details:", errData);
-                alert(`Failed to add test: ${errData.message || response.statusText}`);
+                alert('Failed to add year. Please try again.');
             }
         } catch (error) {
-            console.error('Error adding Current Affairs test:', error);
-            alert("Error adding Current Affairs test. Check console for details.");
+            console.error("Error adding year:", error);
+            alert("Error adding year.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddMonth = async (monthData) => {
+        try {
+            setLoading(true);
+            const token = await getToken();
+            const response = await fetch('https://attainers-272i.vercel.app/api/admin/mock-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: `_PLACEHOLDER_${selectedYear}_${monthData.month}`,
+                    examName: 'Current Affairs',
+                    totalQuestions: 0,
+                    duration: 0,
+                    difficulty: 'Easy',
+                    testType: 'current-affairs',
+                    year: selectedYear,
+                    month: monthData.month,
+                    description: monthData.description,
+                    isPlaceholder: true
+                })
+            });
+
+            if (response.ok) {
+                await fetchCurrentAffairsTests();
+                setIsMonthModalOpen(false);
+                alert(`${monthData.month} added successfully!`);
+            } else {
+                alert('Failed to add month. Please try again.');
+            }
+        } catch (error) {
+            console.error("Error adding month:", error);
+            alert("Error adding month.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteYear = async (category) => {
+        const yearToDelete = category.id;
+        const testsToDelete = tests.filter(test => test.year === yearToDelete);
+        const testCount = testsToDelete.length;
+
+        if (!window.confirm(`Are you sure you want to delete ${yearToDelete}? This will permanently delete ALL ${testCount} tests associated with this year.`)) {
+            return;
+        }
+
+        try {
+            const token = await getToken();
+            setLoading(true);
+
+            // Delete all tests in parallel
+            const deletePromises = testsToDelete.map(test =>
+                fetch(`https://attainers-272i.vercel.app/api/admin/mock-tests/${test._id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            );
+
+            await Promise.all(deletePromises);
+
+            // Remove from custom years if present
+            setCustomYears(prev => prev.filter(y => y !== yearToDelete));
+
+            // Refresh tests
+            await fetchCurrentAffairsTests();
+            alert(`Successfully deleted year ${yearToDelete} and its tests.`);
+        } catch (error) {
+            console.error("Error deleting year:", error);
+            alert("Error deleting year. Check console for details.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteMonth = async (category) => {
+        const monthToDelete = category.id;
+        const testsToDelete = tests.filter(test => test.year === selectedYear && test.month === monthToDelete);
+        const testCount = testsToDelete.length;
+
+        if (!window.confirm(`Are you sure you want to delete ${monthToDelete} ${selectedYear}? This will permanently delete ALL ${testCount} tests associated with this month.`)) {
+            return;
+        }
+
+        try {
+            const token = await getToken();
+            setLoading(true);
+
+            // Delete all tests in parallel
+            if (testsToDelete.length > 0) {
+                const deletePromises = testsToDelete.map(test =>
+                    fetch(`https://attainers-272i.vercel.app/api/admin/mock-tests/${test._id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                );
+                await Promise.all(deletePromises);
+            }
+
+            // Remove from custom months if present
+            setCustomMonths(prev => prev.filter(m => !(m.year === selectedYear && m.month === monthToDelete)));
+
+            // Refresh tests
+            await fetchCurrentAffairsTests();
+            alert(`Successfully deleted ${monthToDelete} ${selectedYear}.`);
+        } catch (error) {
+            console.error("Error deleting month:", error);
+            alert("Error deleting month. Check console for details.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -118,32 +244,43 @@ const CurrentAffairsPage = () => {
         }
     };
 
-    // Get unique years from tests
+    // Get unique years from tests (including placeholders)
     const getYears = () => {
-        const years = [...new Set(tests.map(test => test.year).filter(Boolean))];
-        return years.sort((a, b) => b - a); // Sort descending
+        const testYears = [...new Set(tests.map(test => test.year).filter(Boolean))];
+        return testYears.sort((a, b) => b - a); // Sort descending
     };
 
-    // Get months for selected year
+    // Get months for selected year (including placeholders)
     const getMonthsForYear = (year) => {
         const testsInYear = tests.filter(test => test.year === year);
-        const monthsWithTests = [...new Set(testsInYear.map(test => test.month).filter(Boolean))];
-        return months.filter(month => monthsWithTests.includes(month));
+        const testMonths = [...new Set(testsInYear.map(test => test.month).filter(Boolean))];
+        return months.filter(month => testMonths.includes(month));
     };
 
-    // Get tests for selected month and year
+    // Get tests for selected month and year (excluding placeholders)
     const getTestsForMonth = (year, month) => {
-        return tests.filter(test => test.year === year && test.month === month);
+        return tests.filter(test =>
+            test.year === year &&
+            test.month === month &&
+            !test.title.startsWith('_PLACEHOLDER_')
+        );
     };
 
-    // Get count of tests for a year
+    // Get count of tests for a year (excluding placeholders)
     const getTestCountForYear = (year) => {
-        return tests.filter(test => test.year === year).length;
+        return tests.filter(test =>
+            test.year === year &&
+            !test.title.startsWith('_PLACEHOLDER_')
+        ).length;
     };
 
-    // Get count of tests for a month
+    // Get count of tests for a month (excluding placeholders)
     const getTestCountForMonth = (year, month) => {
-        return tests.filter(test => test.year === year && test.month === month).length;
+        return tests.filter(test =>
+            test.year === year &&
+            test.month === month &&
+            !test.title.startsWith('_PLACEHOLDER_')
+        ).length;
     };
 
     const filteredTests = tests.filter(test =>
@@ -154,7 +291,7 @@ const CurrentAffairsPage = () => {
     // Breadcrumbs
     const getBreadcrumbs = () => {
         const crumbs = [
-            { label: 'Current Affairs', onClick: () => { setSelectedYear(null); setSelectedMonth(null); } }
+            { label: 'J and K Current Affairs', onClick: () => { setSelectedYear(null); setSelectedMonth(null); } }
         ];
 
         if (selectedYear) {
@@ -174,7 +311,7 @@ const CurrentAffairsPage = () => {
         const yearCategories = years.map(year => ({
             id: year,
             title: year.toString(),
-            description: `Browse current affairs tests from ${year}`,
+            description: year === 2025 ? `Browse all ${year} current affairs tests` : `Browse current affairs tests from ${year}`,
             count: getTestCountForYear(year),
             colorClass: 'bg-orange-500',
             icon: (
@@ -188,14 +325,15 @@ const CurrentAffairsPage = () => {
             <CategoryNavigator
                 categories={yearCategories}
                 onCategoryClick={(category) => setSelectedYear(category.id)}
-                title="Current Affairs by Year"
-                description="Select a year to view monthly current affairs tests"
+                title="J and K Current Affairs by Year"
+                description="Select a year to view current affairs tests"
                 breadcrumbs={getBreadcrumbs()}
+                onDelete={isAdmin ? handleDeleteYear : null}
             />
         );
     };
 
-    // Render month selection
+    // Render month selection (only for 2026+)
     const renderMonthSelection = () => {
         const monthsForYear = getMonthsForYear(selectedYear);
         const monthCategories = monthsForYear.map(month => ({
@@ -215,24 +353,43 @@ const CurrentAffairsPage = () => {
             <CategoryNavigator
                 categories={monthCategories}
                 onCategoryClick={(category) => setSelectedMonth(category.id)}
-                title={`${selectedYear} Current Affairs`}
+                title={`${selectedYear} J and K Current Affairs`}
                 description="Select a month to view tests"
                 showBackButton={true}
                 onBack={() => setSelectedYear(null)}
                 breadcrumbs={getBreadcrumbs()}
+                onDelete={isAdmin ? handleDeleteMonth : null}
             />
         );
     };
 
-    // Render tests for selected month
+    // Render tests for selected year (2025) or month (2026+)
     const renderTests = () => {
-        const testsToShow = getTestsForMonth(selectedYear, selectedMonth);
+        // For 2025 (or any year really, if we want universal behavior), we show tests. 
+        // Logic: If on monthly view, show filtered tests. 
+        // If on year view (like 2025 legacy), show filtered tests for year.
+
+        const testsToShow = selectedYear === 2025
+            ? tests.filter(test => test.year === selectedYear && !test.title.startsWith('_PLACEHOLDER_'))
+            : getTestsForMonth(selectedYear, selectedMonth);
+
+        const title = selectedYear === 2025
+            ? `${selectedYear} J and K Current Affairs`
+            : `${selectedMonth} ${selectedYear}`;
+
+        const handleBack = () => {
+            if (selectedYear === 2025) {
+                setSelectedYear(null);
+            } else {
+                setSelectedMonth(null);
+            }
+        };
 
         return (
             <div className="animate-fadeIn">
                 {/* Breadcrumb and Back Button */}
                 <div className="mb-6">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-4">
                         {getBreadcrumbs().map((crumb, index) => (
                             <React.Fragment key={index}>
                                 <button
@@ -252,7 +409,7 @@ const CurrentAffairsPage = () => {
 
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => setSelectedMonth(null)}
+                            onClick={handleBack}
                             className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
                         >
                             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +417,7 @@ const CurrentAffairsPage = () => {
                             </svg>
                         </button>
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900">{selectedMonth} {selectedYear}</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{title}</h2>
                             <p className="text-gray-600 mt-1">{testsToShow.length} tests available</p>
                         </div>
                     </div>
@@ -290,23 +447,23 @@ const CurrentAffairsPage = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
-                            <span className="text-orange-600 text-4xl">📰</span> Current Affairs
+                            <span className="text-orange-600 text-4xl">📰</span> J and K Current Affairs
                         </h1>
                         <p className="mt-2 text-lg text-gray-600">
-                            Practice with Current Affairs mock tests to stay updated and boost your preparation.
+                            Practice with J and K Current Affairs mock tests to stay updated and boost your preparation.
                         </p>
                     </div>
 
                     <div className="flex gap-4 items-center">
                         {isAdmin && (
                             <button
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={() => selectedYear ? setIsMonthModalOpen(true) : setIsYearModalOpen(true)}
                                 className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                Add New Test
+                                {selectedYear ? 'Add Month' : 'Add Year'}
                             </button>
                         )}
                     </div>
@@ -322,18 +479,28 @@ const CurrentAffairsPage = () => {
                 ) : (
                     <>
                         {!selectedYear && renderYearSelection()}
-                        {selectedYear && !selectedMonth && renderMonthSelection()}
-                        {selectedYear && selectedMonth && renderTests()}
+                        {selectedYear === 2025 && renderTests()}
+                        {selectedYear && selectedYear !== 2025 && !selectedMonth && renderMonthSelection()}
+                        {selectedYear && selectedYear !== 2025 && selectedMonth && renderTests()}
                     </>
                 )}
             </main>
 
             <Footer />
 
-            <AddTestModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onAdd={handleAddTest}
+            <AddYearModal
+                isOpen={isYearModalOpen}
+                onClose={() => setIsYearModalOpen(false)}
+                onAdd={handleAddYear}
+                existingYears={getYears()}
+            />
+
+            <AddMonthModal
+                isOpen={isMonthModalOpen}
+                onClose={() => setIsMonthModalOpen(false)}
+                onAdd={handleAddMonth}
+                year={selectedYear}
+                existingMonths={getMonthsForYear(selectedYear)}
             />
         </div>
     );
