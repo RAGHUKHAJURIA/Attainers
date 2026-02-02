@@ -30,13 +30,19 @@ const mockTestSchema = new mongoose.Schema({
     },
     testType: {
         type: String,
-        enum: ['mock-test', 'pyq', 'current-affairs'],
+        enum: ['mock-test', 'pyq', 'current-affairs', 'subject-wise'],
         default: 'mock-test'
     },
     year: {
         type: Number,
         required: function () {
             return this.testType === 'pyq' || this.testType === 'current-affairs';
+        }
+    },
+    subject: {
+        type: String,
+        required: function () {
+            return this.testType === 'subject-wise';
         }
     },
     isPlaceholder: {

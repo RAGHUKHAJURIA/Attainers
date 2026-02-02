@@ -4,7 +4,7 @@ import MockTest from "../models/mockTestModel.js";
 export const createMockTest = async (req, res) => {
     try {
 
-        const { title, examName, difficulty, duration, totalQuestions, description, negativeMarks, year, month, testType, isPlaceholder } = req.body;
+        const { title, examName, difficulty, duration, totalQuestions, description, negativeMarks, year, month, testType, isPlaceholder, subject } = req.body;
 
         const newTest = new MockTest({
             title,
@@ -17,7 +17,8 @@ export const createMockTest = async (req, res) => {
             year,
             month,
             testType,
-            isPlaceholder
+            isPlaceholder,
+            subject
         });
 
         const savedTest = await newTest.save();
