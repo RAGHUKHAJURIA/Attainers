@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSubjectWise = false, subject = null }) => {
+const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSubjectWise = false, subject = null, isExamWise = false, examName = null }) => {
     const [formData, setFormData] = useState({
         title: '',
-        examName: 'J&K Current Affairs',
-        totalQuestions: 50,
+        examName: examName || (isSubjectWise ? '' : 'J&K Current Affairs'),
+        totalQuestions: 100,
         duration: 60,
         difficulty: 'Medium',
         description: '',
-        testType: isSubjectWise ? 'subject-wise' : (isPYQ ? 'pyq' : 'current-affairs'),
+        testType: isSubjectWise ? 'subject-wise' : (isExamWise ? 'exam-wise' : (isPYQ ? 'pyq' : 'current-affairs')),
         year: year || new Date().getFullYear(),
         month: ''
     });
@@ -22,6 +22,16 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
             }));
         }
     }, [isPYQ, year]);
+
+    useEffect(() => {
+        if (isExamWise && examName) {
+            setFormData(prev => ({
+                ...prev,
+                testType: 'exam-wise',
+                examName: examName
+            }));
+        }
+    }, [isExamWise, examName]);
 
     if (!isOpen) return null;
 
@@ -49,7 +59,10 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
         onClose();
     };
 
-    const modalTitle = isSubjectWise ? `Add New Test (${subject})` : (isPYQ ? `Add New PYQ Test (${year})` : 'Add New Current Affairs Test');
+    const modalTitle = isSubjectWise ? `Add Subject Mock Test (${subject})`
+        : (isExamWise ? `Add Exam Mock Test (${examName})`
+            : (isPYQ ? `Add New PYQ Test (${year})`
+                : 'Add New Current Affairs Test'));
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -80,7 +93,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Year and Month */}
-                            {!isSubjectWise && (
+                            {!isSubjectWise && !isExamWise && (
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-800 mb-2">Year *</label>
@@ -122,6 +135,18 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
                                     />
                                 </div>
                             )}
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Exam Name *</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="modern-input mt-1 w-full"
+                                    placeholder="e.g. JKSSB SI"
+                                    value={formData.examName}
+                                    onChange={(e) => setFormData({ ...formData, examName: e.target.value })}
+                                />
+                            </div>
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-800 mb-2">Test Title *</label>

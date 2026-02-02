@@ -30,7 +30,7 @@ const mockTestSchema = new mongoose.Schema({
     },
     testType: {
         type: String,
-        enum: ['mock-test', 'pyq', 'current-affairs', 'subject-wise'],
+        enum: ['mock-test', 'pyq', 'current-affairs', 'subject-wise', 'exam-wise'],
         default: 'mock-test'
     },
     year: {

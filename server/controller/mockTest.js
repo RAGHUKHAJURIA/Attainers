@@ -14,8 +14,8 @@ export const createMockTest = async (req, res) => {
             totalQuestions,
             description,
             negativeMarks: negativeMarks || 0,
-            year,
-            month,
+            year: testType === 'subject-wise' ? undefined : year,
+            month: testType === 'subject-wise' ? undefined : (month || undefined),
             testType,
             isPlaceholder,
             subject
