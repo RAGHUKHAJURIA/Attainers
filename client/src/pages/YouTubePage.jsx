@@ -17,7 +17,7 @@ const YouTubePage = () => {
     const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const categories = ['All', 'Tutorial', 'Exam Guidance', 'Current Affairs', 'Motivation', 'General'];
+    const categories = ['All', 'Tutorial', 'Exam Guidance', 'J & K Current Affairs', 'Motivation', 'General'];
 
     useEffect(() => {
         fetchVideos();

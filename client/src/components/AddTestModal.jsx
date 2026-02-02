@@ -62,7 +62,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
     const modalTitle = isSubjectWise ? `Add Subject Mock Test (${subject})`
         : (isExamWise ? `Add Exam Mock Test (${examName})`
             : (isPYQ ? `Add New PYQ Test (${year})`
-                : 'Add New Current Affairs Test'));
+                : 'Add New J & K Current Affairs Test'));
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">

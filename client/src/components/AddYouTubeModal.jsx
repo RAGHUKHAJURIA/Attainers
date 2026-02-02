@@ -14,7 +14,7 @@ const AddYouTubeModal = ({ isOpen, onClose, onAdd }) => {
     const categories = [
         { value: 'tutorial', label: 'Tutorial' },
         { value: 'exam-guidance', label: 'Exam Guidance' },
-        { value: 'current-affairs', label: 'Current Affairs' },
+        { value: 'current-affairs', label: 'J & K Current Affairs' },
         { value: 'motivation', label: 'Motivation' },
         { value: 'general', label: 'General' }
     ];

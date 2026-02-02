@@ -83,7 +83,7 @@ const UpdatesPage = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
-                            <span className="text-purple-600 text-4xl">📢</span> Current Affairs
+                            <span className="text-purple-600 text-4xl">📢</span> J & K Current Affairs
                         </h1>
                         <p className="mt-2 text-lg text-gray-600">
                             Stay informed with the latest news and important announcements.

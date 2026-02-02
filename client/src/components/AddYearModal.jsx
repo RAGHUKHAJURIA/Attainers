@@ -75,7 +75,7 @@ const AddYearModal = ({ isOpen, onClose, onAdd, existingYears = [] }) => {
                                     value={year}
                                     onChange={(e) => setYear(e.target.value)}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Enter the year for Current Affairs tests</p>
+                                <p className="text-xs text-gray-500 mt-1">Enter the year for J & K Current Affairs tests</p>
                             </div>
 
                             <div>
@@ -85,7 +85,7 @@ const AddYearModal = ({ isOpen, onClose, onAdd, existingYears = [] }) => {
                                 <textarea
                                     className="modern-input w-full"
                                     rows="2"
-                                    placeholder={`Browse current affairs tests from ${year}`}
+                                    placeholder={`Browse J & K current affairs tests from ${year}`}
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                 ></textarea>

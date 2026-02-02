@@ -120,14 +120,14 @@ const CurrentAffairsTestManager = () => {
             ) : (
                 <div className="grid grid-cols-1 gap-4">
                     {tests.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed">No Current Affairs tests found. Create one to get started.</div>
+                        <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed">No J & K Current Affairs tests found. Create one to get started.</div>
                     ) : (
                         tests.map(test => (
                             <div key={test._id} className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex-1">
                                     <h3 className="text-base sm:text-lg font-bold text-gray-800">{test.title}</h3>
                                     <div className="flex flex-wrap gap-2 mt-2">
-                                        <span className="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded-full font-medium">Current Affairs</span>
+                                        <span className="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded-full font-medium">J & K Current Affairs</span>
                                         {test.year && <span className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded-full">{test.year}{test.month ? ` - ${test.month}` : ''}</span>}
                                         <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{test.examName}</span>
                                         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">{test.questions?.length || 0} Questions</span>

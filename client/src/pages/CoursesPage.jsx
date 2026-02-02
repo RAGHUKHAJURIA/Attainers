@@ -142,7 +142,7 @@ const CoursesPage = () => {
                 />
 
                 <SectionCard
-                    title="Current Affairs"
+                    title="J & K Current Affairs"
                     description="Stay informed with the latest news, updates, and important announcements."
                     icon={
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@ const CoursesPage = () => {
 
                 {/* Tabs */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                    {['All', 'Academic', 'Competitive Exams', 'Skill Development'].map((tab) => (
+                    {['All', 'Mock Tests', 'J&K Current Affairs', 'Subject Wise', 'Exam Wise'].map((tab) => (
                         <button
                             key={tab}
                             className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === tab
@@ -234,8 +234,25 @@ const CoursesPage = () => {
                                 : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                 }`}
                             onClick={() => {
+                                if (tab === 'Mock Tests') {
+                                    navigate('/mock-tests');
+                                    return;
+                                }
+                                if (tab === 'J&K Current Affairs') {
+                                    navigate('/current-affairs');
+                                    return;
+                                }
+                                if (tab === 'Subject Wise') {
+                                    navigate('/mock-tests/subject-wise');
+                                    return;
+                                }
+                                if (tab === 'Exam Wise') {
+                                    navigate('/mock-tests/exam-wise');
+                                    return;
+                                }
+
                                 setActiveTab(tab);
-                                setActiveSection(null); // Reset section when changing tabs
+                                setActiveSection(null);
                             }}
                         >
                             {tab}
@@ -252,7 +269,7 @@ const CoursesPage = () => {
                     </div>
                 ) : (
                     <div className="min-h-[60vh]">
-                        {activeTab === 'All' && !searchTerm ? (
+                        {(activeTab === 'All' || activeSection) && !searchTerm ? (
                             renderAllTabContent()
                         ) : (
                             // Render standard course grid for other tabs or search
