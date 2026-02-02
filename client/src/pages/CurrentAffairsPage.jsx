@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TestCard from '../components/TestCard';
 import AddYearModal from '../components/AddYearModal';
 import AddMonthModal from '../components/AddMonthModal';
+import AddTestModal from '../components/AddTestModal';
 import CategoryNavigator from '../components/CategoryNavigator';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import CardSkeleton from '../components/CardSkeleton';
+import { AppContext } from '../context/AppContext';
 
 const CurrentAffairsPage = () => {
     const { user, isLoaded } = useUser();
     const { getToken } = useAuth();
+    const { backendUrl } = useContext(AppContext);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isYearModalOpen, setIsYearModalOpen] = useState(false);
     const [isMonthModalOpen, setIsMonthModalOpen] = useState(false);
+    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,7 +51,7 @@ const CurrentAffairsPage = () => {
 
     const fetchCurrentAffairsTests = async () => {
         try {
-            const response = await fetch('https://attainers-272i.vercel.app/api/public/mock-tests');
+            const response = await fetch(`${backendUrl}/api/public/mock-tests`);
             if (response.ok) {
                 const data = await response.json();
                 const currentAffairsTests = data.filter(test => test.testType === 'current-affairs');
@@ -73,7 +77,7 @@ const CurrentAffairsPage = () => {
         try {
             setLoading(true);
             const token = await getToken();
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/mock-tests', {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,7 +116,7 @@ const CurrentAffairsPage = () => {
         try {
             setLoading(true);
             const token = await getToken();
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/mock-tests', {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,6 +151,39 @@ const CurrentAffairsPage = () => {
         }
     };
 
+    const handleAddTest = async (testData) => {
+        try {
+            setLoading(true);
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    ...testData,
+                    year: selectedYear, // Force the year
+                    month: selectedMonth || testData.month, // Use selected month if we are in month view
+                    testType: 'current-affairs'
+                })
+            });
+
+            if (response.ok) {
+                await fetchCurrentAffairsTests();
+                setIsTestModalOpen(false);
+                alert('Test added successfully!');
+            } else {
+                alert('Failed to add test');
+            }
+        } catch (error) {
+            console.error("Error adding test:", error);
+            alert("Error adding test");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleDeleteYear = async (category) => {
         const yearToDelete = category.id;
         const testsToDelete = tests.filter(test => test.year === yearToDelete);
@@ -162,7 +199,7 @@ const CurrentAffairsPage = () => {
 
             // Delete all tests in parallel
             const deletePromises = testsToDelete.map(test =>
-                fetch(`https://attainers-272i.vercel.app/api/admin/mock-tests/${test._id}`, {
+                fetch(`${backendUrl}/api/admin/mock-tests/${test._id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
@@ -200,7 +237,7 @@ const CurrentAffairsPage = () => {
             // Delete all tests in parallel
             if (testsToDelete.length > 0) {
                 const deletePromises = testsToDelete.map(test =>
-                    fetch(`https://attainers-272i.vercel.app/api/admin/mock-tests/${test._id}`, {
+                    fetch(`${backendUrl}/api/admin/mock-tests/${test._id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
@@ -227,7 +264,7 @@ const CurrentAffairsPage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`https://attainers-272i.vercel.app/api/admin/mock-tests/${id}`, {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -457,13 +494,21 @@ const CurrentAffairsPage = () => {
                     <div className="flex gap-4 items-center">
                         {isAdmin && (
                             <button
-                                onClick={() => selectedYear ? setIsMonthModalOpen(true) : setIsYearModalOpen(true)}
+                                onClick={() => {
+                                    if (selectedYear && selectedMonth) {
+                                        setIsTestModalOpen(true);
+                                    } else if (selectedYear) {
+                                        setIsMonthModalOpen(true);
+                                    } else {
+                                        setIsYearModalOpen(true);
+                                    }
+                                }}
                                 className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                {selectedYear ? 'Add Month' : 'Add Year'}
+                                {selectedYear && selectedMonth ? 'Add Test' : (selectedYear ? 'Add Month' : 'Add Year')}
                             </button>
                         )}
                     </div>
@@ -501,6 +546,13 @@ const CurrentAffairsPage = () => {
                 onAdd={handleAddMonth}
                 year={selectedYear}
                 existingMonths={getMonthsForYear(selectedYear)}
+            />
+
+            <AddTestModal
+                isOpen={isTestModalOpen}
+                onClose={() => setIsTestModalOpen(false)}
+                onAdd={handleAddTest}
+                year={selectedYear}
             />
         </div>
     );

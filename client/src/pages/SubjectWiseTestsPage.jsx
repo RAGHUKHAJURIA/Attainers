@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TestCard from '../components/TestCard';
@@ -6,75 +6,49 @@ import AddTestModal from '../components/AddTestModal';
 import CategoryNavigator from '../components/CategoryNavigator';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import CardSkeleton from '../components/CardSkeleton';
+import { AppContext } from '../context/AppContext';
+import AddSubjectModal from '../components/AddSubjectModal';
 
 const SubjectWiseTestsPage = () => {
     const { user, isLoaded } = useUser();
     const { getToken } = useAuth();
+    const { backendUrl } = useContext(AppContext);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+    const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedSubject, setSelectedSubject] = useState(null);
 
-    // Dummy data for demonstration
-    const dummyTests = [
-        // Mathematics
-        { id: 'math-1', title: 'Mathematics - Algebra Basics', examName: 'Mathematics', totalQuestions: 50, duration: 60, difficulty: 'Easy', testType: 'subject-wise', subject: 'Mathematics', description: 'Test your algebra fundamentals' },
-        { id: 'math-2', title: 'Mathematics - Geometry Advanced', examName: 'Mathematics', totalQuestions: 60, duration: 75, difficulty: 'Hard', testType: 'subject-wise', subject: 'Mathematics', description: 'Advanced geometry problems' },
-        { id: 'math-3', title: 'Mathematics - Trigonometry', examName: 'Mathematics', totalQuestions: 45, duration: 60, difficulty: 'Medium', testType: 'subject-wise', subject: 'Mathematics', description: 'Comprehensive trigonometry test' },
-        { id: 'math-4', title: 'Mathematics - Calculus Fundamentals', examName: 'Mathematics', totalQuestions: 50, duration: 70, difficulty: 'Medium', testType: 'subject-wise', subject: 'Mathematics', description: 'Basic calculus concepts' },
-
-        // History
-        { id: 'hist-1', title: 'History - Ancient India', examName: 'History', totalQuestions: 50, duration: 60, difficulty: 'Medium', testType: 'subject-wise', subject: 'History', description: 'Ancient Indian history and civilizations' },
-        { id: 'hist-2', title: 'History - Medieval Period', examName: 'History', totalQuestions: 45, duration: 55, difficulty: 'Medium', testType: 'subject-wise', subject: 'History', description: 'Medieval Indian history' },
-        { id: 'hist-3', title: 'History - Modern India', examName: 'History', totalQuestions: 55, duration: 65, difficulty: 'Hard', testType: 'subject-wise', subject: 'History', description: 'Modern Indian history and freedom struggle' },
-        { id: 'hist-4', title: 'History - World History', examName: 'History', totalQuestions: 60, duration: 70, difficulty: 'Hard', testType: 'subject-wise', subject: 'History', description: 'Major world historical events' },
-
-        // Geography
-        { id: 'geo-1', title: 'Geography - Physical Geography', examName: 'Geography', totalQuestions: 50, duration: 60, difficulty: 'Medium', testType: 'subject-wise', subject: 'Geography', description: 'Landforms, climate, and natural features' },
-        { id: 'geo-2', title: 'Geography - Indian Geography', examName: 'Geography', totalQuestions: 45, duration: 55, difficulty: 'Easy', testType: 'subject-wise', subject: 'Geography', description: 'Geography of India' },
-        { id: 'geo-3', title: 'Geography - World Geography', examName: 'Geography', totalQuestions: 55, duration: 65, difficulty: 'Medium', testType: 'subject-wise', subject: 'Geography', description: 'Countries, capitals, and continents' },
-        { id: 'geo-4', title: 'Geography - Economic Geography', examName: 'Geography', totalQuestions: 50, duration: 60, difficulty: 'Hard', testType: 'subject-wise', subject: 'Geography', description: 'Resources and economic activities' },
-
-        // Politics
-        { id: 'pol-1', title: 'Politics - Indian Constitution', examName: 'Politics', totalQuestions: 50, duration: 60, difficulty: 'Medium', testType: 'subject-wise', subject: 'Politics', description: 'Constitutional provisions and amendments' },
-        { id: 'pol-2', title: 'Politics - Political Theory', examName: 'Politics', totalQuestions: 45, duration: 55, difficulty: 'Hard', testType: 'subject-wise', subject: 'Politics', description: 'Political ideologies and theories' },
-        { id: 'pol-3', title: 'Politics - Indian Polity', examName: 'Politics', totalQuestions: 55, duration: 65, difficulty: 'Medium', testType: 'subject-wise', subject: 'Politics', description: 'Governance and political system' },
-        { id: 'pol-4', title: 'Politics - International Relations', examName: 'Politics', totalQuestions: 50, duration: 60, difficulty: 'Hard', testType: 'subject-wise', subject: 'Politics', description: 'Global politics and diplomacy' },
-
-        // General Knowledge
-        { id: 'gk-1', title: 'General Knowledge - Science & Technology', examName: 'General Knowledge', totalQuestions: 50, duration: 60, difficulty: 'Medium', testType: 'subject-wise', subject: 'General Knowledge', description: 'Latest developments in science and tech' },
-        { id: 'gk-2', title: 'General Knowledge - Sports & Awards', examName: 'General Knowledge', totalQuestions: 40, duration: 50, difficulty: 'Easy', testType: 'subject-wise', subject: 'General Knowledge', description: 'Sports events and prestigious awards' },
-        { id: 'gk-3', title: 'General Knowledge - Books & Authors', examName: 'General Knowledge', totalQuestions: 45, duration: 55, difficulty: 'Medium', testType: 'subject-wise', subject: 'General Knowledge', description: 'Famous books and their authors' },
-        { id: 'gk-4', title: 'General Knowledge - Mixed Topics', examName: 'General Knowledge', totalQuestions: 60, duration: 70, difficulty: 'Hard', testType: 'subject-wise', subject: 'General Knowledge', description: 'Comprehensive GK test' },
-    ];
-
-    const subjects = [
-        { id: 'Mathematics', name: 'Mathematics', icon: '📐', color: 'bg-blue-500', iconColor: 'text-white' },
-        { id: 'History', name: 'History', icon: '📜', color: 'bg-amber-500', iconColor: 'text-white' },
-        { id: 'Geography', name: 'Geography', icon: '🌍', color: 'bg-green-500', iconColor: 'text-white' },
-        { id: 'Politics', name: 'Politics', icon: '⚖️', color: 'bg-purple-500', iconColor: 'text-white' },
-        { id: 'General Knowledge', name: 'General Knowledge', icon: '💡', color: 'bg-orange-500', iconColor: 'text-white' },
+    // Dynamic colors for subjects
+    const colorPalette = [
+        { color: 'bg-blue-500', icon: '📐' },
+        { color: 'bg-amber-500', icon: '📜' },
+        { color: 'bg-green-500', icon: '🌍' },
+        { color: 'bg-purple-500', icon: '⚖️' },
+        { color: 'bg-orange-500', icon: '💡' },
+        { color: 'bg-red-500', icon: '🔬' },
+        { color: 'bg-indigo-500', icon: '💻' },
+        { color: 'bg-teal-500', icon: '🌱' },
     ];
 
     useEffect(() => {
         fetchSubjectWiseTests();
-    }, []);
+    }, [backendUrl]); // Add dependency
 
     const fetchSubjectWiseTests = async () => {
         try {
-            const response = await fetch('https://attainers-272i.vercel.app/api/public/mock-tests');
+            const response = await fetch(`${backendUrl}/api/public/mock-tests`);
             if (response.ok) {
                 const data = await response.json();
                 const subjectTests = data.filter(test => test.testType === 'subject-wise');
-                setTests([...dummyTests, ...subjectTests]);
+                setTests(subjectTests);
             } else {
-                setTests(dummyTests);
+                setTests([]);
             }
         } catch (error) {
             console.error('Error fetching Subject-wise tests:', error);
-            setTests(dummyTests);
+            setTests([]);
         } finally {
             setLoading(false);
         }
@@ -86,12 +60,106 @@ const SubjectWiseTestsPage = () => {
         }
     }, [isLoaded, user]);
 
+    // Derived Subjects from Placeholders
+    const getSubjects = () => {
+        // Find all unique subjects from tests that are placeholders
+        const subjectPlaceholders = tests.filter(test => test.isPlaceholder && test.subject);
+        return subjectPlaceholders.map((ph, index) => {
+            // Assign a consistent color/icon based on index or hash
+            const style = colorPalette[index % colorPalette.length];
+            return {
+                id: ph.subject,
+                name: ph.subject,
+                icon: style.icon,
+                color: style.color,
+                placeholderId: ph._id // Keep ID for deletion
+            };
+        });
+    };
+
+    const handleAddSubject = async (subjectData) => {
+        try {
+            setLoading(true);
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: subjectData.title,
+                    examName: 'Subject Wise',
+                    totalQuestions: 0,
+                    duration: 0,
+                    difficulty: 'Easy',
+                    testType: 'subject-wise',
+                    subject: subjectData.subject,
+                    description: `Category for ${subjectData.subject}`,
+                    isPlaceholder: true,
+                    year: new Date().getFullYear() // Dummy year to satisfy some validations if any strictness remains
+                })
+            });
+
+            if (response.ok) {
+                await fetchSubjectWiseTests();
+                setIsSubjectModalOpen(false);
+                alert(`Subject ${subjectData.subject} added successfully!`);
+            } else {
+                alert('Failed to add subject');
+            }
+        } catch (error) {
+            console.error("Error adding subject:", error);
+            alert("Error adding subject");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteSubject = async (category) => {
+        const subjectName = category.id;
+        // Need to delete the placeholder AND all tests in this subject
+        const testsToDelete = tests.filter(test => test.subject === subjectName);
+        const count = testsToDelete.length;
+
+        if (!window.confirm(`Delete ${subjectName}? This will PERMANENTLY delete the subject and ALL ${count} tests inside it.`)) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const token = await getToken();
+
+            // Parallel delete
+            const deletePromises = testsToDelete.map(test =>
+                fetch(`${backendUrl}/api/admin/mock-tests/${test._id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            );
+
+            await Promise.all(deletePromises);
+            await fetchSubjectWiseTests();
+            alert(`Deleted ${subjectName} and all its tests.`);
+        } catch (error) {
+            console.error("Error deleting subject:", error);
+            alert("Failed to delete subject");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleAddTest = async (newTest) => {
         try {
+            setLoading(true);
             const token = await getToken();
-            const testData = { ...newTest, testType: 'subject-wise' };
+            const testData = {
+                ...newTest,
+                testType: 'subject-wise',
+                subject: selectedSubject // Ensure it links to current subject
+            };
 
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/mock-tests', {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,24 +169,27 @@ const SubjectWiseTestsPage = () => {
             });
 
             if (response.ok) {
-                fetchSubjectWiseTests();
+                await fetchSubjectWiseTests();
+                setIsTestModalOpen(false);
+                alert("Test added successfully!");
             } else {
-                console.error("Failed to add test. Status:", response.status);
                 const errData = await response.json();
                 alert(`Failed to add test: ${errData.message || response.statusText}`);
             }
         } catch (error) {
             console.error('Error adding Subject-wise test:', error);
-            alert("Error adding Subject-wise test. Check console for details.");
+            alert("Error adding Subject-wise test.");
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDeleteTest = async (id) => {
         if (!window.confirm("Are you sure you want to delete this test?")) return;
 
         try {
             const token = await getToken();
-            const response = await fetch(`https://attainers-272i.vercel.app/api/admin/mock-tests/${id}`, {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -136,22 +207,23 @@ const SubjectWiseTestsPage = () => {
     };
 
     const getTestCountForSubject = (subjectName) => {
-        return tests.filter(test => test.subject === subjectName).length;
+        return tests.filter(test => test.subject === subjectName && !test.isPlaceholder).length;
     };
 
     const getTestsForSubject = (subjectName) => {
-        return tests.filter(test => test.subject === subjectName);
+        return tests.filter(test => test.subject === subjectName && !test.isPlaceholder);
     };
 
     const renderSubjectSelection = () => {
-        const subjectCategories = subjects.map(subject => ({
+        const subjectList = getSubjects();
+        const subjectCategories = subjectList.map(subject => ({
             id: subject.id,
             title: subject.name,
             description: `Practice ${subject.name.toLowerCase()} with comprehensive tests`,
             count: getTestCountForSubject(subject.id),
             colorClass: subject.color,
             icon: (
-                <span className={`text-3xl ${subject.iconColor}`}>{subject.icon}</span>
+                <span className="text-3xl text-white">{subject.icon}</span>
             )
         }));
 
@@ -161,13 +233,15 @@ const SubjectWiseTestsPage = () => {
                 onCategoryClick={(category) => setSelectedSubject(category.id)}
                 title="Subject-wise Mock Tests"
                 description="Choose a subject to practice"
+                onDelete={isAdmin ? handleDeleteSubject : null}
             />
         );
     };
 
     const renderTests = () => {
         const testsToShow = getTestsForSubject(selectedSubject);
-        const subject = subjects.find(s => s.id === selectedSubject);
+        const subjectList = getSubjects();
+        const subject = subjectList.find(s => s.id === selectedSubject) || { icon: '📚' };
 
         return (
             <div className="animate-fadeIn">
@@ -184,7 +258,7 @@ const SubjectWiseTestsPage = () => {
                         </button>
                         <div>
                             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                                <span className="text-3xl">{subject?.icon}</span>
+                                <span className="text-3xl">{subject.icon}</span>
                                 {selectedSubject}
                             </h2>
                             <p className="text-gray-600 mt-1">{testsToShow.length} tests available</p>
@@ -200,13 +274,13 @@ const SubjectWiseTestsPage = () => {
                                 key={test.id || test._id}
                                 {...test}
                                 isAdmin={isAdmin}
-                                onDelete={handleDelete}
+                                onDelete={handleDeleteTest}
                             />
                         ))}
                     </div>
                 ) : (
                     <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <div className={`w-16 h-16 ${subject?.color} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                        <div className={`w-16 h-16 ${subject?.color || 'bg-gray-200'} rounded-full flex items-center justify-center mx-auto mb-4`}>
                             <span className="text-3xl">{subject?.icon}</span>
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">No tests available yet</h3>
@@ -236,13 +310,13 @@ const SubjectWiseTestsPage = () => {
                     <div className="flex gap-4 items-center">
                         {isAdmin && (
                             <button
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={() => selectedSubject ? setIsTestModalOpen(true) : setIsSubjectModalOpen(true)}
                                 className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                Add New Test
+                                {selectedSubject ? 'Add New Test' : 'Add New Subject'}
                             </button>
                         )}
                     </div>
@@ -265,10 +339,18 @@ const SubjectWiseTestsPage = () => {
 
             <Footer />
 
+            <AddSubjectModal
+                isOpen={isSubjectModalOpen}
+                onClose={() => setIsSubjectModalOpen(false)}
+                onAdd={handleAddSubject}
+            />
+
             <AddTestModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isTestModalOpen}
+                onClose={() => setIsTestModalOpen(false)}
                 onAdd={handleAddTest}
+                isSubjectWise={true}
+                subject={selectedSubject}
             />
         </div>
     );

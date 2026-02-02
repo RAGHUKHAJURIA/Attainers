@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) => {
+const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSubjectWise = false, subject = null }) => {
     const [formData, setFormData] = useState({
         title: '',
         examName: 'J&K Current Affairs',
@@ -8,7 +8,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
         duration: 60,
         difficulty: 'Medium',
         description: '',
-        testType: isPYQ ? 'pyq' : 'current-affairs',
+        testType: isSubjectWise ? 'subject-wise' : (isPYQ ? 'pyq' : 'current-affairs'),
         year: year || new Date().getFullYear(),
         month: ''
     });
@@ -49,7 +49,7 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
         onClose();
     };
 
-    const modalTitle = isPYQ ? `Add New PYQ Test (${year})` : 'Add New Current Affairs Test';
+    const modalTitle = isSubjectWise ? `Add New Test (${subject})` : (isPYQ ? `Add New PYQ Test (${year})` : 'Add New Current Affairs Test');
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -80,34 +80,48 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null }) =>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Year and Month */}
-                            <div className="grid grid-cols-2 gap-4">
+                            {!isSubjectWise && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-800 mb-2">Year *</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            className="modern-input mt-1"
+                                            placeholder="2025"
+                                            min="2020"
+                                            max="2030"
+                                            value={formData.year}
+                                            onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-800 mb-2">Month (Optional)</label>
+                                        <select
+                                            className="modern-select mt-1"
+                                            value={formData.month || ''}
+                                            onChange={(e) => setFormData({ ...formData, month: e.target.value })}
+                                        >
+                                            <option value="">Select Month</option>
+                                            {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                                                <option key={m} value={m}>{m}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
+                            {isSubjectWise && (
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Year *</label>
+                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Subject</label>
                                     <input
-                                        type="number"
-                                        required
-                                        className="modern-input mt-1"
-                                        placeholder="2025"
-                                        min="2020"
-                                        max="2030"
-                                        value={formData.year}
-                                        onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                                        type="text"
+                                        disabled
+                                        className="modern-input mt-1 bg-gray-50 text-gray-500"
+                                        value={subject || ''}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Month (Optional)</label>
-                                    <select
-                                        className="modern-select mt-1"
-                                        value={formData.month || ''}
-                                        onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                                    >
-                                        <option value="">Select Month</option>
-                                        {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
-                                            <option key={m} value={m}>{m}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-800 mb-2">Test Title *</label>
