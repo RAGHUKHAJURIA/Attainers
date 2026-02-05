@@ -30,12 +30,29 @@ const ExamWiseTestsPage = () => {
     ];
 
     useEffect(() => {
-        fetchExamWiseTests();
-    }, [backendUrl]);
+        if (isLoaded) {
+            const adminStatus = user?.publicMetadata?.role === 'admin';
+            setIsAdmin(adminStatus);
+            fetchExamWiseTests(adminStatus);
+        }
+    }, [isLoaded, user, backendUrl]);
 
-    const fetchExamWiseTests = async () => {
+    const fetchExamWiseTests = async (overrideAdminStatus) => {
+        const shouldUseAdmin = overrideAdminStatus !== undefined ? overrideAdminStatus : isAdmin;
         try {
-            const response = await fetch(`${backendUrl}/api/public/mock-tests`);
+            const endpoint = shouldUseAdmin
+                ? `${backendUrl}/api/admin/mock-tests`
+                : `${backendUrl}/api/public/mock-tests`;
+
+            const options = {};
+            if (shouldUseAdmin) {
+                const token = await getToken();
+                options.headers = {
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+
+            const response = await fetch(endpoint, options);
             if (response.ok) {
                 const data = await response.json();
                 const examTests = data.filter(test => test.testType === 'exam-wise');
@@ -51,11 +68,7 @@ const ExamWiseTestsPage = () => {
         }
     };
 
-    useEffect(() => {
-        if (isLoaded && user) {
-            setIsAdmin(user.publicMetadata?.role === 'admin');
-        }
-    }, [isLoaded, user]);
+
 
     const getExams = () => {
         // Find unique exams from placeholders
@@ -91,6 +104,7 @@ const ExamWiseTestsPage = () => {
                     testType: 'exam-wise',
                     description: `Category for ${examData.examName}`,
                     isPlaceholder: true,
+                    isPublished: true,
                     year: new Date().getFullYear()
                 })
             });
