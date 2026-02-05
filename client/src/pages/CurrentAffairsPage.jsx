@@ -46,12 +46,29 @@ const CurrentAffairsPage = () => {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     useEffect(() => {
-        fetchCurrentAffairsTests();
-    }, []);
+        if (isLoaded) {
+            const adminStatus = user?.publicMetadata?.role === 'admin';
+            setIsAdmin(adminStatus);
+            fetchCurrentAffairsTests(adminStatus);
+        }
+    }, [isLoaded, user]);
 
-    const fetchCurrentAffairsTests = async () => {
+    const fetchCurrentAffairsTests = async (overrideAdminStatus) => {
+        const shouldUseAdmin = overrideAdminStatus !== undefined ? overrideAdminStatus : isAdmin;
         try {
-            const response = await fetch(`${backendUrl}/api/public/mock-tests`);
+            const endpoint = shouldUseAdmin
+                ? `${backendUrl}/api/admin/mock-tests`
+                : `${backendUrl}/api/public/mock-tests`;
+
+            const options = {};
+            if (shouldUseAdmin) {
+                const token = await getToken();
+                options.headers = {
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+
+            const response = await fetch(endpoint, options);
             if (response.ok) {
                 const data = await response.json();
                 const currentAffairsTests = data.filter(test => test.testType === 'current-affairs');
@@ -67,11 +84,7 @@ const CurrentAffairsPage = () => {
         }
     };
 
-    useEffect(() => {
-        if (isLoaded && user) {
-            setIsAdmin(user.publicMetadata?.role === 'admin');
-        }
-    }, [isLoaded, user]);
+
 
     const handleAddYear = async (yearData) => {
         try {
@@ -93,7 +106,8 @@ const CurrentAffairsPage = () => {
                     year: yearData.year,
                     month: 'January', // Default month for year placeholder
                     description: yearData.description || `Placeholder for ${yearData.year}`,
-                    isPlaceholder: true
+                    isPlaceholder: true,
+                    isPublished: true
                 })
             });
 
@@ -132,7 +146,8 @@ const CurrentAffairsPage = () => {
                     year: selectedYear,
                     month: monthData.month,
                     description: monthData.description,
-                    isPlaceholder: true
+                    isPlaceholder: true,
+                    isPublished: true
                 })
             });
 

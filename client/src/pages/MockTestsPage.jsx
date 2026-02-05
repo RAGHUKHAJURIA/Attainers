@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TestCard from '../components/TestCard';
@@ -10,6 +11,7 @@ import CardSkeleton from '../components/CardSkeleton';
 
 
 const MockTestsPage = () => {
+    const { backendUrl } = useContext(AppContext);
     const { user, isLoaded } = useUser();
     const { getToken } = useAuth();
     const navigate = useNavigate();
@@ -24,12 +26,29 @@ const MockTestsPage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchTests();
-    }, []);
+        if (isLoaded) {
+            const adminStatus = user?.publicMetadata?.role === 'admin';
+            setIsAdmin(adminStatus);
+            fetchTests(adminStatus);
+        }
+    }, [isLoaded, user]);
 
-    const fetchTests = async () => {
+    const fetchTests = async (overrideAdminStatus) => {
+        const shouldUseAdmin = overrideAdminStatus !== undefined ? overrideAdminStatus : isAdmin;
         try {
-            const response = await fetch('https://attainers-272i.vercel.app/api/public/mock-tests');
+            const endpoint = shouldUseAdmin
+                ? `${backendUrl}/api/admin/mock-tests`
+                : `${backendUrl}/api/public/mock-tests`;
+
+            const options = {};
+            if (shouldUseAdmin) {
+                const token = await getToken();
+                options.headers = {
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+
+            const response = await fetch(endpoint, options);
             if (response.ok) {
                 const data = await response.json();
                 setTests(data);
@@ -41,19 +60,13 @@ const MockTestsPage = () => {
         }
     };
 
-    useEffect(() => {
-        if (isLoaded && user) {
-            setIsAdmin(user.publicMetadata?.role === 'admin');
-        }
-    }, [isLoaded, user]);
-
     const handleAddTest = async (newTest) => {
         try {
 
             const token = await getToken();
 
 
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/mock-tests', {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -82,7 +95,7 @@ const MockTestsPage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`https://attainers-272i.vercel.app/api/admin/mock-tests/${id}`, {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -96,6 +109,30 @@ const MockTestsPage = () => {
             }
         } catch (error) {
             console.error("Error deleting test:", error);
+        }
+    };
+
+    const handleTogglePublish = async (id, newStatus) => {
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ isPublished: newStatus })
+            });
+
+            if (response.ok) {
+                setTests(tests.map(test =>
+                    (test.id || test._id) === id ? { ...test, isPublished: newStatus } : test
+                ));
+            } else {
+                alert("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
         }
     };
 
@@ -232,6 +269,7 @@ const MockTestsPage = () => {
                                     {...test}
                                     isAdmin={isAdmin}
                                     onDelete={handleDelete}
+                                    onTogglePublish={handleTogglePublish}
                                 />
                             ))}
                         </div>

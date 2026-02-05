@@ -80,6 +80,10 @@ const mockTestSchema = new mongoose.Schema({
         default: ''
     },
     questions: [questionSchema], // Embedded questions
+    isPublished: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -19,7 +19,8 @@ const MockTestForm = ({ onSuccess, onAddQuestions, defaultTestType = 'mock-test'
         month: '',
         subject: '',
         exam: '',
-        subExam: ''
+        subExam: '',
+        isPublished: true
     });
 
     const handleChange = (e) => {
@@ -34,16 +35,31 @@ const MockTestForm = ({ onSuccess, onAddQuestions, defaultTestType = 'mock-test'
         e.preventDefault();
         setIsLoading(true);
 
+        // Generate Title automatically
+        let generatedTitle = '';
+        if (formData.testType === 'current-affairs') {
+            generatedTitle = `J&K ${formData.month ? formData.month + ' ' : ''}Current Affairs ${formData.year}`;
+        } else if (formData.testType === 'subject-wise') {
+            generatedTitle = `${formData.subject} Mock Test`;
+        } else if (formData.testType === 'exam-wise') {
+            generatedTitle = `${formData.exam}${formData.subExam ? ' ' + formData.subExam : ''} Mock Test`;
+        } else if (formData.testType === 'pyq') {
+            generatedTitle = `${formData.examName} PYQ ${formData.year}`;
+        } else {
+            generatedTitle = `${formData.examName} Mock Test`;
+        }
+
         // Prepare data based on test type
         const submitData = {
-            title: formData.title,
+            title: generatedTitle,
             examName: formData.examName,
             difficulty: formData.difficulty,
             duration: parseInt(formData.duration),
-            totalQuestions: parseInt(formData.totalQuestions),
+            totalQuestions: 0, // Auto-calculated
             description: formData.description,
             negativeMarks: parseFloat(formData.negativeMarks),
-            testType: formData.testType
+            testType: formData.testType,
+            isPublished: formData.isPublished
         };
 
         // Add type-specific fields
@@ -79,7 +95,8 @@ const MockTestForm = ({ onSuccess, onAddQuestions, defaultTestType = 'mock-test'
                 month: '',
                 subject: '',
                 exam: '',
-                subExam: ''
+                subExam: '',
+                isPublished: true
             });
         }
         setIsLoading(false);
@@ -223,18 +240,6 @@ const MockTestForm = ({ onSuccess, onAddQuestions, defaultTestType = 'mock-test'
                     {/* Common fields */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Test Title *</label>
-                            <input
-                                type="text"
-                                name="title"
-                                className="modern-input w-full"
-                                placeholder="e.g. Full Syllabus Mock 1"
-                                required
-                                value={formData.title}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Exam Category *</label>
                             <input
                                 type="text"
@@ -248,7 +253,7 @@ const MockTestForm = ({ onSuccess, onAddQuestions, defaultTestType = 'mock-test'
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Duration (mins) *</label>
                             <input
@@ -274,18 +279,7 @@ const MockTestForm = ({ onSuccess, onAddQuestions, defaultTestType = 'mock-test'
                                 <option value="Hard">Hard</option>
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Questions *</label>
-                            <input
-                                type="number"
-                                name="totalQuestions"
-                                className="modern-input w-full"
-                                required
-                                min="0"
-                                value={formData.totalQuestions}
-                                onChange={handleChange}
-                            />
-                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Negative Marks *</label>
                             <input
@@ -312,6 +306,36 @@ const MockTestForm = ({ onSuccess, onAddQuestions, defaultTestType = 'mock-test'
                             value={formData.description}
                             onChange={handleChange}
                         ></textarea>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Visibility Status *</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 flex-1">
+                                    <input
+                                        type="radio"
+                                        name="isPublished"
+                                        value="true"
+                                        checked={formData.isPublished === true}
+                                        onChange={() => setFormData(prev => ({ ...prev, isPublished: true }))}
+                                        className="text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span className="text-sm text-gray-700">Publish Now</span>
+                                </label>
+                                <label className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 flex-1">
+                                    <input
+                                        type="radio"
+                                        name="isPublished"
+                                        value="false"
+                                        checked={formData.isPublished === false}
+                                        onChange={() => setFormData(prev => ({ ...prev, isPublished: false }))}
+                                        className="text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span className="text-sm text-gray-700">Private</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="pt-4">

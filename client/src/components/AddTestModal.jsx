@@ -4,13 +4,14 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
     const [formData, setFormData] = useState({
         title: '',
         examName: examName || (isSubjectWise ? '' : 'J&K Current Affairs'),
-        totalQuestions: 100,
+        totalQuestions: 0,
         duration: 60,
         difficulty: 'Medium',
         description: '',
         testType: isSubjectWise ? 'subject-wise' : (isExamWise ? 'exam-wise' : (isPYQ ? 'pyq' : 'current-affairs')),
         year: year || new Date().getFullYear(),
-        month: ''
+        month: '',
+        isPublished: true
     });
 
     useEffect(() => {
@@ -37,9 +38,23 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        let generatedTitle = '';
+        if (isSubjectWise) {
+            generatedTitle = `${subject} Mock Test`;
+        } else if (isExamWise) {
+            generatedTitle = `${formData.examName} Mock Test`;
+        } else if (isPYQ) {
+            generatedTitle = `${formData.examName} PYQ ${formData.year}`;
+        } else {
+            // Current Affairs
+            generatedTitle = `J&K ${formData.month ? formData.month + ' ' : ''}Current Affairs ${formData.year}`;
+        }
+
         const submitData = {
             ...formData,
-            totalQuestions: parseInt(formData.totalQuestions, 10),
+            title: generatedTitle,
+            totalQuestions: 0,
             duration: parseInt(formData.duration, 10),
             year: parseInt(formData.year, 10)
         };
@@ -48,13 +63,14 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
         setFormData({
             title: '',
             examName: 'J&K Current Affairs',
-            totalQuestions: 50,
+            totalQuestions: 0,
             duration: 60,
             difficulty: 'Medium',
             description: '',
             testType: isPYQ ? 'pyq' : 'current-affairs',
             year: year || new Date().getFullYear(),
-            month: ''
+            month: '',
+            isPublished: true
         });
         onClose();
     };
@@ -149,18 +165,6 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-800 mb-2">Test Title *</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="modern-input mt-1"
-                                    placeholder="e.g. January 2025 Current Affairs - Week 1"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                />
-                            </div>
-
-                            <div>
                                 <label className="block text-sm font-semibold text-gray-800 mb-2">Description</label>
                                 <textarea
                                     className="modern-input mt-1 w-full"
@@ -171,29 +175,16 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
                                 ></textarea>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Questions *</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        className="modern-input mt-1"
-                                        placeholder="50"
-                                        value={formData.totalQuestions}
-                                        onChange={(e) => setFormData({ ...formData, totalQuestions: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">Duration (mins) *</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        className="modern-input mt-1"
-                                        placeholder="60"
-                                        value={formData.duration}
-                                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                    />
-                                </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Duration (mins) *</label>
+                                <input
+                                    type="number"
+                                    required
+                                    className="modern-input mt-1"
+                                    placeholder="60"
+                                    value={formData.duration}
+                                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                                />
                             </div>
 
                             <div>
@@ -207,6 +198,34 @@ const AddTestModal = ({ isOpen, onClose, onAdd, isPYQ = false, year = null, isSu
                                     <option value="Medium">Medium</option>
                                     <option value="Hard">Hard</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-800 mb-2">Visibility Status *</label>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 flex-1">
+                                        <input
+                                            type="radio"
+                                            name="modalIsPublished"
+                                            value="true"
+                                            checked={formData.isPublished === true}
+                                            onChange={() => setFormData({ ...formData, isPublished: true })}
+                                            className="text-indigo-600 focus:ring-indigo-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Publish Now</span>
+                                    </label>
+                                    <label className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 flex-1">
+                                        <input
+                                            type="radio"
+                                            name="modalIsPublished"
+                                            value="false"
+                                            checked={formData.isPublished === false}
+                                            onChange={() => setFormData({ ...formData, isPublished: false })}
+                                            className="text-indigo-600 focus:ring-indigo-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Private</span>
+                                    </label>
+                                </div>
                             </div>
 
                             <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">

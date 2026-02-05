@@ -33,12 +33,29 @@ const SubjectWiseTestsPage = () => {
     ];
 
     useEffect(() => {
-        fetchSubjectWiseTests();
-    }, [backendUrl]); // Add dependency
+        if (isLoaded) {
+            const adminStatus = user?.publicMetadata?.role === 'admin';
+            setIsAdmin(adminStatus);
+            fetchSubjectWiseTests(adminStatus);
+        }
+    }, [isLoaded, user, backendUrl]);
 
-    const fetchSubjectWiseTests = async () => {
+    const fetchSubjectWiseTests = async (overrideAdminStatus) => {
+        const shouldUseAdmin = overrideAdminStatus !== undefined ? overrideAdminStatus : isAdmin;
         try {
-            const response = await fetch(`${backendUrl}/api/public/mock-tests`);
+            const endpoint = shouldUseAdmin
+                ? `${backendUrl}/api/admin/mock-tests`
+                : `${backendUrl}/api/public/mock-tests`;
+
+            const options = {};
+            if (shouldUseAdmin) {
+                const token = await getToken();
+                options.headers = {
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+
+            const response = await fetch(endpoint, options);
             if (response.ok) {
                 const data = await response.json();
                 const subjectTests = data.filter(test => test.testType === 'subject-wise');
@@ -54,11 +71,7 @@ const SubjectWiseTestsPage = () => {
         }
     };
 
-    useEffect(() => {
-        if (isLoaded && user) {
-            setIsAdmin(user.publicMetadata?.role === 'admin');
-        }
-    }, [isLoaded, user]);
+
 
     // Derived Subjects from Placeholders
     const getSubjects = () => {
@@ -97,6 +110,7 @@ const SubjectWiseTestsPage = () => {
                     subject: subjectData.subject,
                     description: `Category for ${subjectData.subject}`,
                     isPlaceholder: true,
+                    isPublished: true,
                     year: new Date().getFullYear() // Dummy year to satisfy some validations if any strictness remains
                 })
             });

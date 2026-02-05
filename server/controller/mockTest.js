@@ -4,7 +4,7 @@ import MockTest from "../models/mockTestModel.js";
 export const createMockTest = async (req, res) => {
     try {
 
-        const { title, examName, difficulty, duration, totalQuestions, description, negativeMarks, year, month, testType, isPlaceholder, subject } = req.body;
+        const { title, examName, difficulty, duration, totalQuestions, description, negativeMarks, year, month, testType, isPlaceholder, subject, isPublished } = req.body;
 
         const newTest = new MockTest({
             title,
@@ -18,7 +18,8 @@ export const createMockTest = async (req, res) => {
             month: testType === 'subject-wise' ? undefined : (month || undefined),
             testType,
             isPlaceholder,
-            subject
+            subject,
+            isPublished: isPublished === undefined ? false : isPublished
         });
 
         const savedTest = await newTest.save();
@@ -33,7 +34,9 @@ export const createMockTest = async (req, res) => {
 // Get all Mock Tests
 export const getAllMockTests = async (req, res) => {
     try {
-        const tests = await MockTest.find().sort({ createdAt: -1 });
+        const isAdminRoute = req.originalUrl.includes('admin') || req.baseUrl.includes('admin');
+        const query = isAdminRoute ? {} : { isPublished: true };
+        const tests = await MockTest.find(query).sort({ createdAt: -1 });
         res.status(200).json(tests);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -54,12 +57,12 @@ export const getMockTestById = async (req, res) => {
 // Get single Mock Test by ID (Public) - Increments view count
 export const getPublicMockTestById = async (req, res) => {
     try {
-        const test = await MockTest.findByIdAndUpdate(
-            req.params.id,
+        const test = await MockTest.findOneAndUpdate(
+            { _id: req.params.id, isPublished: true },
             { $inc: { viewCount: 1 } },
             { new: true }
         );
-        if (!test) return res.status(404).json({ message: "Mock Test not found" });
+        if (!test) return res.status(404).json({ message: "Mock Test not found or not published" });
         res.status(200).json(test);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -109,8 +112,11 @@ export const addQuestions = async (req, res) => {
         if (questions && Array.isArray(questions)) {
             test.questions.push(...questions);
         } else {
-
+            // Optional: Handle single question object if structure varies, though current valid payload is array
         }
+
+        // Update totalQuestions count
+        test.totalQuestions = test.questions.length;
 
         const updatedTest = await test.save();
 
@@ -161,6 +167,9 @@ export const deleteMockTestQuestion = async (req, res) => {
         // Use remove() if available, or pull from array
         // Mongoose subdocument array handling
         test.questions.pull({ _id: questionId });
+
+        // Update totalQuestions count
+        test.totalQuestions = test.questions.length;
 
         await test.save();
 
