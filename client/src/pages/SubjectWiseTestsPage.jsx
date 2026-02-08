@@ -280,7 +280,7 @@ const SubjectWiseTestsPage = () => {
     };
 
     const getTestsForSubject = (subjectName) => {
-        return tests.filter(test => test.subject === subjectName && !test.isPlaceholder);
+        return tests.filter(test => test.subject === subjectName && !test.isPlaceholder && !test.title.startsWith('_'));
     };
 
     const renderSubjectSelection = () => {

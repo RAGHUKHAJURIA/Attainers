@@ -35,9 +35,9 @@ const Navbar = () => {
       type: 'dropdown',
       items: [
         { name: 'PDFs', href: '/pdfs' },
-        { name: 'Courses', href: '/courses' },
+        { name: 'Tests', href: '/courses' },
         { name: 'Previous Papers', href: '/previous-papers' },
-        { name: 'Free Courses', href: '/free-courses' },
+        { name: 'YouTube Courses', href: '/free-courses' },
       ]
     },
     {
@@ -55,9 +55,9 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled
+      className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled || location.pathname !== '/'
         ? "bg-white/80 backdrop-blur-md shadow-lg"
-        : "bg-transparent" // Start transparent, overlapping hero if desired, or bg-white if not
+        : "bg-white xl:bg-transparent" // White on mobile/tablet, transparent on desktop (until scroll) only on Home
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,7 +71,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="hidden xl:flex items-center space-x-6">
             {navGroups.map((item, index) => (
               <div
                 key={index}
@@ -127,7 +127,7 @@ const Navbar = () => {
           </div>
 
           {/* Auth Section */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden xl:flex items-center space-x-4">
             {!isLoaded ? (
               <div className="h-9 w-24 bg-gray-200 rounded-lg animate-pulse" />
             ) : isSignedIn ? (
@@ -154,7 +154,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center space-x-4">
+          <div className="xl:hidden flex items-center space-x-4">
             {isSignedIn && <UserButton afterSignOutUrl="/" />}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -175,7 +175,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+      <div className={`xl:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="bg-white border-t border-gray-100 shadow-lg pb-6 px-4 pt-2">
           <div className="space-y-1">
             {navGroups.map((item, index) => (

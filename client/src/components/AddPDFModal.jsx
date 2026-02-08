@@ -5,7 +5,7 @@ const AddPDFModal = ({ isOpen, onClose, onAdd }) => {
         title: '',
         description: '',
         category: 'study-material',
-        subject: 'Mathematics',
+        subject: 'General',
         fileUrl: '',
         file: null, // For uploaded file
         fileName: '',
@@ -32,7 +32,7 @@ const AddPDFModal = ({ isOpen, onClose, onAdd }) => {
             title: '',
             description: '',
             category: 'study-material',
-            subject: 'Mathematics',
+            subject: 'General',
             fileUrl: '',
             file: null,
             fileName: '',
@@ -101,14 +101,8 @@ const AddPDFModal = ({ isOpen, onClose, onAdd }) => {
                                         value={formData.subject}
                                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                                     >
-                                        <option value="Mathematics">Mathematics</option>
-                                        <option value="Physics">Physics</option>
-                                        <option value="Chemistry">Chemistry</option>
-                                        <option value="Biology">Biology</option>
-                                        <option value="English">English</option>
-                                        <option value="History">History</option>
-                                        <option value="Computer Science">Computer Science</option>
-                                        <option value="General Knowledge">General Knowledge</option>
+                                        <option value="PYQs">PYQs</option>
+                                        <option value="General">General</option>
                                     </select>
                                 </div>
                             </div>

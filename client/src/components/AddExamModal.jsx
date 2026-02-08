@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AddExamModal = ({ isOpen, onClose, onAdd }) => {
+const AddExamModal = ({ isOpen, onClose, onAdd, isPYQ = false }) => {
     const [examName, setExamName] = useState('');
 
     if (!isOpen) return null;
@@ -10,7 +10,8 @@ const AddExamModal = ({ isOpen, onClose, onAdd }) => {
         onAdd({
             examName: examName,
             isPlaceholder: true,
-            title: `_EXAM_PLACEHOLDER_${examName}`
+            title: `_EXAM_PLACEHOLDER_${examName}`,
+            testType: isPYQ ? 'pyq' : 'exam-wise'
         });
         setExamName('');
         onClose();

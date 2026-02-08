@@ -241,7 +241,7 @@ const ExamWiseTestsPage = () => {
     };
 
     const getTestsForExam = (examName) => {
-        return tests.filter(test => test.examName === examName && !test.isPlaceholder);
+        return tests.filter(test => test.examName === examName && !test.isPlaceholder && !test.title.startsWith('_'));
     };
 
     const renderExamSelection = () => {

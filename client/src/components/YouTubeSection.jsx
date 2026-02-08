@@ -39,7 +39,7 @@ const YouTubeSection = () => {
                         </svg>
                     </div>
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                        Educational Videos
+                        Free Youtube Lectures
                     </h2>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                         Watch our comprehensive video tutorials, exam guidance, and educational content to enhance your learning experience.
@@ -71,8 +71,8 @@ const YouTubeSection = () => {
                                 key={category.value}
                                 onClick={() => setSelectedCategory(category.value)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === category.value
-                                        ? 'bg-red-600 text-white shadow-lg'
-                                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                    ? 'bg-red-600 text-white shadow-lg'
+                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                     }`}
                             >
                                 {category.label}

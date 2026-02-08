@@ -3,6 +3,7 @@ import { AppContext } from '../context/AppContext';
 
 import Navbar from '../components/Navbar';
 import TableCard from '../components/TableCard';
+import AddTableModal from '../components/AddTableModal';
 import Footer from '../components/Footer';
 import CardSkeleton from '../components/CardSkeleton';
 import { useUser, useAuth } from '@clerk/clerk-react';
@@ -14,6 +15,7 @@ const TablesPage = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [loading, setLoading] = useState(true);
+    const [isIdModalOpen, setIsIdModalOpen] = useState(false); // Using unique name to avoid conflict if any
 
     const categories = [
         { value: 'all', label: 'All Tables' },
@@ -88,7 +90,7 @@ const TablesPage = () => {
                         {/* Admin Action Placeholders */}
                         {isAdmin && (
                             <button
-                                onClick={() => alert("Add Table functionality requires specific modal (not customized for tables yet).")}
+                                onClick={() => setIsIdModalOpen(true)}
                                 className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,6 +150,15 @@ const TablesPage = () => {
             </main>
 
             <Footer />
+
+            <AddTableModal
+                isOpen={isIdModalOpen}
+                onClose={() => setIsIdModalOpen(false)}
+                onAdd={() => {
+                    fetchAllTables();
+                    setIsIdModalOpen(false); // Close after successful add
+                }}
+            />
         </div>
     );
 };

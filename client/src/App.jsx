@@ -17,6 +17,7 @@ import UpdatesPage from './pages/UpdatesPage';
 import TablesPage from './pages/TablesPage';
 import MockTestsPage from './pages/MockTestsPage';
 import MockTestDetailPage from './pages/MockTestDetailPage';
+import PreviousPapersPage from './pages/PreviousPapersPage';
 import PYQPage from './pages/PYQPage';
 import FreeCoursesPage from './pages/FreeCoursesPage';
 import PYQYearPage from './pages/PYQYearPage';
@@ -56,7 +57,7 @@ function App() {
         <Route path='/courses/:id' element={<CourseDetailPage />} />
         <Route path='/courses/:id' element={<CourseDetailPage />} />
         {/* Previous Papers now redirects to Exam-wise Tests */}
-        <Route path='/previous-papers' element={<ExamWiseTestsPage />} />
+        <Route path='/previous-papers' element={<PreviousPapersPage />} />
         {/* Route path='/video-lectures' element={<VideoLecturesPage />} / */}
         <Route path='/blogs' element={<BlogsPage />} />
         <Route path='/blogs/:id' element={<BlogDetailPage />} />

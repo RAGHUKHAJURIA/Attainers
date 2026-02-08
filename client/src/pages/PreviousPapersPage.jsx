@@ -1,222 +1,387 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import PreviousPaperCard from '../components/PreviousPaperCard';
-import AddPreviousPaperModal from '../components/AddPreviousPaperModal';
+import TestCard from '../components/TestCard';
+import AddTestModal from '../components/AddTestModal';
+import CategoryNavigator from '../components/CategoryNavigator';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import CardSkeleton from '../components/CardSkeleton';
-
+import { AppContext } from '../context/AppContext';
+import AddExamModal from '../components/AddExamModal';
 
 const PreviousPapersPage = () => {
     const { user, isLoaded } = useUser();
     const { getToken } = useAuth();
+    const { backendUrl } = useContext(AppContext);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [papers, setPapers] = useState([]);
+    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+    const [isExamModalOpen, setIsExamModalOpen] = useState(false);
+    const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedExam, setSelectedExam] = useState(null);
+
+    const colorPalette = [
+        { color: 'bg-emerald-500', icon: '📝' },
+        { color: 'bg-indigo-500', icon: '📚' },
+        { color: 'bg-rose-500', icon: '🎯' },
+        { color: 'bg-amber-500', icon: '💡' },
+        { color: 'bg-cyan-500', icon: '⚡' },
+        { color: 'bg-violet-500', icon: '🎓' },
+    ];
 
     useEffect(() => {
-        fetchPapers();
-    }, []);
+        if (isLoaded) {
+            const adminStatus = user?.publicMetadata?.role === 'admin';
+            setIsAdmin(adminStatus);
+            fetchPYQTests(adminStatus);
+        }
+    }, [isLoaded, user, backendUrl]);
 
-    const fetchPapers = async () => {
+    const fetchPYQTests = async (overrideAdminStatus) => {
+        const shouldUseAdmin = overrideAdminStatus !== undefined ? overrideAdminStatus : isAdmin;
         try {
-            const response = await fetch('https://attainers-272i.vercel.app/api/public/previous-papers');
+            const endpoint = shouldUseAdmin
+                ? `${backendUrl}/api/admin/mock-tests`
+                : `${backendUrl}/api/public/mock-tests`;
+
+            const options = {};
+            if (shouldUseAdmin) {
+                const token = await getToken();
+                options.headers = {
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+
+            const response = await fetch(endpoint, options);
             if (response.ok) {
                 const data = await response.json();
-                if (data.success) {
-                    setPapers(data.papers);
-                }
+                const pyqTests = data.filter(test => test.testType === 'pyq');
+                setTests(pyqTests);
+            } else {
+                setTests([]);
             }
         } catch (error) {
-            console.error('Error fetching previous papers:', error);
+            console.error('Error fetching PYQ tests:', error);
+            setTests([]);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        if (isLoaded && user) {
-            setIsAdmin(user.publicMetadata?.role === 'admin');
-        }
-    }, [isLoaded, user]);
-
-    const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this paper?")) return;
-
+    const handleTogglePublish = async (id, newStatus) => {
         try {
             const token = await getToken();
-            const response = await fetch(`https://attainers-272i.vercel.app/api/admin/previous-papers/${id}`, {
-                method: 'DELETE',
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
+                method: 'PUT',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                body: JSON.stringify({ isPublished: newStatus })
             });
 
             if (response.ok) {
-                fetchPapers(); // Refresh list
+                setTests(tests.map(test =>
+                    (test.id || test._id) === id ? { ...test, isPublished: newStatus } : test
+                ));
             } else {
-                const errData = await response.json();
-                alert(`Failed to delete paper: ${errData.message || response.statusText}`);
+                alert("Failed to update status");
             }
         } catch (error) {
-            console.error('Error deleting paper:', error);
-            alert("Error deleting paper. Check console for details.");
+            console.error("Error updating status:", error);
+            alert("Error updating status");
         }
     };
 
-    const handleAddPaper = async (newPaper) => {
+    const getExams = () => {
+        // Find unique exams from placeholders
+        const examPlaceholders = tests.filter(test => test.isPlaceholder && test.examName);
+        return examPlaceholders.map((ph, index) => {
+            const style = colorPalette[index % colorPalette.length];
+            return {
+                id: ph.examName,
+                name: ph.examName,
+                icon: style.icon,
+                color: style.color,
+                placeholderId: ph._id
+            };
+        });
+    };
+
+    const handleAddExam = async (examData) => {
         try {
+            setLoading(true);
             const token = await getToken();
-            let body;
-            let headers = {
-                'Authorization': `Bearer ${token}`
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: examData.title,
+                    examName: examData.examName,
+                    totalQuestions: 0,
+                    duration: 0,
+                    difficulty: 'Easy',
+                    testType: 'pyq', // Explicitly setting PYQ type
+                    description: `Category for ${examData.examName} PYQs`,
+                    isPlaceholder: true,
+                    isPublished: true,
+                    year: new Date().getFullYear()
+                })
+            });
+
+            if (response.ok) {
+                await fetchPYQTests();
+                setIsExamModalOpen(false);
+                alert(`Exam Category ${examData.examName} added successfully!`);
+            } else {
+                alert('Failed to add exam category');
+            }
+        } catch (error) {
+            console.error("Error adding exam category:", error);
+            alert("Error adding exam category");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteExam = async (category) => {
+        const examName = category.id;
+        const testsToDelete = tests.filter(test => test.examName === examName);
+        const count = testsToDelete.length;
+
+        if (!window.confirm(`Delete ${examName}? This will PERMANENTLY delete the PYQ category and ALL ${count} tests inside it.`)) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const token = await getToken();
+            const deletePromises = testsToDelete.map(test =>
+                fetch(`${backendUrl}/api/admin/mock-tests/${test._id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            );
+
+            await Promise.all(deletePromises);
+            await fetchPYQTests();
+            alert(`Deleted ${examName} and all its PYQs.`);
+        } catch (error) {
+            console.error("Error deleting exam:", error);
+            alert("Failed to delete exam");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddTest = async (newTest) => {
+        try {
+            setLoading(true);
+            const token = await getToken();
+            const testData = {
+                ...newTest,
+                testType: 'pyq',
+                examName: selectedExam
             };
 
-            if (newPaper.file) {
-                const formData = new FormData();
-                // Append all fields manually
-                Object.keys(newPaper).forEach(key => {
-                    if (key === 'file') {
-                        formData.append('file', newPaper.file);
-                    } else {
-                        formData.append(key, newPaper[key]);
-                    }
-                });
-                body = formData;
-            } else {
-                body = JSON.stringify(newPaper);
-                headers['Content-Type'] = 'application/json';
-            }
-
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/previous-papers', {
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests`, {
                 method: 'POST',
-                headers: headers,
-                body: body
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(testData)
             });
 
             if (response.ok) {
-                fetchPapers(); // Refresh list
+                await fetchPYQTests();
+                setIsTestModalOpen(false);
+                alert("PYQ Test added successfully!");
             } else {
                 const errData = await response.json();
-                alert(`Failed to add paper: ${errData.message || response.statusText}`);
+                alert(`Failed to add test: ${errData.message || response.statusText}`);
             }
         } catch (error) {
-            console.error('Error adding paper:', error);
-            alert("Error adding paper. Check console for details.");
+            console.error('Error adding PYQ test:', error);
+            alert("Error adding PYQ test.");
+        } finally {
+            setLoading(false);
         }
     };
 
-    const filteredPapers = papers.filter(paper =>
-        paper.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        paper.examName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        paper.subject.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleDeleteTest = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this test?")) return;
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setTests(tests.filter(test => (test.id || test._id) !== id));
+            } else {
+                alert("Failed to delete test");
+            }
+        } catch (error) {
+            console.error("Error deleting test:", error);
+        }
+    };
+
+    const getTestCountForExam = (examName) => {
+        return tests.filter(test => test.examName === examName && !test.isPlaceholder).length;
+    };
+
+    const getTestsForExam = (examName) => {
+        return tests.filter(test => test.examName === examName && !test.isPlaceholder && !test.title.startsWith('_'));
+    };
+
+    const renderExamSelection = () => {
+        const examList = getExams();
+        const examCategories = examList.map(exam => ({
+            id: exam.id,
+            title: exam.name,
+            description: `Previous Year Papers for ${exam.name}`,
+            count: getTestCountForExam(exam.id),
+            colorClass: exam.color,
+            icon: (
+                <span className="text-3xl text-white">{exam.icon}</span>
+            )
+        }));
+
+        return (
+            <CategoryNavigator
+                categories={examCategories}
+                onCategoryClick={(category) => setSelectedExam(category.id)}
+                title="Previous Year Papers"
+                description="Practice with past exam papers"
+                onDelete={isAdmin ? handleDeleteExam : null}
+            />
+        );
+    };
+
+    const renderTests = () => {
+        const testsToShow = getTestsForExam(selectedExam);
+        const examList = getExams();
+        const exam = examList.find(e => e.id === selectedExam) || { icon: '📚' };
+
+        return (
+            <div className="animate-fadeIn">
+                {/* Back Button and Header */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-4 mb-4">
+                        <button
+                            onClick={() => setSelectedExam(null)}
+                            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                        >
+                            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                <span className="text-3xl">{exam.icon}</span>
+                                {selectedExam}
+                            </h2>
+                            <p className="text-gray-600 mt-1">{testsToShow.length} papers available</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tests Grid */}
+                {testsToShow.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {testsToShow.map((test) => (
+                            <TestCard
+                                key={test.id || test._id}
+                                {...test}
+                                isAdmin={isAdmin}
+                                onDelete={handleDeleteTest}
+                                onTogglePublish={handleTogglePublish}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div className={`w-16 h-16 ${exam.color || 'bg-gray-200'} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                            <span className="text-3xl">{exam.icon}</span>
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900">No papers available yet</h3>
+                        <p className="text-gray-500 mt-1">Check back soon for new {selectedExam} papers!</p>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-
             <Navbar />
 
             <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                            Previous Year Papers
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                            <span className="text-indigo-600 text-4xl">📚</span> Previous Year Papers
                         </h1>
                         <p className="mt-2 text-lg text-gray-600">
-                            Access previous year question papers to practice effectively.
+                            Access and practice with previous year question papers.
                         </p>
                     </div>
 
                     <div className="flex gap-4 items-center">
-                        {/* Search Bar */}
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search papers..."
-                                className="modern-input !pl-14"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-
                         {isAdmin && (
                             <button
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={() => selectedExam ? setIsTestModalOpen(true) : setIsExamModalOpen(true)}
                                 className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                Upload Paper
+                                {selectedExam ? 'Add PYQ Paper' : 'Add Category'}
                             </button>
                         )}
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="flex flex-wrap gap-2 mb-8">
-                    {['All', 'UPSC', 'SSC', 'Banking', 'JKSSB'].map((filter) => (
-                        <button
-                            key={filter}
-                            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${searchTerm === '' && filter === 'All' ? 'bg-blue-600 text-white' :
-                                filter !== 'All' && searchTerm.toLowerCase().includes(filter.toLowerCase()) ? 'bg-blue-600 text-white' :
-                                    'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                }`}
-                            onClick={() => setSearchTerm(filter === 'All' ? '' : filter)}
-                        >
-                            {filter}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Content Grid */}
+                {/* Content Area */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                         {[...Array(6)].map((_, i) => (
                             <CardSkeleton key={i} />
                         ))}
                     </div>
-                ) : filteredPapers.length > 0 ? (
-                    <div className="h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
-                            {filteredPapers.map((paper) => (
-                                <PreviousPaperCard
-                                    key={paper._id}
-                                    paper={paper}
-                                    isAdmin={isAdmin}
-                                    onDelete={handleDelete}
-                                />
-                            ))}
-                        </div>
-                    </div>
                 ) : (
-                    <div className="text-center py-12">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No papers found</h3>
-                        <p className="mt-1 text-sm text-gray-500">Try adjusting your search criteria.</p>
-                    </div>
+                    <>
+                        {!selectedExam && renderExamSelection()}
+                        {selectedExam && renderTests()}
+                    </>
                 )}
             </main>
 
             <Footer />
 
-            <AddPreviousPaperModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onAdd={handleAddPaper}
+            <AddExamModal
+                isOpen={isExamModalOpen}
+                onClose={() => setIsExamModalOpen(false)}
+                onAdd={handleAddExam}
+                isPYQ={true}
+            />
+
+            <AddTestModal
+                isOpen={isTestModalOpen}
+                onClose={() => setIsTestModalOpen(false)}
+                onAdd={handleAddTest}
+                isPYQ={true}
+                examName={selectedExam} // Pass exam name context
             />
         </div>
     );
 };
 
 export default PreviousPapersPage;
-

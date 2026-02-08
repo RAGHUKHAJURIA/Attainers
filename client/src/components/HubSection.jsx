@@ -43,8 +43,8 @@ const HubSection = () => {
                         </p>
                     </Link>
 
-                    {/* Top Right: Schedules (Visual: Calendar/Table) */}
-                    <Link to="/schedules" className="group bg-white rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col items-center text-center relative overflow-hidden">
+                    {/* Top Right: PYQs (Visual: Calendar/Table) */}
+                    <Link to="/previous-papers" className="group bg-white rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col items-center text-center relative overflow-hidden">
                         {/* Abstract UI Visual */}
                         <div className="w-[85%] bg-gray-50 rounded-2xl p-5 mb-8 transform group-hover:scale-105 transition-transform duration-500 ease-out border border-gray-100/50">
                             <div className="flex justify-between mb-4">
@@ -53,16 +53,16 @@ const HubSection = () => {
                             </div>
                             <div className="grid grid-cols-4 gap-2">
                                 <div className="h-16 bg-blue-100 rounded-xl flex items-center justify-center text-blue-500 font-bold text-xs flex-col">
-                                    <span>15</span>
+                                    <span>PYQ</span>
                                 </div>
                                 <div className="h-16 bg-white rounded-xl border border-gray-100"></div>
                                 <div className="h-16 bg-white rounded-xl border border-gray-100"></div>
                                 <div className="h-16 bg-purple-100 rounded-xl flex items-center justify-center text-purple-500 font-bold text-xs flex-col">
-                                    <span>18</span>
+                                    <span>24</span>
                                 </div>
                                 <div className="h-16 bg-white rounded-xl border border-gray-100"></div>
                                 <div className="h-16 bg-green-100 rounded-xl flex items-center justify-center text-green-500 font-bold text-xs flex-col">
-                                    <span>22</span>
+                                    <span>23</span>
                                 </div>
                                 <div className="h-16 bg-white rounded-xl border border-gray-100"></div>
                                 <div className="h-16 bg-white rounded-xl border border-gray-100"></div>
@@ -70,10 +70,10 @@ const HubSection = () => {
                         </div>
 
                         <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
-                            Exam Schedules & Data
+                            PYQs
                         </h3>
                         <p className="text-gray-500 max-w-sm">
-                            Keep track of important dates, syllabus, and download data tables.
+                            Access Previous Year Questions and Exam Papers.
                         </p>
                     </Link>
 
@@ -85,7 +85,7 @@ const HubSection = () => {
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                                    Educational Videos
+                                    Free Youtube Lectures
                                 </h3>
                                 <p className="text-gray-500 text-sm">
                                     Watch & Learn

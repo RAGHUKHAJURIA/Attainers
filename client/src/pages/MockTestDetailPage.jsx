@@ -34,7 +34,7 @@ const MockTestDetailPage = () => {
     const [questionStatus, setQuestionStatus] = useState({}); // { questionId: STATUS }
     const [timeLeft, setTimeLeft] = useState(0); // in seconds
     // Practice Mode State
-    const isPracticeMode = test?.testType === 'exam-wise';
+    const isPracticeMode = test?.testType === 'pyq';
 
     // Admin Add Form State
     const [questionText, setQuestionText] = useState('');

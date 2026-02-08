@@ -139,7 +139,9 @@ const MockTestsPage = () => {
     const filteredTests = tests.filter(test =>
         (test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             test.examName.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        test.testType === 'mock-test' // Only show mock-test type, not current-affairs, subject-wise, or exam-wise
+        ['mock-test', 'subject-wise', 'exam-wise'].includes(test.testType) && // Show all main test types
+        !test.isPlaceholder && // Filter out placeholders
+        !test.title.startsWith('_') // Filter out legacy placeholders
     );
 
     // Render category cards
@@ -205,17 +207,7 @@ const MockTestsPage = () => {
                             </svg>
                         </div>
 
-                        {isAdmin && (
-                            <button
-                                onClick={() => setIsModalOpen(true)}
-                                className="btn-primary whitespace-nowrap flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-                            >
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                                Add New Card
-                            </button>
-                        )}
+                        {/* Add New Card button removed as per request */}
                     </div>
                 </div>
 

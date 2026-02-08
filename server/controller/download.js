@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import PDF from '../models/pdfModel.js';
 import PreviousPaper from '../models/previousPaperModel.js';
+import axios from 'axios';
 
 export const downloadFile = async (req, res) => {
     try {
@@ -45,11 +46,30 @@ export const downloadFile = async (req, res) => {
         // Increment download count (already done above, but good to keep flow clear)
 
         // 1. Check if it is a Cloudinary URL (or any remote URL)
+        // 1. Check if it is a Cloudinary URL (or any remote URL)
         if (fileUrl.startsWith('http') && (fileUrl.includes('cloudinary') || !fileUrl.includes(req.get('host')))) {
-            // For Cloudinary, we want to force download if possible.
-            // Cloudinary allows adding flags to URL for attachment.
-            // If regular remote URL, just redirect.
-            return res.redirect(fileUrl);
+            try {
+                // Proxy the file download
+                const response = await axios({
+                    method: 'GET',
+                    url: fileUrl,
+                    responseType: 'stream'
+                });
+
+                const contentType = response.headers['content-type'];
+                const filename = item.fileName || 'download.pdf';
+                // Sanitize filename
+                const safeFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+
+                res.setHeader('Content-Type', contentType);
+                res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+
+                response.data.pipe(res);
+                return;
+            } catch (proxyError) {
+                console.error("Proxy download failed, falling back to redirect:", proxyError.message);
+                return res.redirect(fileUrl);
+            }
         }
 
         // 2. Fallback for legacy local files

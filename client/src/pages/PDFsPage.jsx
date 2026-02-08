@@ -171,7 +171,7 @@ const PDFsPage = () => {
 
                 {/* Filters */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                    {['All', 'Mathematics', 'Physics', 'History'].map((filter) => (
+                    {['All', 'PYQs', 'General'].map((filter) => (
                         <button
                             key={filter}
                             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${searchTerm === '' && filter === 'All' ? 'bg-blue-600 text-white' :
