@@ -37,6 +37,7 @@ const Navbar = () => {
         { name: 'PDFs', href: '/pdfs' },
         { name: 'Courses', href: '/courses' },
         { name: 'Previous Papers', href: '/previous-papers' },
+        { name: 'Free Courses', href: '/free-courses' },
       ]
     },
     {

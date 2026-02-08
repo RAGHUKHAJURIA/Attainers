@@ -50,6 +50,8 @@ const ExamWiseTestsPage = () => {
                 options.headers = {
                     'Authorization': `Bearer ${token}`
                 };
+
+
             }
 
             const response = await fetch(endpoint, options);
@@ -65,6 +67,31 @@ const ExamWiseTestsPage = () => {
             setTests([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleTogglePublish = async (id, newStatus) => {
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ isPublished: newStatus })
+            });
+
+            if (response.ok) {
+                setTests(tests.map(test =>
+                    (test.id || test._id) === id ? { ...test, isPublished: newStatus } : test
+                ));
+            } else {
+                alert("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("Error updating status");
         }
     };
 
@@ -278,6 +305,7 @@ const ExamWiseTestsPage = () => {
                                 {...test}
                                 isAdmin={isAdmin}
                                 onDelete={handleDeleteTest}
+                                onTogglePublish={handleTogglePublish}
                             />
                         ))}
                     </div>

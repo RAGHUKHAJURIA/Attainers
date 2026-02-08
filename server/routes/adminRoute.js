@@ -13,6 +13,7 @@ import { getAllFeedback, getFeedbackById, updateFeedbackStatus, deleteFeedback, 
 import { protectAdminRoute } from "../middleware/clerkMiddleware.js";
 import { upload } from "../middleware/upload.js";
 import { uploadMemory } from "../middleware/uploadMemory.js";
+import { createFreeCourse, deleteFreeCourse, getFreeCourses } from "../controller/freeCourse.js";
 
 
 const router = express.Router();
@@ -133,5 +134,9 @@ router.get('/feedback/:id', protectAdminRoute, getFeedbackById);
 router.put('/feedback/:id', protectAdminRoute, updateFeedbackStatus);
 router.delete('/feedback/:id', protectAdminRoute, deleteFeedback);
 router.post('/feedback/delete-multiple', protectAdminRoute, deleteMultipleFeedback);
+// Free Courses Routes
+router.post('/free-courses', protectAdminRoute, createFreeCourse);
+router.delete('/free-courses/:id', protectAdminRoute, deleteFreeCourse);
+router.get('/free-courses', getFreeCourses); // Admin might generally list all or filtered
 
 export default router;

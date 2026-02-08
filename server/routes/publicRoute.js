@@ -12,6 +12,7 @@ import { getAllPreviousPapers, getPreviousPaperById } from "../controller/previo
 import { getAllMockTests, getPublicMockTestById } from "../controller/mockTest.js";
 import { submitFeedback } from "../controller/feedback.js";
 import { downloadFile, viewFile } from "../controller/download.js";
+import { getFreeCourses } from "../controller/freeCourse.js";
 
 const router = express.Router();
 
@@ -66,5 +67,7 @@ router.get('/view/:type/:id', viewFile);
 
 // Feedback (Public)
 router.post('/feedback', submitFeedback);
+// Free Courses
+router.get('/free-courses', getFreeCourses);
 
 export default router;

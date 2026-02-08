@@ -84,6 +84,31 @@ const CurrentAffairsPage = () => {
         }
     };
 
+    const handleTogglePublish = async (id, newStatus) => {
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ isPublished: newStatus })
+            });
+
+            if (response.ok) {
+                setTests(tests.map(test =>
+                    (test.id || test._id) === id ? { ...test, isPublished: newStatus } : test
+                ));
+            } else {
+                alert("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("Error updating status");
+        }
+    };
+
 
 
     const handleAddYear = async (yearData) => {
@@ -483,6 +508,7 @@ const CurrentAffairsPage = () => {
                             {...test}
                             isAdmin={isAdmin}
                             onDelete={handleDelete}
+                            onTogglePublish={handleTogglePublish}
                         />
                     ))}
                 </div>

@@ -9,7 +9,7 @@ import { AppProvider } from './context/AppContext'
 import PDFsPage from './pages/PDFsPage';
 import CoursesPage from './pages/CoursesPage';
 import CourseDetailPage from './pages/CourseDetailPage';
-import PreviousPapersPage from './pages/PreviousPapersPage';
+// import PreviousPapersPage from './pages/PreviousPapersPage';
 import BlogsPage from './pages/BlogsPage';
 import BlogDetailPage from './pages/BlogDetailPage';
 import YouTubePage from './pages/YouTubePage';
@@ -18,6 +18,7 @@ import TablesPage from './pages/TablesPage';
 import MockTestsPage from './pages/MockTestsPage';
 import MockTestDetailPage from './pages/MockTestDetailPage';
 import PYQPage from './pages/PYQPage';
+import FreeCoursesPage from './pages/FreeCoursesPage';
 import PYQYearPage from './pages/PYQYearPage';
 import ContactUsPage from './pages/ContactUsPage';
 import CurrentAffairsPage from './pages/CurrentAffairsPage';
@@ -50,9 +51,12 @@ function App() {
         <Route path='/' element={<Hero />} />
         <Route path='/admin' element={<Admin />} />
         <Route path='/pdfs' element={<PDFsPage />} />
+        <Route path='/free-courses' element={<FreeCoursesPage />} />
         <Route path='/courses' element={<CoursesPage />} />
         <Route path='/courses/:id' element={<CourseDetailPage />} />
-        <Route path='/previous-papers' element={<PreviousPapersPage />} />
+        <Route path='/courses/:id' element={<CourseDetailPage />} />
+        {/* Previous Papers now redirects to Exam-wise Tests */}
+        <Route path='/previous-papers' element={<ExamWiseTestsPage />} />
         {/* Route path='/video-lectures' element={<VideoLecturesPage />} / */}
         <Route path='/blogs' element={<BlogsPage />} />
         <Route path='/blogs/:id' element={<BlogDetailPage />} />

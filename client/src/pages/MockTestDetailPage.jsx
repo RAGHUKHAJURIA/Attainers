@@ -33,6 +33,8 @@ const MockTestDetailPage = () => {
     const [answers, setAnswers] = useState({}); // { questionId: optionIndex }
     const [questionStatus, setQuestionStatus] = useState({}); // { questionId: STATUS }
     const [timeLeft, setTimeLeft] = useState(0); // in seconds
+    // Practice Mode State
+    const isPracticeMode = test?.testType === 'exam-wise';
 
     // Admin Add Form State
     const [questionText, setQuestionText] = useState('');
@@ -71,10 +73,12 @@ const MockTestDetailPage = () => {
         }
     }, [isLoaded, test, isAdmin, isTestActive, showScoreModal]);
 
-    // Timer Effect
+
+
+    // Timer Effect (Skip in Practice Mode)
     useEffect(() => {
         let timer;
-        if (isTestActive && timeLeft > 0) {
+        if (isTestActive && timeLeft > 0 && !isPracticeMode) {
             timer = setInterval(() => {
                 setTimeLeft((prev) => {
                     if (prev <= 1) {
@@ -86,14 +90,14 @@ const MockTestDetailPage = () => {
             }, 1000);
         }
         return () => clearInterval(timer);
-    }, [isTestActive, timeLeft]);
+    }, [isTestActive, timeLeft, isPracticeMode]);
 
-    // Auto-submit when time runs out
+    // Auto-submit when time runs out (Skip in Practice Mode)
     useEffect(() => {
-        if (timeLeft === 0 && isTestActive) {
+        if (timeLeft === 0 && isTestActive && !isPracticeMode) {
             calculateAndSubmit();
         }
-    }, [timeLeft, isTestActive]);
+    }, [timeLeft, isTestActive, isPracticeMode]);
 
     const fetchTestDetails = async () => {
         try {
@@ -400,7 +404,7 @@ const MockTestDetailPage = () => {
                             <span className="leading-none text-[8px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider hidden sm:inline">Time Left</span>
                             <span className="leading-none text-[8px] sm:hidden text-gray-500 font-bold uppercase tracking-wider mb-0.5">Time</span>
                             <span className={`leading-none text-sm sm:text-xl font-mono font-bold whitespace-nowrap ${timeLeft < 300 ? 'text-red-600 animate-pulse' : 'text-blue-600'}`}>
-                                {formatTime(timeLeft)}
+                                {isPracticeMode ? "Unlimited" : formatTime(timeLeft)}
                             </span>
                         </div>
 
@@ -441,28 +445,78 @@ const MockTestDetailPage = () => {
                                     {currentQ.questionText}
                                 </p>
                                 <div className="space-y-3 sm:space-y-4 max-w-2xl">
-                                    {currentQ.options.map((opt, idx) => (
-                                        <label
-                                            key={idx}
-                                            className={`flex items-start sm:items-center p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-gray-50 ${answers[currentQ._id] === idx
-                                                ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
-                                                : 'border-gray-200'
-                                                }`}
-                                        >
-                                            <div className="flex items-center h-5">
-                                                <input
-                                                    type="radio"
-                                                    name={`question-${currentQ._id}`}
-                                                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 focus:ring-blue-500 mr-3 sm:mr-4 mt-0.5 sm:mt-0"
-                                                    checked={answers[currentQ._id] === idx}
-                                                    onChange={() => handleAnswerSelect(idx)}
-                                                />
-                                            </div>
-                                            <span className="text-sm sm:text-base text-gray-700">{opt.text}</span>
-                                        </label>
-                                    ))}
+                                    {currentQ.options.map((opt, idx) => {
+                                        const isSelected = answers[currentQ._id] === idx;
+                                        const isCorrect = opt.isCorrect;
+                                        const showFeedback = isPracticeMode && answers[currentQ._id] !== undefined;
+
+                                        let borderClass = 'border-gray-200';
+                                        let bgClass = '';
+                                        let ringClass = '';
+
+                                        if (isSelected) {
+                                            if (showFeedback) {
+                                                if (isCorrect) {
+                                                    borderClass = 'border-green-600';
+                                                    bgClass = 'bg-green-50';
+                                                    ringClass = 'ring-1 ring-green-600';
+                                                } else {
+                                                    borderClass = 'border-red-600';
+                                                    bgClass = 'bg-red-50';
+                                                    ringClass = 'ring-1 ring-red-600';
+                                                }
+                                            } else {
+                                                borderClass = 'border-blue-600';
+                                                bgClass = 'bg-blue-50';
+                                                ringClass = 'ring-1 ring-blue-600';
+                                            }
+                                        } else if (showFeedback && isCorrect) {
+                                            // Show correct answer even if not selected
+                                            borderClass = 'border-green-600';
+                                            bgClass = 'bg-green-50';
+                                            ringClass = 'ring-1 ring-green-600';
+                                        }
+
+                                        return (
+                                            <label
+                                                key={idx}
+                                                className={`flex items-start sm:items-center p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-gray-50 ${borderClass} ${bgClass} ${ringClass}`}
+                                            >
+                                                <div className="flex items-center h-5">
+                                                    <input
+                                                        type="radio"
+                                                        name={`question-${currentQ._id}`}
+                                                        className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 focus:ring-blue-500 mr-3 sm:mr-4 mt-0.5 sm:mt-0"
+                                                        checked={answers[currentQ._id] === idx}
+                                                        onChange={() => handleAnswerSelect(idx)}
+                                                        disabled={showFeedback} // Disable changing answer in Practice Mode once answered
+                                                    />
+                                                </div>
+                                                <span className="text-sm sm:text-base text-gray-700 w-full flex justify-between">
+                                                    <span>{opt.text}</span>
+                                                    {showFeedback && isSelected && (isCorrect ? <span className="text-green-600 font-bold ml-2">✓</span> : <span className="text-red-600 font-bold ml-2">✗</span>)}
+                                                </span>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
-                                {/* Explanation removed during test */}
+
+                                {/* Explanation - Show in Practice Mode if Answered */}
+                                {isPracticeMode && answers[currentQ._id] !== undefined && (
+                                    <div className="mt-6 p-4 bg-yellow-50 border border-yellow-100 rounded-lg animate-fadeIn">
+                                        <h5 className="text-xs font-bold text-yellow-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Explanation & Answer
+                                        </h5>
+                                        <p className="text-gray-700 text-sm leading-relaxed mb-2">
+                                            <span className="font-bold">Correct Answer: </span>
+                                            {currentQ.options.find(o => o.isCorrect)?.text}
+                                        </p>
+                                        <p className="text-gray-700 text-sm leading-relaxed">
+                                            {currentQ.explanation || "No explanation provided."}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Footer Actions */}

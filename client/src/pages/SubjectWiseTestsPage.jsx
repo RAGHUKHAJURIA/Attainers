@@ -85,9 +85,39 @@ const SubjectWiseTestsPage = () => {
                 name: ph.subject,
                 icon: style.icon,
                 color: style.color,
-                placeholderId: ph._id // Keep ID for deletion
+                placeholderId: ph._id, // Keep ID for deletion
+                isPublished: ph.isPublished
             };
         });
+    };
+
+    const handleToggleSubjectPublish = async (category) => {
+        const placeholderId = category.placeholderId;
+        const newStatus = !category.isPublished;
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${placeholderId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ isPublished: newStatus })
+            });
+
+            if (response.ok) {
+                // Update local state by mapping over tests and finding the placeholder
+                setTests(tests.map(test =>
+                    test._id === placeholderId ? { ...test, isPublished: newStatus } : test
+                ));
+            } else {
+                alert("Failed to update subject status");
+            }
+        } catch (error) {
+            console.error("Error updating subject status:", error);
+            alert("Error updating subject status");
+        }
     };
 
     const handleAddSubject = async (subjectData) => {
@@ -220,6 +250,31 @@ const SubjectWiseTestsPage = () => {
         }
     };
 
+    const handleTogglePublish = async (id, newStatus) => {
+        try {
+            const token = await getToken();
+            const response = await fetch(`${backendUrl}/api/admin/mock-tests/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ isPublished: newStatus })
+            });
+
+            if (response.ok) {
+                setTests(tests.map(test =>
+                    (test.id || test._id) === id ? { ...test, isPublished: newStatus } : test
+                ));
+            } else {
+                alert("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("Error updating status");
+        }
+    };
+
     const getTestCountForSubject = (subjectName) => {
         return tests.filter(test => test.subject === subjectName && !test.isPlaceholder).length;
     };
@@ -236,6 +291,8 @@ const SubjectWiseTestsPage = () => {
             description: `Practice ${subject.name.toLowerCase()} with comprehensive tests`,
             count: getTestCountForSubject(subject.id),
             colorClass: subject.color,
+            placeholderId: subject.placeholderId,
+            isPublished: subject.isPublished,
             icon: (
                 <span className="text-3xl text-white">{subject.icon}</span>
             )
@@ -248,6 +305,7 @@ const SubjectWiseTestsPage = () => {
                 title="Subject-wise Mock Tests"
                 description="Choose a subject to practice"
                 onDelete={isAdmin ? handleDeleteSubject : null}
+                onTogglePublish={isAdmin ? handleToggleSubjectPublish : null}
             />
         );
     };
@@ -289,6 +347,7 @@ const SubjectWiseTestsPage = () => {
                                 {...test}
                                 isAdmin={isAdmin}
                                 onDelete={handleDeleteTest}
+                                onTogglePublish={handleTogglePublish}
                             />
                         ))}
                     </div>
