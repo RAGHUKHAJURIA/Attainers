@@ -79,6 +79,20 @@ const mockTestSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // AI-routing metadata
+    tags: {
+        type: [String],
+        default: []
+    },
+    category: {
+        type: String,
+        enum: ['subject', 'current-affairs', 'pyq', 'exam-specific', 'practice', 'general'],
+        default: 'general'
+    },
+    timePeriod: {
+        type: String,
+        default: ''
+    },
     questions: [questionSchema], // Embedded questions
     isPublished: {
         type: Boolean,

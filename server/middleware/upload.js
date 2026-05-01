@@ -1,14 +1,21 @@
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary from '../configs/cloudinary.js';
+import path from 'path';
+import fs from 'fs';
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'attainers_uploads', // Folder name in Cloudinary
-        allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-        resource_type: 'auto', // Auto-detect (image, raw/pdf, video)
+// Ensure uploads directory exists
+const uploadDir = (process.env.NODE_ENV === 'production' || process.env.VERCEL) ? '/tmp' : 'uploads';
+if (uploadDir === 'uploads' && !fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads');
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
     },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
 });
 
 export const upload = multer({ storage: storage });

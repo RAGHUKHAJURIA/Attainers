@@ -335,6 +335,9 @@ const MockTestDetailPage = () => {
             wrong
         });
         setShowScoreModal(true);
+
+        // Submit to Backend (Removed)
+        // if (user && !isAdmin) { ... }
     };
 
     const formatTime = (seconds) => {

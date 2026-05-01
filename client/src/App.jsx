@@ -27,6 +27,7 @@ import SubjectWiseTestsPage from './pages/SubjectWiseTestsPage';
 import ExamWiseTestsPage from './pages/ExamWiseTestsPage';
 // import VideoLecturesPage from './pages/VideoLecturesPage';
 import { useUser } from '@clerk/clerk-react';
+import AdminAIMockTest from './pages/AdminAIMockTest';
 
 function App() {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -71,7 +72,12 @@ function App() {
         <Route path='/pyq/:year' element={<PYQYearPage />} />
         <Route path='/mock-tests/subject-wise' element={<SubjectWiseTestsPage />} />
         <Route path='/mock-tests/exam-wise' element={<ExamWiseTestsPage />} />
+        <Route path='/mock-tests/exam-wise' element={<ExamWiseTestsPage />} />
         <Route path='/contact' element={<ContactUsPage />} />
+        {/* Admin-only AI Mock Test Generator */}
+        {user?.publicMetadata?.role === 'admin' && (
+          <Route path='/admin/ai-mock-test' element={<AdminAIMockTest />} />
+        )}
       </Routes>
     </AppProvider>
   )

@@ -13,6 +13,8 @@ import { getAllMockTests, getPublicMockTestById } from "../controller/mockTest.j
 import { submitFeedback } from "../controller/feedback.js";
 import { downloadFile, viewFile } from "../controller/download.js";
 import { getFreeCourses } from "../controller/freeCourse.js";
+import Result from '../models/Result.js';
+import User from '../models/User.js';
 
 const router = express.Router();
 
@@ -69,5 +71,62 @@ router.get('/view/:type/:id', viewFile);
 router.post('/feedback', submitFeedback);
 // Free Courses
 router.get('/free-courses', getFreeCourses);
+
+// Submit Mock Test Result
+router.post('/mock-tests/:id/submit', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, userEmail, userFirstName, userLastName, userAvatar, score, totalQuestions, correctAnswers, wrongAnswers, unattempted } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required' });
+        }
+
+        // 1. Find or Create User
+        let user = await User.findOne({ clerkId: userId });
+        if (!user) {
+            user = new User({
+                clerkId: userId,
+                email: userEmail,
+                firstName: userFirstName,
+                lastName: userLastName,
+                avatar: userAvatar
+            });
+        } else {
+            // Update user details in case they changed
+            user.firstName = userFirstName || user.firstName;
+            user.lastName = userLastName || user.lastName;
+            user.avatar = userAvatar || user.avatar;
+            user.email = userEmail || user.email;
+        }
+
+        // 2. Save Result
+        const newResult = new Result({
+            userId: user._id,
+            mockTestId: id,
+            score,
+            totalQuestions,
+            correctAnswers,
+            wrongAnswers,
+            unattempted
+        });
+        await newResult.save();
+
+        // 3. Update User Stats (Average Score)
+        // Calculate new average
+        const currentTotalScore = user.averageScore * user.totalTestsTaken;
+        const newTotalScore = currentTotalScore + score;
+        user.totalTestsTaken += 1;
+        user.averageScore = newTotalScore / user.totalTestsTaken;
+
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Result submitted successfully' });
+
+    } catch (error) {
+        console.error('Error submitting test result:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+});
 
 export default router;

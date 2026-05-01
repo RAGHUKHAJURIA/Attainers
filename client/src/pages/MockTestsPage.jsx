@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TestCard from '../components/TestCard';
 import AddTestModal from '../components/AddTestModal';
+import UploadTestModal from '../components/UploadTestModal';
 import SectionCard from '../components/SectionCard';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +18,7 @@ const MockTestsPage = () => {
     const navigate = useNavigate();
     const [isAdmin, setIsAdmin] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [showCategories, setShowCategories] = useState(true);
 
@@ -208,30 +210,56 @@ const MockTestsPage = () => {
                         </div>
 
                         {/* Add New Card button removed as per request */}
+                        {isAdmin && (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setIsUploadModalOpen(true)}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Upload PDF</span>
+                                </button>
+                                <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Create Test</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
+
                 {/* Toggle between categories and all tests */}
-                <div className="flex flex-wrap gap-2 mb-8">
-                    <button
-                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${showCategories
-                            ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                            : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                            }`}
-                        onClick={() => setShowCategories(true)}
-                    >
-                        Categories
-                    </button>
-                    <button
-                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${!showCategories
-                            ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                            : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                            }`}
-                        onClick={() => setShowCategories(false)}
-                    >
-                        All Tests
-                    </button>
+                <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${showCategories
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                }`}
+                            onClick={() => setShowCategories(true)}
+                        >
+                            Categories
+                        </button>
+                        <button
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${!showCategories
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                }`}
+                            onClick={() => setShowCategories(false)}
+                        >
+                            All Tests
+                        </button>
+                    </div>
                 </div>
+
 
                 {/* Content Area */}
                 {loading ? (
@@ -273,6 +301,14 @@ const MockTestsPage = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onAdd={handleAddTest}
+            />
+            <UploadTestModal
+                isOpen={isUploadModalOpen}
+                onClose={() => setIsUploadModalOpen(false)}
+                onUploadComplete={() => {
+                    setIsUploadModalOpen(false);
+                    fetchTests();
+                }}
             />
         </div>
     );

@@ -1,4 +1,5 @@
 import express from "express";
+import { uploadPDF } from "../controller/pdfController.js";
 import { createNews, getAllNews } from "../controller/news.js";
 import { createBlog, getAllBlogs, getBlogById, updateBlog, deleteBlog } from "../controller/blog.js";
 import { createTable, getAllTables, getTableById, updateTable, deleteTable } from "../controller/table.js";
@@ -127,6 +128,12 @@ router.delete('/mock-tests/:id', protectAdminRoute, deleteMockTest);
 router.post('/mock-tests/:id/questions', protectAdminRoute, addQuestions);
 router.put('/mock-tests/:testId/questions/:questionId', protectAdminRoute, updateMockTestQuestion);
 router.delete('/mock-tests/:testId/questions/:questionId', protectAdminRoute, deleteMockTestQuestion);
+
+
+// ... existing imports ...
+
+// Synchronous PDF Upload
+router.post('/mock-tests/upload-pdf', protectAdminRoute, uploadMemory.single('file'), uploadPDF);
 
 // Feedback routes (Admin)
 router.get('/feedback', protectAdminRoute, getAllFeedback);

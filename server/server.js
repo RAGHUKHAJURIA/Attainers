@@ -4,6 +4,7 @@ import 'dotenv/config'
 import connectDB from './configs/mongodb.js';
 import publicRoute from './routes/publicRoute.js';
 import router from './routes/adminRoute.js';
+import agentRoutes from './routes/agentRoutes.js';
 import { clerkMiddleware } from '@clerk/express';
 
 const app = express();
@@ -31,8 +32,8 @@ app.use(cors({
     },
     credentials: true
 }));
-// Parse JSON for standard requests
-app.use(express.json());
+// Parse JSON for standard requests (5MB limit for large AI-generated content)
+app.use(express.json({ limit: '5mb' }));
 // Parse XML/Atom feeds as raw text for the webhook
 app.use(express.text({ type: 'application/atom+xml' }));
 
@@ -49,6 +50,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/admin', clerkMiddleware(), router)
 app.use('/api/public', publicRoute)
+app.use('/api/agent', clerkMiddleware(), agentRoutes)
 
 // Global 404 Handler for API
 app.use((req, res) => {
