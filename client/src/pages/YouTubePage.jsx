@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import AddYouTubeModal from '../components/AddYouTubeModal';
 import CardSkeleton from '../components/CardSkeleton';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import backendUrl from '../utils/backendUrl';
 
 const YouTubePage = () => {
     const { user, isLoaded } = useUser();
@@ -31,7 +32,7 @@ const YouTubePage = () => {
 
     const fetchVideos = async () => {
         try {
-            const response = await fetch('https://attainers-272i.vercel.app/api/public/youtube');
+            const response = await fetch(`${backendUrl}/api/public/youtube`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -48,7 +49,7 @@ const YouTubePage = () => {
     const handleAddVideo = async (newVideo) => {
         try {
             const token = await getToken();
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/youtube', {
+            const response = await fetch(`${backendUrl}/api/admin/youtube`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,7 +76,7 @@ const YouTubePage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/youtube/sync', {
+            const response = await fetch(`${backendUrl}/api/admin/youtube/sync`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -102,7 +103,7 @@ const YouTubePage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/youtube/fix-thumbnails', {
+            const response = await fetch(`${backendUrl}/api/admin/youtube/fix-thumbnails`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -128,7 +129,7 @@ const YouTubePage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`https://attainers-272i.vercel.app/api/admin/youtube/${id}`, {
+            const response = await fetch(`${backendUrl}/api/admin/youtube/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -153,7 +154,7 @@ const YouTubePage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch('https://attainers-272i.vercel.app/api/admin/youtube/delete-shorts', {
+            const response = await fetch(`${backendUrl}/api/admin/youtube/delete-shorts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

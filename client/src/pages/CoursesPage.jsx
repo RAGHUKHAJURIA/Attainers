@@ -10,7 +10,7 @@ import SubjectWiseCourses from '../components/courses/SubjectWiseCourses';
 import ExamWiseCourses from '../components/courses/ExamWiseCourses';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-
+import backendUrl from '../utils/backendUrl';
 
 
 const CoursesPage = () => {
@@ -32,7 +32,7 @@ const CoursesPage = () => {
 
     const fetchCourses = async () => {
         try {
-            const response = await fetch('https://attainers-272i.vercel.app/api/public/courses');
+            const response = await fetch(`${backendUrl}/api/public/courses`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.success) {
@@ -66,7 +66,7 @@ const CoursesPage = () => {
 
         try {
             const token = await getToken();
-            const response = await fetch(`https://attainers-272i.vercel.app/api/admin/courses/${id}`, {
+            const response = await fetch(`${backendUrl}/api/admin/courses/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

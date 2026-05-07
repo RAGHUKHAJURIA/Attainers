@@ -12,7 +12,7 @@ const CourseDetailPage = () => {
     useEffect(() => {
         const fetchCourse = async () => {
             try {
-                const response = await fetch(`https://attainers-272i.vercel.app/api/public/courses/${id}`);
+                const response = await fetch(`${backendUrl}/api/public/courses/${id}`);
                 const data = await response.json();
                 if (data.success) {
                     setCourse(data.course);
