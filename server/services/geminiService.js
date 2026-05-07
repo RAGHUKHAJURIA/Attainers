@@ -9,7 +9,7 @@ const getModel = () => {
       throw new Error('GEMINI_API_KEY is missing! Add it to your .env file.');
     }
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   }
   return model;
 };

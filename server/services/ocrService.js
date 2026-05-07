@@ -1,8 +1,10 @@
 import fs from 'fs-extra';
 import pdf from '../utils/pdfParser.js';
-import { fromPath } from 'pdf2pic';
-import Tesseract from 'tesseract.js';
 import path from 'path';
+
+// pdf2pic + tesseract.js require system binaries (ImageMagick, Tesseract OCR)
+// These are NOT available on Vercel serverless. OCR is disabled in production.
+const IS_VERCEL = !!process.env.VERCEL;
 
 export const extractText = async (filePath) => {
     try {
@@ -11,12 +13,17 @@ export const extractText = async (filePath) => {
         const text = pdfData.text.trim();
 
         // Heuristic: If text is very short relative to page count, it likely scanned.
-        // e.g. < 50 chars per page on average
         const isScanned = text.length < (pdfData.numpages * 50);
 
         if (!isScanned) {
             console.log("PDF detected as Text-based.");
             return text;
+        }
+
+        // On Vercel (serverless), skip OCR — binaries are unavailable
+        if (IS_VERCEL) {
+            console.warn("Scanned PDF detected but OCR is unavailable on Vercel. Returning partial text.");
+            return text || "This appears to be a scanned PDF. OCR is not supported in the cloud environment.";
         }
 
         console.log("PDF detected as Scanned. Starting OCR...");
@@ -29,11 +36,14 @@ export const extractText = async (filePath) => {
 };
 
 const performOCR = async (filePath, numPages) => {
+    // Dynamic imports so Vercel doesn't crash on module load
+    const { fromPath } = await import('pdf2pic');
+    const Tesseract = (await import('tesseract.js')).default;
+
     let combinedText = '';
     const tempDir = path.dirname(filePath);
     const baseName = path.basename(filePath, path.extname(filePath));
 
-    // Configure pdf2pic
     const options = {
         density: 100,
         saveFilename: baseName,
@@ -43,21 +53,17 @@ const performOCR = async (filePath, numPages) => {
         height: 1100
     };
 
-    // Note: pdf2pic requires GraphicsMagick/ImageMagick installed on system
     const convert = fromPath(filePath, options);
 
     for (let page = 1; page <= numPages; page++) {
         try {
             console.log(`Processing page ${page}/${numPages}...`);
-            // Convert page to image
             const resolvePath = await convert(page, { responseType: "image" });
             const imagePath = resolvePath.path;
 
-            // OCR with Tesseract.js
             const { data: { text } } = await Tesseract.recognize(imagePath, 'eng');
             combinedText += text + '\n\n';
 
-            // Cleanup image
             await fs.remove(imagePath);
         } catch (err) {
             console.error(`Error processing page ${page}:`, err);

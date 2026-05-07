@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { extractText } from '../services/ocrService.js';
+import path from 'path';
+import os from 'os';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize Gemini AI lazily
@@ -11,18 +12,39 @@ const getGenAI = () => {
 };
 
 export const uploadPDF = async (req, res) => {
+    let tempFilePath = null;
+
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, message: "No file uploaded" });
         }
 
-        const filePath = req.file.path;
+        let extractedText = '';
 
-        // 1. Extract Text from PDF (uses OCR for scanned PDFs)
-        const extractedText = await extractText(filePath);
+        // On Vercel (memory storage), write buffer to /tmp then extract text
+        if (req.file.buffer) {
+            // Memory storage — write to temp file
+            const tempDir = process.env.VERCEL ? '/tmp' : os.tmpdir();
+            tempFilePath = path.join(tempDir, `pdf-${Date.now()}-${req.file.originalname}`);
+            fs.writeFileSync(tempFilePath, req.file.buffer);
+
+            // Lazy import to avoid crashing on Vercel if OCR binaries absent
+            const { extractText } = await import('../services/ocrService.js');
+            extractedText = await extractText(tempFilePath);
+
+            // Cleanup temp file
+            if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+            tempFilePath = null;
+        } else if (req.file.path) {
+            // Disk storage (local dev)
+            const { extractText } = await import('../services/ocrService.js');
+            extractedText = await extractText(req.file.path);
+            if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        } else {
+            return res.status(400).json({ success: false, message: "Unsupported upload mode" });
+        }
 
         if (!extractedText || extractedText.trim().length === 0) {
-            fs.unlinkSync(filePath);
             return res.status(400).json({
                 success: false,
                 message: "Could not extract text from the PDF. Please try another file."
@@ -43,10 +65,10 @@ export const uploadPDF = async (req, res) => {
         - explanation: A brief explanation if available, or generate a helpful one. If no explanation can be provided, leave as empty string.
         - marks: Default to 1.
         
-        The Output must range be a valid JSON array. Do not include markdown formatting like \`\`\`json. Just the raw JSON.
+        The Output must be a valid JSON array. Do not include markdown formatting like \`\`\`json. Just the raw JSON.
         
         Text to process:
-        ${extractedText}
+        ${extractedText.substring(0, 15000)}
         `;
 
         const result = await model.generateContent(prompt);
@@ -60,7 +82,6 @@ export const uploadPDF = async (req, res) => {
             questions = JSON.parse(cleanedJson);
         } catch (e) {
             console.error("AI JSON Parse Error:", e, responseText);
-            // Verify if it's an array
             const match = cleanedJson.match(/\[.*\]/s);
             if (match) {
                 questions = JSON.parse(match[0]);
@@ -69,14 +90,15 @@ export const uploadPDF = async (req, res) => {
             }
         }
 
-        // Cleanup file
-        fs.unlinkSync(filePath);
-
         res.status(200).json({ success: true, data: questions });
 
     } catch (error) {
         console.error("Error processing PDF:", error);
-        if (req.file && fs.existsSync(req.file.path)) {
+        // Cleanup temp file on error
+        if (tempFilePath && fs.existsSync(tempFilePath)) {
+            fs.unlinkSync(tempFilePath);
+        }
+        if (req.file?.path && fs.existsSync(req.file.path)) {
             fs.unlinkSync(req.file.path);
         }
         res.status(500).json({ success: false, message: "Failed to process PDF: " + error.message });

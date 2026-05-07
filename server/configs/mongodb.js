@@ -64,7 +64,12 @@ const connectDB = async () => {
     console.error("\n💡 Tip: Get the correct connection string from MongoDB Atlas:");
     console.error("   Atlas Dashboard → Connect → Connect your application → Copy connection string");
 
-    process.exit(1);
+    // In serverless (Vercel), do NOT call process.exit — it kills the function container
+    if (process.env.VERCEL) {
+      throw error; // Let the caller handle gracefully
+    } else {
+      process.exit(1);
+    }
   }
 };
 

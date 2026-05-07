@@ -40,7 +40,6 @@ app.use(express.text({ type: 'application/atom+xml' }));
 const uploadDir = (process.env.NODE_ENV === 'production' || process.env.VERCEL) ? '/tmp' : 'uploads';
 app.use('/uploads', express.static(uploadDir));
 
-import { initCronJobs } from './services/cronService.js';
 
 
 // Define routes before starting server
@@ -62,7 +61,7 @@ const PORT = process.env.PORT || 5000
 const startServer = async () => {
     try {
         await connectDB();
-        initCronJobs();
+        // initCronJobs(); // Cron jobs are disabled on Vercel (serverless)
 
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
@@ -73,14 +72,13 @@ const startServer = async () => {
     }
 };
 
-
-if (process.env.VERCEL) {
-    // Vercel Serverless environment
-    connectDB().catch(err => console.error("MongoDB Connection Error:", err));
-    initCronJobs();
-} else {
-    // Local development
+// Vercel Serverless: connect DB lazily, no cron jobs, just export app
+// Local development: start the HTTP server
+if (!process.env.VERCEL) {
     startServer();
+} else {
+    // Pre-connect DB on cold start (non-blocking)
+    connectDB().catch(err => console.error("MongoDB Connection Error on cold start:", err));
 }
 
 export default app;
