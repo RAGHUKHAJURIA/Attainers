@@ -6,17 +6,13 @@ import { useAuth, useUser, useSession } from '@clerk/clerk-react'
 export const AppContext = createContext();
 
 export const AppProvider = (props) => {
-  // --- Configuration for Backend URL ---
+  // --- Backend URL Configuration ---
+  // In dev mode (npm run dev): uses localhost:5000
+  // In production build: uses VITE_BACKEND_URL from .env (https://attainers.vercel.app)
   const localBackend = 'http://localhost:5000';
-  // Fallback to hosted if VITE_BACKEND_URL not set
-  const hostedBackend = import.meta.env.VITE_BACKEND_URL || 'https://attainers-272i.vercel.app';
+  const hostedBackend = import.meta.env.VITE_BACKEND_URL || 'https://attainers.vercel.app';
 
-  // If true, will use local backend when running in dev mode (npm run dev)
-  // If false, will use hosted backend even in dev mode
-  // In production (npm run build), it will ALWAYS use hostedBackend
-  const PREFER_LOCAL_IN_DEV = true;
-
-  const backendUrl = (import.meta.env.DEV && PREFER_LOCAL_IN_DEV) ? localBackend : hostedBackend;
+  const backendUrl = import.meta.env.DEV ? localBackend : hostedBackend;
 
 
 

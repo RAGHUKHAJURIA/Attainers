@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import backendUrl from '../utils/backendUrl';
 
 const Dummyadd = () => {
     const [formData, setFormData] = useState({
@@ -10,7 +11,6 @@ const Dummyadd = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const handleChange = (e) => {
         const { name, value } = e.target;

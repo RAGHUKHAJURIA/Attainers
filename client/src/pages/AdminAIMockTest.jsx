@@ -3,6 +3,7 @@ import { useUser } from '@clerk/clerk-react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import backendUrl from '../utils/backendUrl';
 
 /* ── UI Configs ── */
 const CATEGORY_LABELS = {
@@ -328,7 +329,7 @@ const AdminAIMockTest = () => {
       fd.append('prompt', p);
       
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/agent/parse-pdf`, 
+        `${backendUrl}/api/agent/parse-pdf`, 
         fd, 
         {
           headers: { 
@@ -377,7 +378,7 @@ const AdminAIMockTest = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/agent/approve-test`,
+        `${backendUrl}/api/agent/approve-test`,
         {
           draft: currentPreview,
           metadata: currentMetadata,
